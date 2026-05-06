@@ -1,37 +1,41 @@
 import { useState } from "react";
-import { gold, holesByTee } from "./data";
+import {
+  Logo,
+  MatchButtons,
+  blankHoles,
+  cx,
+  first,
+  holesByTee,
+  keyFor,
+  panel,
+  playersForMatch,
+  shots,
+  stableford,
+  TEAM,
+} from "./data";
 
-function cx(...classes: any[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function first(name = "Player") {
-  return String(name).split(" ")[0];
-}
-
-function getResult(holes: any[], teamNames: any) {
+function getResult(holes: any[]) {
   const done = holes.filter((h) => h.status !== "pending");
   const red = done.filter((h) => h.status === "red").length;
   const blue = done.filter((h) => h.status === "blue").length;
-  const halves = done.filter((h) => h.status === "halve").length;
+  const as = done.filter((h) => h.status === "as").length;
   const diff = red - blue;
   const left = 18 - done.length;
 
   if (!done.length || diff === 0) {
     return {
       main: "ALL SQUARE",
-      sub: `${red}-${blue}-${halves} • ${left} TO PLAY`,
+      sub: `${red}-${blue}-${as} • ${left} TO PLAY`,
       leader: null,
     };
   }
 
-  const leader = diff > 0 ? "Red" : "Blue";
+  const leader = diff > 0 ? "red" : "blue";
   const lead = Math.abs(diff);
-  const name = teamNames[leader]?.toUpperCase() || leader.toUpperCase();
 
   if (lead > left) {
     return {
-      main: `${name} ${lead}&${left}`,
+      main: `${leader.toUpperCase()} ${lead}&${left}`,
       sub: "MATCH CLOSED",
       leader,
     };
@@ -39,368 +43,493 @@ function getResult(holes: any[], teamNames: any) {
 
   if (lead === left && left > 0) {
     return {
-      main: `${name} DORMIE`,
+      main: `${leader.toUpperCase()} DORMIE`,
       sub: `${lead}UP • ${left} TO PLAY`,
       leader,
     };
   }
 
   return {
-    main: `${name} ${lead}UP`,
-    sub: `${red}-${blue}-${halves} • ${left} TO PLAY`,
+    main: `${leader.toUpperCase()} ${lead}UP`,
+    sub: `${red}-${blue}-${as} • ${left} TO PLAY`,
     leader,
   };
 }
 
-export default function Score({ state, setState, setScreen }: any) {
-  const holes = state.holes;
-  const tee = state.day.tee || "Blue";
-  const result = getResult(holes, state.teamNames);
+export default function Score({
+  setScreen,
+  dayConfigs,
+  players,
+  activeDay,
+  roster,
+  states,
+  setStates,
+  scorecards,
+  setScorecards,
+  startMatch,
+  teamLogos,
+  teamNames,
+}: any) {
+  const day = dayConfigs[activeDay];
+  const count = /singles/i.test(day.format)
+    ? players
+    : Math.max(1, Math.ceil(players / 2));
 
-  const nextHole =
+  const [activeMatch, setActiveMatch] = useState(startMatch || 0);
+  const [selectedHole, setSelectedHole] = useState<any>(null);
+  const [cardPlayer, setCardPlayer] = useState<any>(null);
+  const [draft, setDraft] = useState({ red: 4, blue: 4 });
+
+  const stateKey = keyFor(activeDay, activeMatch);
+  const holes = states[stateKey] || blankHoles();
+  const match = playersForMatch(roster, players, day.format, activeMatch);
+  const result = getResult(holes);
+
+  const nextHoleNumber =
     holes.find((h: any) => h.status === "pending")?.hole || 18;
 
-  const current = holesByTee[nextHole][tee];
+  const current = holesByTee[nextHoleNumber][day.tee];
 
-  const [selectedHole, setSelectedHole] = useState<any>(null);
-  const [redScore, setRedScore] = useState(4);
-  const [blueScore, setBlueScore] = useState(4);
+  const displayMain = (() => {
+    if (!result.leader) return result.main;
 
-  const redPlayer = state.roster.Red[0];
-  const bluePlayer = state.roster.Blue[0];
+    const name =
+      teamNames[result.leader === "red" ? "Red" : "Blue"] ||
+      result.leader.toUpperCase();
+
+    return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
+  })();
+
+  const playerKey = (team: string, p: any) =>
+    `${team}-${p.rosterIndex}-${p.name}`;
+
+  const grossFor = (team: string, p: any, hole: number) =>
+    scorecards[playerKey(team, p)]?.[hole] ?? null;
 
   function openHole(holeNumber: number) {
-    const detail = holesByTee[holeNumber][tee];
+    const detail = holesByTee[holeNumber][day.tee];
     setSelectedHole(detail);
-    setRedScore(detail.par);
-    setBlueScore(detail.par);
+    setDraft({
+      red: detail.par,
+      blue: detail.par,
+    });
   }
 
   function saveHole() {
     if (!selectedHole) return;
 
-    let status = "halve";
+    const redScore = Number(draft.red ?? selectedHole.par);
+    const blueScore = Number(draft.blue ?? selectedHole.par);
 
-    if (redScore < blueScore) status = "red";
-    if (blueScore < redScore) status = "blue";
+    const redNet =
+      redScore -
+      shots(
+        Math.max(
+          0,
+          Number(match.red[0]?.handicap || 0) -
+            Number(match.blue[0]?.handicap || 0)
+        ),
+        selectedHole.si
+      );
+
+    const blueNet =
+      blueScore -
+      shots(
+        Math.max(
+          0,
+          Number(match.blue[0]?.handicap || 0) -
+            Number(match.red[0]?.handicap || 0)
+        ),
+        selectedHole.si
+      );
+
+    const status = redNet < blueNet ? "red" : blueNet < redNet ? "blue" : "as";
 
     const updated = holes.map((h: any) =>
       h.hole === selectedHole.hole ? { ...h, status } : h
     );
 
-    setState({
-      ...state,
-      holes: updated,
+    setStates((s: any) => ({
+      ...s,
+      [stateKey]: updated,
+    }));
+
+    setScorecards((s: any) => {
+      const next = { ...s };
+
+      match.red.forEach((p: any) => {
+        const k = playerKey("red", p);
+        next[k] = {
+          ...(next[k] || {}),
+          [selectedHole.hole]: redScore,
+        };
+      });
+
+      match.blue.forEach((p: any) => {
+        const k = playerKey("blue", p);
+        next[k] = {
+          ...(next[k] || {}),
+          [selectedHole.hole]: blueScore,
+        };
+      });
+
+      return next;
     });
 
-    const next = updated.find((h: any) => h.status === "pending");
+    const nextPending = updated.find((h: any) => h.status === "pending");
 
-    if (next) {
-      const nextDetail = holesByTee[next.hole][tee];
+    if (nextPending) {
+      const nextDetail = holesByTee[nextPending.hole][day.tee];
       setSelectedHole(nextDetail);
-      setRedScore(nextDetail.par);
-      setBlueScore(nextDetail.par);
+      setDraft({
+        red: nextDetail.par,
+        blue: nextDetail.par,
+      });
     } else {
       setSelectedHole(null);
     }
   }
 
-  function quickCycle(holeNumber: number) {
-    const updated = holes.map((h: any) => {
-      if (h.hole !== holeNumber) return h;
+  const playerCard = (p: any, team: string) =>
+    Array.from({ length: 18 }, (_, i) => {
+      const h = holesByTee[i + 1][day.tee];
+      const gross = grossFor(team, p, h.hole);
+      const shotCount = shots(Number(p.handicap || 0), h.si);
 
-      const next =
-        h.status === "pending"
-          ? "red"
-          : h.status === "red"
-          ? "blue"
-          : h.status === "blue"
-          ? "halve"
-          : "pending";
-
-      return { ...h, status: next };
+      return {
+        ...h,
+        gross,
+        pts: gross == null ? null : stableford(gross, h.par, shotCount),
+      };
     });
 
-    setState({
-      ...state,
-      holes: updated,
-    });
-  }
+  const Hole = ({ h }: any) => {
+    const detail = holesByTee[h.hole][day.tee];
+    const status = h.status;
+    const active = h.hole === nextHoleNumber;
+
+    const tone =
+      status === "red"
+        ? "from-[#7c2430]/95 to-[#47151d]/95 border-[#b54854]/40"
+        : status === "blue"
+        ? "from-[#415aaf]/95 to-[#29386c]/95 border-[#627dd7]/40"
+        : status === "as"
+        ? "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
+        : "from-black/50 to-black/30 border-white/5";
+
+    return (
+      <button
+        onClick={() => openHole(h.hole)}
+        className={cx(
+          "relative h-[86px] rounded-[18px] border bg-gradient-to-b px-2 py-1 text-center transition-all",
+          tone
+        )}
+        style={
+          active
+            ? {
+                border: "2px solid #d1c79f",
+                boxShadow:
+                  "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
+                transform: "scale(1.05)",
+                zIndex: 2,
+              }
+            : undefined
+        }
+      >
+        {active && (
+          <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#d1c79f] px-2 py-[1px] text-[8px] font-black text-black">
+            NOW
+          </div>
+        )}
+
+        <div className="flex h-5 items-center justify-center">
+          {status === "red" || status === "blue" ? (
+            <Logo
+              team={status}
+              size="h-5 w-5"
+              src={teamLogos[status === "red" ? "Red" : "Blue"]}
+            />
+          ) : status === "as" ? (
+            <span className="text-[9px]">AS</span>
+          ) : null}
+        </div>
+
+        <div className="mt-0.5 text-[13px] font-medium">
+          {h.hole}
+        </div>
+
+        <div className="mt-1 text-[9px] text-white/50">
+          SI {detail.si}
+        </div>
+      </button>
+    );
+  };
 
   return (
-    <div className="min-h-[100svh] bg-[#050505] p-4 text-white">
-      <div className="mx-auto max-w-[430px] pb-24">
+    <>
+      <div className="relative flex-1 overflow-y-auto pb-[220px]">
         <div
           className={cx(
-            "rounded-[30px] border p-4 shadow-2xl backdrop-blur-xl",
-            result.leader === "Red"
-              ? "border-red-400/30 bg-gradient-to-b from-red-950/80 to-black"
-              : result.leader === "Blue"
-              ? "border-blue-400/30 bg-gradient-to-b from-blue-950/80 to-black"
-              : "border-white/10 bg-gradient-to-b from-[#171717] to-black"
+            "mt-6 rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
+            result.leader === "red"
+              ? "bg-gradient-to-b from-[#7c2430]/80 to-[#47151d]/80"
+              : result.leader === "blue"
+              ? "bg-gradient-to-b from-[#415aaf]/80 to-[#29386c]/80"
+              : "bg-gradient-to-b from-[#5c5c5c]/70 to-[#2d2d2d]/70"
           )}
         >
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
             <div>
-              <div className="text-[10px] font-semibold tracking-[0.28em] text-white/45">
-                {state.day.course.toUpperCase()} • {tee.toUpperCase()}
-              </div>
-
-              <div
-                className="mt-1 text-[12px] font-bold tracking-[0.16em]"
-                style={{ color: gold }}
-              >
-                Hole {current.hole} • SI {current.si} • {current.metres}m
-              </div>
+              {day.label.toUpperCase()} • ST MICHAELS • {day.tee.toUpperCase()}
             </div>
 
             <button
               onClick={() => setScreen("home")}
-              className="rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80"
+              className="text-sm font-semibold tracking-normal text-white/85"
             >
               Back
             </button>
           </div>
 
-          <div className="mb-3 text-center text-[11px] font-black tracking-[0.32em] text-white/70">
-            {state.day.format.toUpperCase()}
+          <div className="mb-2 text-center text-[11px] font-extrabold tracking-[0.32em] text-white/80">
+            {day.format.toUpperCase()}
           </div>
 
-          <div className="grid grid-cols-[1fr_46px_1fr] items-start gap-3">
-            <TeamHeader
-              side="red"
-              team={state.teamNames.Red}
-              logo={state.teamLogos.Red}
-              player={redPlayer}
-              onClick={() => setScreen("rosterRed")}
+          <div className="grid grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)] items-start gap-3">
+            <TeamPlayers
+              team="red"
+              players={match.red}
+              setCardPlayer={setCardPlayer}
+              teamLogos={teamLogos}
             />
 
-            <div className="flex h-[78px] items-center justify-center text-2xl font-black text-white/55">
+            <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
               VS
             </div>
 
-            <TeamHeader
-              side="blue"
-              team={state.teamNames.Blue}
-              logo={state.teamLogos.Blue}
-              player={bluePlayer}
-              onClick={() => setScreen("rosterBlue")}
+            <TeamPlayers
+              team="blue"
+              players={match.blue}
+              setCardPlayer={setCardPlayer}
+              teamLogos={teamLogos}
             />
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center">
-            <div className="text-[23px] font-black tracking-[0.08em]">
-              {result.main}
+          <div className="mt-1 text-center">
+            <div className="text-[20px] font-extrabold tracking-[0.08em]">
+              {displayMain}
             </div>
 
-            <div className="mt-1 text-[10px] tracking-[0.18em] text-white/45">
+            <div className="mt-0.5 text-[10px] tracking-[0.16em] text-white/55">
               {result.sub}
             </div>
           </div>
         </div>
 
-        <div className="mt-4 rounded-[30px] border border-white/10 bg-gradient-to-b from-[#151515] to-black p-4 shadow-xl">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <div className="text-[10px] font-semibold tracking-[0.24em] text-white/45">
-                HOLE TRACKER
-              </div>
-
-              <div className="mt-1 text-[15px] font-bold tracking-[0.08em]">
-                Next: Hole{" "}
-                <span style={{ color: gold }}>
-                  {current.hole}
-                </span>
-              </div>
+        <div className="relative mt-4 rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+          <div className="mb-4">
+            <div className="text-[10px] tracking-[0.22em] text-white/60">
+              HOLE TRACKER
             </div>
 
-            <div
-              className="rounded-full px-3 py-1 text-[10px] font-black tracking-[0.16em] text-black"
-              style={{ background: gold }}
-            >
-              LIVE
+            <div className="text-[14px] font-bold tracking-[0.16em]">
+              Hole {current.hole} • SI {current.si} • {current.metres}m
             </div>
           </div>
 
           <div className="grid grid-cols-6 gap-2.5">
-            {holes.map((h: any) => {
-              const detail = holesByTee[h.hole][tee];
-              const active = h.hole === nextHole;
+            {holes.map((h: any) => (
+              <Hole key={h.hole} h={h} />
+            ))}
+          </div>
 
-              return (
-                <button
-                  key={h.hole}
-                  onClick={() => openHole(h.hole)}
-                  onDoubleClick={() => quickCycle(h.hole)}
-                  className={cx(
-                    "relative h-[88px] rounded-[18px] border px-2 py-2 text-center transition-all",
-                    h.status === "red" &&
-                      "border-red-400/50 bg-gradient-to-b from-red-800 to-black",
-                    h.status === "blue" &&
-                      "border-blue-400/50 bg-gradient-to-b from-blue-800 to-black",
-                    h.status === "halve" &&
-                      "border-white/20 bg-gradient-to-b from-neutral-700 to-black",
-                    h.status === "pending" &&
-                      "border-white/10 bg-gradient-to-b from-[#111] to-black"
-                  )}
-                  style={
-                    active
-                      ? {
-                          border: `2px solid ${gold}`,
-                          boxShadow:
-                            "0 0 0 2px rgba(209,199,159,0.45), 0 0 22px rgba(209,199,159,0.85)",
-                          transform: "scale(1.06)",
-                          zIndex: 2,
-                        }
-                      : undefined
-                  }
-                >
-                  {active && (
-                    <div
-                      className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[8px] font-black text-black"
-                      style={{ background: gold }}
-                    >
-                      NOW
+          {cardPlayer && (
+            <Overlay tall>
+              <div className="mb-4 flex justify-between">
+                <div>
+                  <div className="text-[11px] tracking-[0.28em] text-[#d1c79f]/70">
+                    PLAYER SCORECARD
+                  </div>
+
+                  <div className="mt-2 text-[18px] font-bold">
+                    {cardPlayer.p.name}
+                  </div>
+
+                  <div className="mt-1 text-[11px] text-[#d1c79f]/65">
+                    {day.course} • {day.tee} TEE
+                  </div>
+                </div>
+
+                <Close onClick={() => setCardPlayer(null)} />
+              </div>
+
+              <div className="grid grid-cols-6 gap-2 overflow-y-auto">
+                {playerCard(cardPlayer.p, cardPlayer.team).map((h: any) => (
+                  <div
+                    key={h.hole}
+                    className="rounded-[14px] border border-white/10 bg-black/45 p-2 text-center"
+                  >
+                    <div className="text-[9px] text-white/45">
+                      HOLE
                     </div>
-                  )}
 
-                  <div className="h-5 text-[10px] font-black">
-                    {h.status === "red" && "R"}
-                    {h.status === "blue" && "B"}
-                    {h.status === "halve" && "AS"}
+                    <div className="text-[15px] font-bold">
+                      {h.hole}
+                    </div>
+
+                    <div className="mt-1 text-[9px] text-white/45">
+                      PAR {h.par}
+                    </div>
+
+                    <div className="mt-2 text-[18px] font-black text-[#d1c79f]">
+                      {h.gross == null ? "-" : h.gross}
+                    </div>
+
+                    <div className="mt-1 text-[9px] text-white/55">
+                      {h.pts == null ? "" : `${h.pts} pts`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Overlay>
+          )}
+
+          {selectedHole && (
+            <Overlay>
+              <div className="mb-3 flex justify-between">
+                <div>
+                  <div className="text-[11px] tracking-[0.28em] text-white/60">
+                    SCORE HOLE
                   </div>
 
-                  <div className="mt-1 text-[16px] font-black">
-                    {h.hole}
+                  <div className="mt-2 text-[14px] font-bold tracking-[0.16em]">
+                    Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
+                    {selectedHole.si}
                   </div>
+                </div>
 
-                  <div className="mt-1 text-[9px] text-white/45">
-                    PAR {detail.par}
-                  </div>
-
-                  <div className="text-[9px] text-white/45">
-                    SI {detail.si}
-                  </div>
+                <button
+                  onClick={saveHole}
+                  className="rounded-full border border-[#d1c79f]/40 bg-[#d1c79f]/15 px-4 py-2 text-sm font-semibold text-[#efe6bf]"
+                >
+                  Save
                 </button>
-              );
-            })}
-          </div>
+              </div>
 
-          <div className="mt-3 text-center text-[10px] leading-4 text-white/35">
-            Tap a hole to score. Save auto-opens the next hole.
-          </div>
+              <div className="grid grid-cols-2 gap-3">
+                <ScoreBox
+                  team="red"
+                  players={match.red}
+                  score={draft.red}
+                  setScore={(v: number) =>
+                    setDraft((d) => ({ ...d, red: v }))
+                  }
+                  par={selectedHole.par}
+                />
+
+                <ScoreBox
+                  team="blue"
+                  players={match.blue}
+                  score={draft.blue}
+                  setScore={(v: number) =>
+                    setDraft((d) => ({ ...d, blue: v }))
+                  }
+                  par={selectedHole.par}
+                />
+              </div>
+            </Overlay>
+          )}
         </div>
       </div>
 
-      {selectedHole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-          <div className="w-full max-w-[390px] rounded-[30px] border border-[#d1c79f]/35 bg-gradient-to-b from-[#151515] to-black p-4 shadow-2xl">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <div className="text-[10px] font-semibold tracking-[0.26em] text-white/45">
-                  SCORE HOLE
-                </div>
+      <div
+        className={cx(
+          "absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3",
+          panel
+        )}
+      >
+        <div className="mb-2 text-[9px] tracking-[0.22em] text-white/60">
+          MATCHES
+        </div>
 
-                <div
-                  className="mt-1 text-[16px] font-black"
-                  style={{ color: gold }}
-                >
-                  Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
-                  {selectedHole.si}
-                </div>
-              </div>
+        <MatchButtons
+          count={count}
+          active={activeMatch}
+          setActive={setActiveMatch}
+        />
+      </div>
+    </>
+  );
+}
 
-              <button
-                onClick={saveHole}
-                className="rounded-full px-5 py-2 text-sm font-black text-black"
-                style={{ background: gold }}
-              >
-                Save
-              </button>
-            </div>
+function TeamPlayers({ team, players, setCardPlayer, teamLogos }: any) {
+  const fallbackLogo =
+    teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
 
-            <div className="grid grid-cols-2 gap-3">
-              <ScoreBox
-                side="red"
-                name={first(redPlayer.name)}
-                score={redScore}
-                setScore={setRedScore}
-                par={selectedHole.par}
-              />
+  const logoSize = players.length > 1 ? "h-[50px] w-[50px]" : "h-[64px] w-[64px]";
 
-              <ScoreBox
-                side="blue"
-                name={first(bluePlayer.name)}
-                score={blueScore}
-                setScore={setBlueScore}
-                par={selectedHole.par}
-              />
-            </div>
+  return (
+    <div className="flex items-start justify-center gap-2 text-center">
+      {players.map((p: any, i: number) => (
+        <div
+          key={`${p.name}-${i}`}
+          className="flex w-[64px] flex-col items-center"
+        >
+          <button
+            onClick={() => setCardPlayer({ team, p })}
+            className="flex h-[64px] items-center justify-center"
+          >
+            <Logo
+              team={team}
+              size={logoSize}
+              src={p.photo || fallbackLogo}
+            />
+          </button>
+
+          <div className="mt-1 w-full truncate text-[11px] leading-tight text-white">
+            {first(p.name)}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
 
-function TeamHeader({ side, team, logo, player, onClick }: any) {
+function ScoreBox({ team, players, score, setScore, par }: any) {
+  const namesText =
+    players.map((p: any) => first(p.name)).join(" & ") ||
+    TEAM[team].title;
+
   return (
-    <button onClick={onClick} className="flex min-w-0 flex-col items-center">
+    <div className="h-[120px] rounded-[20px] border border-[#d1c79f]/20 bg-black/55 backdrop-blur-xl overflow-hidden flex flex-col">
       <div
         className={cx(
-          "flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border text-3xl font-black shadow-xl",
-          side === "red"
-            ? "border-red-300/25 bg-gradient-to-b from-red-600 to-red-950"
-            : "border-blue-300/25 bg-gradient-to-b from-blue-500 to-blue-950"
+          "border-b px-3 py-1.5 text-center text-[11px] font-semibold tracking-[0.14em]",
+          team === "red"
+            ? "bg-[#6f2a33] text-[#f1dada]"
+            : "bg-[#3f56a0] text-[#d6e1ff]"
         )}
       >
-        {logo ? (
-          <img src={logo} className="h-full w-full object-cover" />
-        ) : (
-          team[0]
-        )}
+        <span className="block truncate">
+          {namesText}
+        </span>
       </div>
 
-      <div className="mt-2 max-w-[118px] truncate text-center text-[12px] font-black tracking-[0.12em]">
-        {team}
-      </div>
-
-      <div className="mt-1 text-[11px] text-white/45">
-        {first(player.name)}
-      </div>
-    </button>
-  );
-}
-
-function ScoreBox({ side, name, score, setScore, par }: any) {
-  return (
-    <div className="overflow-hidden rounded-[22px] border border-[#d1c79f]/20 bg-black/60">
-      <div
-        className={cx(
-          "px-3 py-2 text-center text-[11px] font-black tracking-[0.12em]",
-          side === "red"
-            ? "bg-red-900 text-red-100"
-            : "bg-blue-900 text-blue-100"
-        )}
-      >
-        {name}
-      </div>
-
-      <div className="relative h-[112px]">
+      <div className="relative flex-1">
         <button
           onClick={() => setScore(Math.max(0, score - 1))}
-          className="absolute left-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border border-white/20 bg-black/75 text-2xl font-black"
+          className="absolute left-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white"
         >
           −
         </button>
 
-        <div className="flex h-full items-center justify-center text-[64px] font-black">
+        <div className="flex h-full items-center justify-center text-[52px] font-extrabold">
           {score === par + 4 ? "P" : score}
         </div>
 
         <button
           onClick={() => setScore(Math.min(par + 4, score + 1))}
-          className="absolute right-3 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full border border-white/20 bg-black/75 text-2xl font-black"
+          className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white"
         >
           +
         </button>
@@ -408,14 +537,35 @@ function ScoreBox({ side, name, score, setScore, par }: any) {
 
       <div
         className={cx(
-          "px-3 py-2 text-center text-[10px] font-bold tracking-[0.16em]",
-          side === "red"
-            ? "bg-red-900 text-red-100"
-            : "bg-blue-900 text-blue-100"
+          "px-3 py-1.5 text-center text-[10px] font-semibold tracking-[0.18em]",
+          team === "red"
+            ? "bg-[#6f2a33] text-[#f1dada]"
+            : "bg-[#3f56a0] text-[#d6e1ff]"
         )}
       >
-        {score === par + 4 ? "PICKUP" : `${score} GROSS`}
+        {stableford(score, par, 0)} POINTS
       </div>
     </div>
+  );
+}
+
+function Overlay({ children, tall = false }: any) {
+  return (
+    <div className={cx("absolute inset-0 z-30", tall && "-top-[160px] bottom-[-55px]")}>
+      <div className="h-full rounded-[26px] border border-[#d1c79f]/25 bg-black/90 p-4 backdrop-blur-xl shadow-2xl flex flex-col">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Close({ onClick }: any) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-full border border-[#d1c79f]/40 bg-[#d1c79f]/15 px-3 py-1.5 text-xs font-semibold text-[#efe6bf]"
+    >
+      Close
+    </button>
   );
 }
