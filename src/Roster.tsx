@@ -11,24 +11,27 @@ export default function Roster({
   teamNames,
 }: any) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-
   const list = roster[team].slice(0, players);
 
-  function movePlayer(toIndex: number) {
-    if (draggedIndex === null || draggedIndex === toIndex) return;
+  function reorder(fromIndex: number, toIndex: number) {
+    if (toIndex < 0 || toIndex >= list.length) return;
 
     const fullRoster = [...roster[team]];
     const visibleRoster = fullRoster.slice(0, players);
     const hiddenRoster = fullRoster.slice(players);
 
-    const [moved] = visibleRoster.splice(draggedIndex, 1);
+    const [moved] = visibleRoster.splice(fromIndex, 1);
     visibleRoster.splice(toIndex, 0, moved);
 
     setRoster((current: any) => ({
       ...current,
       [team]: rosterMeta([...visibleRoster, ...hiddenRoster]),
     }));
+  }
 
+  function movePlayer(toIndex: number) {
+    if (draggedIndex === null || draggedIndex === toIndex) return;
+    reorder(draggedIndex, toIndex);
     setDraggedIndex(null);
   }
 
@@ -102,16 +105,30 @@ export default function Roster({
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-center gap-2">
                   <span className="rounded-full border border-[#d1c79f]/25 px-2 py-0.5 text-[9px] tracking-[0.14em] text-white/50">
-                    DRAG
-                  </span>
-
-                  <span className="text-[10px] tracking-[0.16em] text-white/45">
                     SLOT {i + 1}
                   </span>
                 </div>
 
                 <div className="truncate text-[18px] font-semibold">
                   {first(p.name)}
+                </div>
+
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => reorder(i, i - 1)}
+                    disabled={i === 0}
+                    className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] disabled:opacity-25"
+                  >
+                    ↑ Up
+                  </button>
+
+                  <button
+                    onClick={() => reorder(i, i + 1)}
+                    disabled={i === list.length - 1}
+                    className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] disabled:opacity-25"
+                  >
+                    ↓ Down
+                  </button>
                 </div>
               </div>
 
