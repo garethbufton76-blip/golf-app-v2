@@ -71,6 +71,7 @@ export default function Score({
   teamNames,
 }: any) {
   const day = dayConfigs[activeDay];
+
   const count = /singles/i.test(day.format)
     ? players
     : Math.max(1, Math.ceil(players / 2));
@@ -86,7 +87,7 @@ export default function Score({
   const result = getResult(holes);
 
   const nextHoleNumber =
-    holes.find((h: any) => h.status === "pending")?.hole || 18;
+    holes.find((h) => h.status === "pending")?.hole || 18;
 
   const current = holesByTee[nextHoleNumber][day.tee];
 
@@ -110,6 +111,7 @@ export default function Score({
     const detail = holesByTee[holeNumber][day.tee];
 
     setSelectedHole(detail);
+
     setDraft({
       red: detail.par,
       blue: detail.par,
@@ -220,6 +222,7 @@ export default function Score({
 
       match.red.forEach((p: any) => {
         const k = playerKey("red", p);
+
         next[k] = {
           ...(next[k] || {}),
           [selectedHole.hole]: redScore,
@@ -228,6 +231,7 @@ export default function Score({
 
       match.blue.forEach((p: any) => {
         const k = playerKey("blue", p);
+
         next[k] = {
           ...(next[k] || {}),
           [selectedHole.hole]: blueScore,
@@ -257,6 +261,7 @@ export default function Score({
     const detail = holesByTee[h.hole][day.tee];
     const status = h.status;
     const active = h.hole === nextHoleNumber;
+
     const shotDot = holeShotDots(detail);
     const both = shotDot.red && shotDot.blue;
     const single = shotDot.red || shotDot.blue;
@@ -289,12 +294,6 @@ export default function Score({
             : undefined
         }
       >
-        {active && (
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-[#d1c79f] px-2 py-[1px] text-[8px] font-black text-black">
-            NOW
-          </div>
-        )}
-
         <div className="absolute left-0 right-0 top-1 flex justify-center">
           {both ? (
             <div className="flex gap-1">
@@ -411,57 +410,6 @@ export default function Score({
               <Hole key={h.hole} h={h} />
             ))}
           </div>
-
-          {cardPlayer && (
-            <Overlay tall>
-              <div className="mb-4 flex justify-between">
-                <div>
-                  <div className="text-[11px] tracking-[0.28em] text-[#d1c79f]/70">
-                    PLAYER SCORECARD
-                  </div>
-
-                  <div className="mt-2 text-[18px] font-bold">
-                    {cardPlayer.p.name}
-                  </div>
-
-                  <div className="mt-1 text-[11px] text-[#d1c79f]/65">
-                    {day.course} • {day.tee} TEE
-                  </div>
-                </div>
-
-                <Close onClick={() => setCardPlayer(null)} />
-              </div>
-
-              <div className="grid grid-cols-6 gap-2 overflow-y-auto">
-                {playerCard(cardPlayer.p, cardPlayer.team).map((h: any) => (
-                  <div
-                    key={h.hole}
-                    className="rounded-[14px] border border-white/10 bg-black/45 p-2 text-center"
-                  >
-                    <div className="text-[9px] text-white/45">
-                      HOLE
-                    </div>
-
-                    <div className="text-[15px] font-bold">
-                      {h.hole}
-                    </div>
-
-                    <div className="mt-1 text-[9px] text-white/45">
-                      PAR {h.par}
-                    </div>
-
-                    <div className="mt-2 text-[18px] font-black text-[#d1c79f]">
-                      {h.gross == null ? "-" : h.gross}
-                    </div>
-
-                    <div className="mt-1 text-[9px] text-white/55">
-                      {h.pts == null ? "" : `${h.pts} pts`}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Overlay>
-          )}
         </div>
       </div>
 
@@ -618,31 +566,5 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
         {stableford(score, par, 0)} POINTS
       </div>
     </div>
-  );
-}
-
-function Overlay({ children, tall = false }: any) {
-  return (
-    <div
-      className={cx(
-        "absolute inset-0 z-30",
-        tall && "-top-[160px] bottom-[-55px]"
-      )}
-    >
-      <div className="h-full rounded-[26px] border border-[#d1c79f]/25 bg-black/90 p-4 backdrop-blur-xl shadow-2xl flex flex-col">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function Close({ onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-full border border-[#d1c79f]/40 bg-[#d1c79f]/15 px-3 py-1.5 text-xs font-semibold text-[#efe6bf]"
-    >
-      Close
-    </button>
   );
 }
