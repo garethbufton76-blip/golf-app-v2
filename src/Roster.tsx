@@ -90,7 +90,7 @@ export default function Roster({
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => movePlayer(i)}
             onDragEnd={() => setDraggedIndex(null)}
-            className={`rounded-full border border-[#d1c79f]/20 bg-black/45 px-3 py-3 backdrop-blur-xl transition-all ${
+            className={`rounded-[28px] border border-[#d1c79f]/20 bg-black/45 px-4 py-3 backdrop-blur-xl transition-all ${
               draggedIndex === i ? "scale-[0.98] opacity-50" : ""
             }`}
           >
@@ -111,7 +111,7 @@ export default function Roster({
                 </div>
               </div>
 
-              <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-2 text-center">
+              <div className="rounded-[22px] border border-[#d1c79f]/25 bg-black/35 px-3 py-2 text-center">
                 <div className="text-[8px] tracking-[0.12em] text-white/40">
                   HCP
                 </div>
@@ -125,7 +125,7 @@ export default function Roster({
                 <button
                   onClick={() => reorder(i, i - 1)}
                   disabled={i === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
+                  className="flex h-8 w-8 items-center justify-center rounded-[14px] border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
                 >
                   ▲
                 </button>
@@ -133,7 +133,7 @@ export default function Roster({
                 <button
                   onClick={() => reorder(i, i + 1)}
                   disabled={i === list.length - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
+                  className="flex h-8 w-8 items-center justify-center rounded-[14px] border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
                 >
                   ▼
                 </button>
