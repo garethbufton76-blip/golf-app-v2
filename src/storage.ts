@@ -23,19 +23,26 @@ export function clearAppState() {
 
 export function compressImage(file: File, callback: (data: string) => void) {
   const reader = new FileReader();
+
   reader.onload = () => {
     const img = new Image();
+
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const max = 420;
       const scale = Math.min(1, max / Math.max(img.width, img.height));
+
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
+
       const ctx = canvas.getContext("2d");
       ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
       callback(canvas.toDataURL("image/jpeg", 0.78));
     };
+
     img.src = String(reader.result);
   };
+
   reader.readAsDataURL(file);
 }
