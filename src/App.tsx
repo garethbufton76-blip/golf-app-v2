@@ -14,7 +14,7 @@ import Admin from "./Admin";
 
 export default function App() {
   const [screen, setScreen] = useState("home");
-  const [players, setPlayers] = useState(1);
+  const [players, setPlayers] = useState(2);
   const [days, setDays] = useState(1);
   const [dayConfigs, setDayConfigs] = useState(
     Array.from({ length: 4 }, (_, i) => ({
