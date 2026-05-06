@@ -1,6 +1,19 @@
 import { useState } from "react";
 import { Logo, panel, first, rosterMeta } from "./data";
 
+function ambroseHandicap(pair: any[]) {
+  const total = pair.reduce(
+    (sum, p) => sum + Number(p?.handicap || 0),
+    0
+  );
+
+  if (pair.length === 2) return Math.round(total / 4);
+  if (pair.length === 3) return Math.round(total / 6);
+  if (pair.length === 4) return Math.round(total / 8);
+
+  return Math.round(total);
+}
+
 export default function Roster({
   team,
   setScreen,
@@ -55,18 +68,30 @@ export default function Roster({
       </div>
 
       <div className={`${panel} mt-3 p-3`}>
-        <div className="mb-2 text-[10px] tracking-[0.22em] text-white/50">
-          PAIRING PREVIEW
+        <div className="mb-2 flex items-center justify-between">
+          <div className="text-[10px] tracking-[0.22em] text-white/50">
+            PAIRING PREVIEW
+          </div>
+
+          <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-[9px] font-bold tracking-[0.12em] text-[#d1c79f]">
+            AMBROSE HCP
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-2">
           {pairs.map((pair: any[], i: number) => (
             <div
               key={i}
-              className="min-h-[92px] rounded-[18px] border border-[#d1c79f]/20 bg-black/35 p-3"
+              className="min-h-[104px] rounded-[18px] border border-[#d1c79f]/20 bg-black/35 p-3"
             >
-              <div className="mb-2 text-[8px] tracking-[0.16em] text-white/40">
-                PAIR {i + 1}
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="text-[8px] tracking-[0.16em] text-white/40">
+                  PAIR {i + 1}
+                </div>
+
+                <div className="rounded-full bg-[#d1c79f]/15 px-2 py-0.5 text-[9px] font-black text-[#d1c79f]">
+                  {ambroseHandicap(pair)}
+                </div>
               </div>
 
               <div className="truncate text-[12px] font-black leading-tight">
