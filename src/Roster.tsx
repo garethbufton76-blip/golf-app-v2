@@ -35,9 +35,8 @@ export default function Roster({
     setDraggedIndex(null);
   }
 
-  const pairs = Array.from(
-    { length: Math.ceil(list.length / 2) },
-    (_, i) => list.slice(i * 2, i * 2 + 2)
+  const pairs = Array.from({ length: Math.ceil(list.length / 2) }, (_, i) =>
+    list.slice(i * 2, i * 2 + 2)
   );
 
   return (
@@ -60,22 +59,22 @@ export default function Roster({
           PAIRING PREVIEW
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {pairs.map((pair: any[], i: number) => (
             <div
               key={i}
-              className="rounded-[18px] border border-[#d1c79f]/20 bg-black/35 p-3"
+              className="min-h-[92px] rounded-[18px] border border-[#d1c79f]/20 bg-black/35 p-3"
             >
-              <div className="mb-1 text-[9px] tracking-[0.18em] text-white/45">
+              <div className="mb-2 text-[8px] tracking-[0.16em] text-white/40">
                 PAIR {i + 1}
               </div>
 
-              <div className="truncate text-sm font-bold">
-                {pair[0]?.name || "-"}
+              <div className="truncate text-[12px] font-black leading-tight">
+                {first(pair[0]?.name || "-")}
               </div>
 
-              <div className="truncate text-sm text-white/70">
-                {pair[1]?.name || "-"}
+              <div className="mt-1 truncate text-[12px] leading-tight text-white/65">
+                {first(pair[1]?.name || "-")}
               </div>
             </div>
           ))}
@@ -91,55 +90,53 @@ export default function Roster({
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => movePlayer(i)}
             onDragEnd={() => setDraggedIndex(null)}
-            className={`${panel} p-3 transition-all ${
+            className={`rounded-full border border-[#d1c79f]/20 bg-black/45 px-3 py-3 backdrop-blur-xl transition-all ${
               draggedIndex === i ? "scale-[0.98] opacity-50" : ""
             }`}
           >
             <div className="flex items-center gap-3">
               <Logo
                 team={team === "Red" ? "red" : "blue"}
-                size="h-16 w-16"
+                size="h-14 w-14"
                 src={p.photo || teamLogos[team]}
               />
 
               <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="rounded-full border border-[#d1c79f]/25 px-2 py-0.5 text-[9px] tracking-[0.14em] text-white/50">
-                    SLOT {i + 1}
-                  </span>
+                <div className="text-[9px] tracking-[0.18em] text-white/40">
+                  SLOT {i + 1}
                 </div>
 
-                <div className="truncate text-[18px] font-semibold">
+                <div className="truncate text-[18px] font-bold leading-tight">
                   {first(p.name)}
-                </div>
-
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={() => reorder(i, i - 1)}
-                    disabled={i === 0}
-                    className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] disabled:opacity-25"
-                  >
-                    ↑ Up
-                  </button>
-
-                  <button
-                    onClick={() => reorder(i, i + 1)}
-                    disabled={i === list.length - 1}
-                    className="rounded-full border border-white/15 bg-black/35 px-3 py-1 text-[11px] disabled:opacity-25"
-                  >
-                    ↓ Down
-                  </button>
                 </div>
               </div>
 
-              <div className="rounded-[18px] border border-[#d1c79f]/25 bg-black/35 px-3 py-3 text-center">
-                <div className="text-[10px] text-white/50">
+              <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-2 text-center">
+                <div className="text-[8px] tracking-[0.12em] text-white/40">
                   HCP
                 </div>
 
-                <div className="text-[18px]">
+                <div className="text-[17px] font-bold">
                   {p.handicap}
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => reorder(i, i - 1)}
+                  disabled={i === 0}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
+                >
+                  ▲
+                </button>
+
+                <button
+                  onClick={() => reorder(i, i + 1)}
+                  disabled={i === list.length - 1}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/15 text-[#d1c79f] disabled:opacity-20"
+                >
+                  ▼
+                </button>
               </div>
             </div>
           </div>
