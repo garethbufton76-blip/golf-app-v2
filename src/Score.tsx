@@ -108,6 +108,7 @@ export default function Score({
 
   function openHole(holeNumber: number) {
     const detail = holesByTee[holeNumber][day.tee];
+
     setSelectedHole(detail);
     setDraft({
       red: detail.par,
@@ -393,54 +394,65 @@ export default function Score({
               </div>
             </Overlay>
           )}
+        </div>
+      </div>
 
-          {selectedHole && (
-            <Overlay>
-              <div className="mb-3 flex justify-between">
-                <div>
-                  <div className="text-[11px] tracking-[0.28em] text-white/60">
-                    SCORE HOLE
-                  </div>
-
-                  <div className="mt-2 text-[14px] font-bold tracking-[0.16em]">
-                    Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
-                    {selectedHole.si}
-                  </div>
+      {selectedHole && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-[380px] rounded-[26px] border border-[#d1c79f]/30 bg-black/95 p-4 shadow-2xl backdrop-blur-xl">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <div className="text-[10px] tracking-[0.24em] text-white/50">
+                  SCORE HOLE
                 </div>
+
+                <div className="mt-1 text-[16px] font-black tracking-[0.08em] text-white">
+                  Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
+                  {selectedHole.si}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setSelectedHole(null)}
+                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/75"
+                >
+                  Back
+                </button>
 
                 <button
                   onClick={saveHole}
-                  className="rounded-full border border-[#d1c79f]/40 bg-[#d1c79f]/15 px-4 py-2 text-sm font-semibold text-[#efe6bf]"
+                  className="rounded-full bg-[#d1c79f] px-3 py-1.5 text-[11px] font-black text-black"
                 >
                   Save
                 </button>
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <ScoreBox
-                  team="red"
-                  players={match.red}
-                  score={draft.red}
-                  setScore={(v: number) =>
-                    setDraft((d) => ({ ...d, red: v }))
-                  }
-                  par={selectedHole.par}
-                />
+            <div className="grid grid-cols-2 gap-3">
+              <ScoreBox
+                team="red"
+                players={match.red}
+                score={draft.red}
+                setScore={(v: number) =>
+                  setDraft((d) => ({ ...d, red: v }))
+                }
+                par={selectedHole.par}
+              />
 
-                <ScoreBox
-                  team="blue"
-                  players={match.blue}
-                  score={draft.blue}
-                  setScore={(v: number) =>
-                    setDraft((d) => ({ ...d, blue: v }))
-                  }
-                  par={selectedHole.par}
-                />
-              </div>
-            </Overlay>
-          )}
+              <ScoreBox
+                team="blue"
+                players={match.blue}
+                score={draft.blue}
+                setScore={(v: number) =>
+                  setDraft((d) => ({ ...d, blue: v }))
+                }
+                par={selectedHole.par}
+              />
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       <div
         className={cx(
@@ -501,10 +513,10 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
     TEAM[team].title;
 
   return (
-    <div className="h-[120px] rounded-[20px] border border-[#d1c79f]/20 bg-black/55 backdrop-blur-xl overflow-hidden flex flex-col">
+    <div className="h-[146px] overflow-hidden rounded-[20px] border border-[#d1c79f]/20 bg-black/55 backdrop-blur-xl">
       <div
         className={cx(
-          "border-b px-3 py-1.5 text-center text-[11px] font-semibold tracking-[0.14em]",
+          "border-b px-2 py-1.5 text-center text-[10px] font-semibold tracking-[0.14em]",
           team === "red"
             ? "bg-[#6f2a33] text-[#f1dada]"
             : "bg-[#3f56a0] text-[#d6e1ff]"
@@ -515,21 +527,21 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
         </span>
       </div>
 
-      <div className="relative flex-1">
+      <div className="relative h-[92px]">
         <button
           onClick={() => setScore(Math.max(0, score - 1))}
-          className="absolute left-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white"
+          className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-xl text-white"
         >
           −
         </button>
 
-        <div className="flex h-full items-center justify-center text-[52px] font-extrabold">
+        <div className="flex h-full items-center justify-center text-[58px] font-extrabold">
           {score === par + 4 ? "P" : score}
         </div>
 
         <button
           onClick={() => setScore(Math.min(par + 4, score + 1))}
-          className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-white"
+          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-xl text-white"
         >
           +
         </button>
@@ -537,7 +549,7 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
 
       <div
         className={cx(
-          "px-3 py-1.5 text-center text-[10px] font-semibold tracking-[0.18em]",
+          "px-2 py-1.5 text-center text-[10px] font-semibold tracking-[0.16em]",
           team === "red"
             ? "bg-[#6f2a33] text-[#f1dada]"
             : "bg-[#3f56a0] text-[#d6e1ff]"
