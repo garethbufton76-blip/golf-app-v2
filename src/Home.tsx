@@ -1,10 +1,8 @@
-import hero from "./assets/hero.png";
-
 export default function Home({ state, setScreen }: any) {
   return (
     <div className="relative min-h-[100svh] overflow-hidden bg-black">
       <img
-        src={hero}
+        src="https://i.ibb.co/B5MCPFwV/hf-20260406-212338-4e6f71fe-a63d-4837-9341-31237b0552c3.png"
         className="absolute inset-0 h-full w-full object-cover opacity-40"
       />
 
