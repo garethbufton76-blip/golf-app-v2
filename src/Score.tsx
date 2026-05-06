@@ -76,10 +76,22 @@ export default function Score({
     ? players
     : Math.max(1, Math.ceil(players / 2));
 
+  const isAmbrose = /ambrose/i.test(day.format);
+  const isBetterBall = /better ball/i.test(day.format);
+
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
   const [selectedHole, setSelectedHole] = useState<any>(null);
   const [cardPlayer, setCardPlayer] = useState<any>(null);
-  const [draft, setDraft] = useState({ red: 4, blue: 4 });
+  const [draft, setDraft] = useState<any>({
+    red: 4,
+    blue: 4,
+    red_0: 4,
+    red_1: 4,
+    blue_0: 4,
+    blue_1: 4,
+  });
+
+  const [teeShots, setTeeShots] = useState<any>({});
 
   const stateKey = keyFor(activeDay, activeMatch);
   const holes = states[stateKey] || blankHoles();
@@ -87,7 +99,7 @@ export default function Score({
   const result = getResult(holes);
 
   const nextHoleNumber =
-    holes.find((h) => h.status === "pending")?.hole || 18;
+    holes.find((h: any) => h.status === "pending")?.hole || 18;
 
   const current = holesByTee[nextHoleNumber][day.tee];
 
@@ -104,6 +116,23 @@ export default function Score({
   const playerKey = (team: string, p: any) =>
     `${team}-${p.rosterIndex}-${p.name}`;
 
+  function teeShotKey(team: string, p: any) {
+    return `${stateKey}-${team}-${p.rosterIndex}-${p.name}`;
+  }
+
+  function getTeeShotCount(team: string, p: any) {
+    return teeShots[teeShotKey(team, p)] || 0;
+  }
+
+  function cycleTeeShot(team: string, p: any) {
+    const key = teeShotKey(team, p);
+
+    setTeeShots((current: any) => ({
+      ...current,
+      [key]: ((current[key] || 0) + 1) % 7,
+    }));
+  }
+
   const grossFor = (team: string, p: any, hole: number) =>
     scorecards[playerKey(team, p)]?.[hole] ?? null;
 
@@ -112,10 +141,16 @@ export default function Score({
 
     setSelectedHole(detail);
 
-    setDraft({
+    const nextDraft: any = {
       red: detail.par,
       blue: detail.par,
-    });
+      red_0: detail.par,
+      red_1: detail.par,
+      blue_0: detail.par,
+      blue_1: detail.par,
+    };
+
+    setDraft(nextDraft);
   }
 
   function teamHandicap(side: any[]) {
@@ -181,32 +216,95 @@ export default function Score({
   function saveHole() {
     if (!selectedHole) return;
 
-    const redScore = Number(draft.red ?? selectedHole.par);
-    const blueScore = Number(draft.blue ?? selectedHole.par);
+    let status = "as";
+    const nextScorecards: any = { ...scorecards };
 
-    const redNet =
-      redScore -
-      shots(
-        Math.max(
-          0,
-          Number(match.red[0]?.handicap || 0) -
-            Number(match.blue[0]?.handicap || 0)
-        ),
-        selectedHole.si
+    if (isBetterBall) {
+      const allPlayers = [...match.red, ...match.blue];
+      const lowMarker = Math.min(
+        ...allPlayers.map((p: any) => Number(p.handicap || 0))
       );
 
-    const blueNet =
-      blueScore -
-      shots(
-        Math.max(
-          0,
-          Number(match.blue[0]?.handicap || 0) -
-            Number(match.red[0]?.handicap || 0)
-        ),
-        selectedHole.si
-      );
+      const redNets = match.red.map((p: any, i: number) => {
+        const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
+        const strokeCount = shots(
+          Math.max(0, Number(p.handicap || 0) - lowMarker),
+          selectedHole.si
+        );
 
-    const status = redNet < blueNet ? "red" : blueNet < redNet ? "blue" : "as";
+        const k = playerKey("red", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return gross - strokeCount;
+      });
+
+      const blueNets = match.blue.map((p: any, i: number) => {
+        const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
+        const strokeCount = shots(
+          Math.max(0, Number(p.handicap || 0) - lowMarker),
+          selectedHole.si
+        );
+
+        const k = playerKey("blue", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return gross - strokeCount;
+      });
+
+      const redBest = Math.min(...redNets);
+      const blueBest = Math.min(...blueNets);
+
+      status = redBest < blueBest ? "red" : blueBest < redBest ? "blue" : "as";
+    } else {
+      const redScore = Number(draft.red ?? selectedHole.par);
+      const blueScore = Number(draft.blue ?? selectedHole.par);
+
+      const redHcp =
+        /ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)
+          ? teamHandicap(match.red)
+          : Number(match.red[0]?.handicap || 0);
+
+      const blueHcp =
+        /ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)
+          ? teamHandicap(match.blue)
+          : Number(match.blue[0]?.handicap || 0);
+
+      const low = Math.min(redHcp, blueHcp);
+
+      const redNet =
+        redScore - shots(Math.max(0, redHcp - low), selectedHole.si);
+
+      const blueNet =
+        blueScore - shots(Math.max(0, blueHcp - low), selectedHole.si);
+
+      status = redNet < blueNet ? "red" : blueNet < redNet ? "blue" : "as";
+
+      match.red.forEach((p: any) => {
+        const k = playerKey("red", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: redScore,
+        };
+      });
+
+      match.blue.forEach((p: any) => {
+        const k = playerKey("blue", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: blueScore,
+        };
+      });
+    }
 
     const updated = holes.map((h: any) =>
       h.hole === selectedHole.hole ? { ...h, status } : h
@@ -217,29 +315,7 @@ export default function Score({
       [stateKey]: updated,
     }));
 
-    setScorecards((s: any) => {
-      const next = { ...s };
-
-      match.red.forEach((p: any) => {
-        const k = playerKey("red", p);
-
-        next[k] = {
-          ...(next[k] || {}),
-          [selectedHole.hole]: redScore,
-        };
-      });
-
-      match.blue.forEach((p: any) => {
-        const k = playerKey("blue", p);
-
-        next[k] = {
-          ...(next[k] || {}),
-          [selectedHole.hole]: blueScore,
-        };
-      });
-
-      return next;
-    });
+    setScorecards(nextScorecards);
 
     setSelectedHole(null);
   }
@@ -369,6 +445,9 @@ export default function Score({
               players={match.red}
               setCardPlayer={setCardPlayer}
               teamLogos={teamLogos}
+              isAmbrose={isAmbrose}
+              getTeeShotCount={getTeeShotCount}
+              cycleTeeShot={cycleTeeShot}
             />
 
             <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
@@ -380,6 +459,9 @@ export default function Score({
               players={match.blue}
               setCardPlayer={setCardPlayer}
               teamLogos={teamLogos}
+              isAmbrose={isAmbrose}
+              getTeeShotCount={getTeeShotCount}
+              cycleTeeShot={cycleTeeShot}
             />
           </div>
 
@@ -436,27 +518,96 @@ export default function Score({
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <ScoreBox
-                team="red"
-                players={match.red}
-                score={draft.red}
-                setScore={(v: number) =>
-                  setDraft((d) => ({ ...d, red: v }))
-                }
-                par={selectedHole.par}
-              />
+            {isBetterBall ? (
+              <div className="grid grid-cols-2 gap-3">
+                {match.red.map((p: any, i: number) => (
+                  <ScoreBox
+                    key={`red-${i}`}
+                    team="red"
+                    players={[p]}
+                    score={draft[`red_${i}`]}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({
+                        ...d,
+                        [`red_${i}`]: v,
+                      }))
+                    }
+                    par={selectedHole.par}
+                  />
+                ))}
 
-              <ScoreBox
-                team="blue"
-                players={match.blue}
-                score={draft.blue}
-                setScore={(v: number) =>
-                  setDraft((d) => ({ ...d, blue: v }))
-                }
-                par={selectedHole.par}
-              />
-            </div>
+                {match.blue.map((p: any, i: number) => (
+                  <ScoreBox
+                    key={`blue-${i}`}
+                    team="blue"
+                    players={[p]}
+                    score={draft[`blue_${i}`]}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({
+                        ...d,
+                        [`blue_${i}`]: v,
+                      }))
+                    }
+                    par={selectedHole.par}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <ScoreBox
+                  team="red"
+                  players={match.red}
+                  score={draft.red}
+                  setScore={(v: number) =>
+                    setDraft((d: any) => ({
+                      ...d,
+                      red: v,
+                    }))
+                  }
+                  par={selectedHole.par}
+                />
+
+                <ScoreBox
+                  team="blue"
+                  players={match.blue}
+                  score={draft.blue}
+                  setScore={(v: number) =>
+                    setDraft((d: any) => ({
+                      ...d,
+                      blue: v,
+                    }))
+                  }
+                  par={selectedHole.par}
+                />
+              </div>
+            )}
+
+            {isAmbrose && (
+              <div className="mt-4 rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
+                <div className="mb-2 text-center text-[9px] font-bold tracking-[0.22em] text-white/45">
+                  TEE SHOT USED
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[...match.red.map((p: any) => ({ p, team: "red" })), ...match.blue.map((p: any) => ({ p, team: "blue" }))].map(
+                    ({ p, team }: any) => (
+                      <button
+                        key={`${team}-${p.name}`}
+                        onClick={() => cycleTeeShot(team, p)}
+                        className={cx(
+                          "rounded-xl border px-2 py-2 text-[11px] font-semibold",
+                          team === "red"
+                            ? "border-red-400/25 bg-red-950/35 text-red-100"
+                            : "border-blue-400/25 bg-blue-950/35 text-blue-100"
+                        )}
+                      >
+                        {first(p.name)} • {getTeeShotCount(team, p)}/6
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -481,7 +632,15 @@ export default function Score({
   );
 }
 
-function TeamPlayers({ team, players, setCardPlayer, teamLogos }: any) {
+function TeamPlayers({
+  team,
+  players,
+  setCardPlayer,
+  teamLogos,
+  isAmbrose,
+  getTeeShotCount,
+  cycleTeeShot,
+}: any) {
   const fallbackLogo =
     teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
 
@@ -509,6 +668,30 @@ function TeamPlayers({ team, players, setCardPlayer, teamLogos }: any) {
           <div className="mt-1 w-full truncate text-[11px] leading-tight text-white">
             {first(p.name)}
           </div>
+
+          {isAmbrose && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                cycleTeeShot(team, p);
+              }}
+              className="mt-1 flex justify-center gap-[2px]"
+            >
+              {Array.from({ length: 6 }, (_, dot) => (
+                <span
+                  key={dot}
+                  className={cx(
+                    "h-1.5 w-1.5 rounded-full border border-white/25",
+                    dot < getTeeShotCount(team, p)
+                      ? team === "red"
+                        ? "bg-[#ff6d6d]"
+                        : "bg-[#67a6ff]"
+                      : "bg-black/45"
+                  )}
+                />
+              ))}
+            </button>
+          )}
         </div>
       ))}
     </div>
