@@ -91,7 +91,7 @@ export default function Score({
     blue_1: 4,
   });
 
-  const [teeShots, setTeeShots] = useState<any>({});
+  const [teeShotSelections, setTeeShotSelections] = useState<any>({});
 
   const stateKey = keyFor(activeDay, activeMatch);
   const holes = states[stateKey] || blankHoles();
@@ -116,21 +116,28 @@ export default function Score({
   const playerKey = (team: string, p: any) =>
     `${team}-${p.rosterIndex}-${p.name}`;
 
-  function teeShotKey(team: string, p: any) {
-    return `${stateKey}-${team}-${p.rosterIndex}-${p.name}`;
+  function teeSelectionKey(hole: number, team: string) {
+    return `${stateKey}-hole-${hole}-${team}`;
+  }
+
+  function getSelectedTeePlayer(hole: number, team: string) {
+    return teeShotSelections[teeSelectionKey(hole, team)] || "";
+  }
+
+  function selectTeeShot(hole: number, team: string, p: any) {
+    setTeeShotSelections((current: any) => ({
+      ...current,
+      [teeSelectionKey(hole, team)]: playerKey(team, p),
+    }));
   }
 
   function getTeeShotCount(team: string, p: any) {
-    return teeShots[teeShotKey(team, p)] || 0;
-  }
+    const key = playerKey(team, p);
 
-  function cycleTeeShot(team: string, p: any) {
-    const key = teeShotKey(team, p);
-
-    setTeeShots((current: any) => ({
-      ...current,
-      [key]: ((current[key] || 0) + 1) % 7,
-    }));
+    return Object.entries(teeShotSelections).filter(
+      ([selectionKey, value]) =>
+        selectionKey.startsWith(`${stateKey}-hole-`) && value === key
+    ).length;
   }
 
   const grossFor = (team: string, p: any, hole: number) =>
@@ -141,16 +148,14 @@ export default function Score({
 
     setSelectedHole(detail);
 
-    const nextDraft: any = {
+    setDraft({
       red: detail.par,
       blue: detail.par,
       red_0: detail.par,
       red_1: detail.par,
       blue_0: detail.par,
       blue_1: detail.par,
-    };
-
-    setDraft(nextDraft);
+    });
   }
 
   function teamHandicap(side: any[]) {
@@ -447,7 +452,6 @@ export default function Score({
               teamLogos={teamLogos}
               isAmbrose={isAmbrose}
               getTeeShotCount={getTeeShotCount}
-              cycleTeeShot={cycleTeeShot}
             />
 
             <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
@@ -461,7 +465,6 @@ export default function Score({
               teamLogos={teamLogos}
               isAmbrose={isAmbrose}
               getTeeShotCount={getTeeShotCount}
-              cycleTeeShot={cycleTeeShot}
             />
           </div>
 
@@ -589,22 +592,33 @@ export default function Score({
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
-                  {[...match.red.map((p: any) => ({ p, team: "red" })), ...match.blue.map((p: any) => ({ p, team: "blue" }))].map(
-                    ({ p, team }: any) => (
+                  {[
+                    ...match.red.map((p: any) => ({ p, team: "red" })),
+                    ...match.blue.map((p: any) => ({ p, team: "blue" })),
+                  ].map(({ p, team }: any) => {
+                    const selected =
+                      getSelectedTeePlayer(selectedHole.hole, team) ===
+                      playerKey(team, p);
+
+                    return (
                       <button
                         key={`${team}-${p.name}`}
-                        onClick={() => cycleTeeShot(team, p)}
+                        onClick={() => selectTeeShot(selectedHole.hole, team, p)}
                         className={cx(
-                          "rounded-xl border px-2 py-2 text-[11px] font-semibold",
-                          team === "red"
+                          "rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
+                          selected
+                            ? team === "red"
+                              ? "border-red-300 bg-red-800 text-white shadow-[0_0_12px_rgba(255,109,109,0.45)]"
+                              : "border-blue-300 bg-blue-800 text-white shadow-[0_0_12px_rgba(103,166,255,0.45)]"
+                            : team === "red"
                             ? "border-red-400/25 bg-red-950/35 text-red-100"
                             : "border-blue-400/25 bg-blue-950/35 text-blue-100"
                         )}
                       >
                         {first(p.name)} • {getTeeShotCount(team, p)}/6
                       </button>
-                    )
-                  )}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -639,7 +653,6 @@ function TeamPlayers({
   teamLogos,
   isAmbrose,
   getTeeShotCount,
-  cycleTeeShot,
 }: any) {
   const fallbackLogo =
     teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
@@ -670,13 +683,7 @@ function TeamPlayers({
           </div>
 
           {isAmbrose && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                cycleTeeShot(team, p);
-              }}
-              className="mt-1 flex justify-center gap-[2px]"
-            >
+            <div className="mt-1 flex justify-center gap-[2px]">
               {Array.from({ length: 6 }, (_, dot) => (
                 <span
                   key={dot}
@@ -690,7 +697,7 @@ function TeamPlayers({
                   )}
                 />
               ))}
-            </button>
+            </div>
           )}
         </div>
       ))}
