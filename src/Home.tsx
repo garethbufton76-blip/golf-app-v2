@@ -1,30 +1,68 @@
 import {
   Logo,
+  MatchButtons,
   panel,
   gold,
+  Button,
+  matchCount,
 } from "./data";
+
+function DayButtons({
+  dayConfigs,
+  days,
+  active,
+  setActive,
+}: any) {
+  const shown = dayConfigs.slice(0, days);
+
+  return (
+    <div
+      className="grid gap-2"
+      style={{
+        gridTemplateColumns: `repeat(${shown.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {shown.map((d: any, i: number) => (
+        <Button
+          key={d.label}
+          active={i === active}
+          onClick={() => setActive(i)}
+        >
+          {d.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
 export default function Home({
   setScreen,
   dayConfigs,
+  days,
+  players,
   activeDay,
+  setActiveDay,
   totals,
   openMatch,
   teamLogos,
   teamNames,
 }: any) {
-  const count = 1;
+  const count = matchCount(
+    players,
+    dayConfigs[activeDay].format
+  );
 
   return (
     <>
       <div className="flex justify-center mt-4">
         <img
           src="https://i.ibb.co/23Rs55J9/DUEL-LOGO.png"
-          className="h-20 object-contain opacity-95"
+          alt="DUEL"
+          className="h-20 object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.65)]"
         />
       </div>
 
-      <div className="mt-[110px] grid grid-cols-2 text-center">
+      <div className="mt-[108px] grid grid-cols-2 text-center">
         <button onClick={() => setScreen("rosterP")}>
           <Logo
             team="red"
@@ -32,7 +70,7 @@ export default function Home({
             src={teamLogos.Red}
           />
 
-          <div className="mt-2 text-[11px] tracking-[0.18em] text-white/75">
+          <div className="mt-2 text-[11px] font-semibold tracking-[0.18em] text-white/75">
             {teamNames.Red}
           </div>
 
@@ -48,7 +86,7 @@ export default function Home({
             src={teamLogos.Blue}
           />
 
-          <div className="mt-2 text-[11px] tracking-[0.18em] text-white/75">
+          <div className="mt-2 text-[11px] font-semibold tracking-[0.18em] text-white/75">
             {teamNames.Blue}
           </div>
 
@@ -73,12 +111,23 @@ export default function Home({
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
-        <button
-          onClick={() => openMatch(0)}
-          className={`${gold} w-full rounded-2xl py-4 text-lg font-black`}
-        >
-          START MATCH
-        </button>
+        <DayButtons
+          dayConfigs={dayConfigs}
+          days={days}
+          active={activeDay}
+          setActive={setActiveDay}
+        />
+
+        <div className="mt-2 text-[9px] tracking-[0.22em] text-white/60">
+          MATCHES
+        </div>
+
+        <div className="mt-1.5">
+          <MatchButtons
+            count={count}
+            setActive={openMatch}
+          />
+        </div>
       </div>
     </>
   );
