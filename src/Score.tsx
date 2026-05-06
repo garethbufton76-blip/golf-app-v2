@@ -116,6 +116,66 @@ export default function Score({
     });
   }
 
+  function teamHandicap(side: any[]) {
+    const total = side.reduce(
+      (sum, p) => sum + Number(p.handicap || 0),
+      0
+    );
+
+    if (/ambrose/i.test(day.format)) {
+      if (side.length === 2) return Math.round(total / 4);
+      if (side.length === 3) return Math.round(total / 6);
+      if (side.length === 4) return Math.round(total / 8);
+      return Math.round(total / Math.max(1, side.length * 2));
+    }
+
+    if (/foursomes/i.test(day.format)) {
+      return Math.round(total * 0.5);
+    }
+
+    if (/chapman|pinehurst|greensomes/i.test(day.format)) {
+      return Math.round(total * 0.6);
+    }
+
+    return Math.round(total);
+  }
+
+  function holeShotDots(detail: any) {
+    const allPlayers = [...match.red, ...match.blue];
+
+    if (allPlayers.length < 2) {
+      return { red: false, blue: false };
+    }
+
+    if (/ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)) {
+      const redHcp = teamHandicap(match.red);
+      const blueHcp = teamHandicap(match.blue);
+      const low = Math.min(redHcp, blueHcp);
+
+      return {
+        red: shots(Math.max(0, redHcp - low), detail.si) > 0,
+        blue: shots(Math.max(0, blueHcp - low), detail.si) > 0,
+      };
+    }
+
+    const lowMarker = Math.min(
+      ...allPlayers.map((p) => Number(p.handicap || 0))
+    );
+
+    return {
+      red: match.red.some(
+        (p: any) =>
+          shots(Math.max(0, Number(p.handicap || 0) - lowMarker), detail.si) >
+          0
+      ),
+      blue: match.blue.some(
+        (p: any) =>
+          shots(Math.max(0, Number(p.handicap || 0) - lowMarker), detail.si) >
+          0
+      ),
+    };
+  }
+
   function saveHole() {
     if (!selectedHole) return;
 
@@ -177,18 +237,7 @@ export default function Score({
       return next;
     });
 
-    const nextPending = updated.find((h: any) => h.status === "pending");
-
-    if (nextPending) {
-      const nextDetail = holesByTee[nextPending.hole][day.tee];
-      setSelectedHole(nextDetail);
-      setDraft({
-        red: nextDetail.par,
-        blue: nextDetail.par,
-      });
-    } else {
-      setSelectedHole(null);
-    }
+    setSelectedHole(null);
   }
 
   const playerCard = (p: any, team: string) =>
@@ -208,6 +257,9 @@ export default function Score({
     const detail = holesByTee[h.hole][day.tee];
     const status = h.status;
     const active = h.hole === nextHoleNumber;
+    const shotDot = holeShotDots(detail);
+    const both = shotDot.red && shotDot.blue;
+    const single = shotDot.red || shotDot.blue;
 
     const tone =
       status === "red"
@@ -242,6 +294,22 @@ export default function Score({
             NOW
           </div>
         )}
+
+        <div className="absolute left-0 right-0 top-1 flex justify-center">
+          {both ? (
+            <div className="flex gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ff6d6d] shadow-[0_0_7px_rgba(255,109,109,0.9)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#67a6ff] shadow-[0_0_7px_rgba(103,166,255,0.9)]" />
+            </div>
+          ) : single ? (
+            <span
+              className={cx(
+                "h-1.5 w-1.5 rounded-full shadow-[0_0_7px_rgba(255,255,255,0.6)]",
+                shotDot.red ? "bg-[#ff6d6d]" : "bg-[#67a6ff]"
+              )}
+            />
+          ) : null}
+        </div>
 
         <div className="flex h-5 items-center justify-center">
           {status === "red" || status === "blue" ? (
@@ -412,21 +480,12 @@ export default function Score({
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectedHole(null)}
-                  className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white/75"
-                >
-                  Back
-                </button>
-
-                <button
-                  onClick={saveHole}
-                  className="rounded-full bg-[#d1c79f] px-3 py-1.5 text-[11px] font-black text-black"
-                >
-                  Save
-                </button>
-              </div>
+              <button
+                onClick={saveHole}
+                className="rounded-full bg-[#d1c79f] px-4 py-2 text-[12px] font-black text-black"
+              >
+                Save
+              </button>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -478,7 +537,8 @@ function TeamPlayers({ team, players, setCardPlayer, teamLogos }: any) {
   const fallbackLogo =
     teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
 
-  const logoSize = players.length > 1 ? "h-[50px] w-[50px]" : "h-[64px] w-[64px]";
+  const logoSize =
+    players.length > 1 ? "h-[50px] w-[50px]" : "h-[64px] w-[64px]";
 
   return (
     <div className="flex items-start justify-center gap-2 text-center">
@@ -563,7 +623,12 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
 
 function Overlay({ children, tall = false }: any) {
   return (
-    <div className={cx("absolute inset-0 z-30", tall && "-top-[160px] bottom-[-55px]")}>
+    <div
+      className={cx(
+        "absolute inset-0 z-30",
+        tall && "-top-[160px] bottom-[-55px]"
+      )}
+    >
       <div className="h-full rounded-[26px] border border-[#d1c79f]/25 bg-black/90 p-4 backdrop-blur-xl shadow-2xl flex flex-col">
         {children}
       </div>
