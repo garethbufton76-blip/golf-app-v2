@@ -2,7 +2,6 @@ import {
   Logo,
   MatchButtons,
   panel,
-  gold,
   Button,
   matchCount,
 } from "./data";
@@ -47,10 +46,7 @@ export default function Home({
   teamLogos,
   teamNames,
 }: any) {
-  const count = matchCount(
-    players,
-    dayConfigs[activeDay].format
-  );
+  const count = matchCount(players, dayConfigs[activeDay].format);
 
   return (
     <>
@@ -111,14 +107,18 @@ export default function Home({
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
-        <DayButtons
-          dayConfigs={dayConfigs}
-          days={days}
-          active={activeDay}
-          setActive={setActiveDay}
-        />
+        {days > 1 && (
+          <div className="mb-2">
+            <DayButtons
+              dayConfigs={dayConfigs}
+              days={days}
+              active={activeDay}
+              setActive={setActiveDay}
+            />
+          </div>
+        )}
 
-        <div className="mt-2 text-[9px] tracking-[0.22em] text-white/60">
+        <div className="text-[9px] tracking-[0.22em] text-white/60">
           MATCHES
         </div>
 
