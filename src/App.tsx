@@ -1,43 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
-import { defaultState } from "./data";
-import { loadAppState, saveAppState } from "./storage";
-import Home from "./Home";
-import Score from "./Score";
-import Admin from "./Admin";
-import Roster from "./Roster";
-
-type Screen = "home" | "score" | "admin" | "rosterRed" | "rosterBlue";
+import React, { useState } from "react";
+import Home from "./components/Home";
+import Score from "./components/Score";
 
 export default function App() {
-  const loaded = useMemo(() => loadAppState(defaultState), []);
-  const [screen, setScreen] = useState<Screen>("home");
-  const [state, setState] = useState<any>(loaded);
-
-  useEffect(() => {
-    saveAppState(state);
-  }, [state]);
+  const [screen, setScreen] = useState("home");
+  const [players] = useState(2);
 
   return (
-    <div className="min-h-[100svh] bg-black text-white">
+    <div className="min-h-screen bg-black text-white">
       {screen === "home" && (
-        <Home state={state} setScreen={setScreen} />
+        <Home players={players} setScreen={setScreen} />
       )}
 
-      {screen === "score" && (
-        <Score state={state} setState={setState} setScreen={setScreen} />
-      )}
-
-      {screen === "admin" && (
-        <Admin state={state} setState={setState} setScreen={setScreen} />
-      )}
-
-      {screen === "rosterRed" && (
-        <Roster team="Red" state={state} setScreen={setScreen} />
-      )}
-
-      {screen === "rosterBlue" && (
-        <Roster team="Blue" state={state} setScreen={setScreen} />
-      )}
+      {screen === "score" && <Score />}
     </div>
   );
 }
