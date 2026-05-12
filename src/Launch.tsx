@@ -7,6 +7,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
       <div className="relative h-[780px] w-[390px] overflow-hidden rounded-3xl bg-black">
+        {/* Background */}
         <img
           src="/launch-bg.jpg"
           alt=""
@@ -15,6 +16,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
 
         <div className="absolute inset-0 bg-black/8" />
 
+        {/* Content */}
         <div className="relative z-10 flex h-full flex-col px-6 pt-8 pb-7">
           {/* DUEL Logo */}
           <div className="flex justify-center">
@@ -74,7 +76,7 @@ function ModeCard({
         tone === "red" ? "bg-[#040001]/96" : "bg-[#00030a]/96"
       }`}
     >
-      {/* Overlay */}
+      {/* Background overlay */}
       <div
         className={`absolute inset-0 ${
           tone === "red"
@@ -84,25 +86,30 @@ function ModeCard({
       />
 
       {/* Gold divider lines */}
-      <div className="pointer-events-none absolute inset-x-6 top-8 h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-70" />
+      <div className="pointer-events-none absolute inset-x-6 top-[74px] h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-55" />
 
-      <div className="pointer-events-none absolute inset-x-6 top-[118px] h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-45" />
+      <div className="pointer-events-none absolute inset-x-6 bottom-[76px] h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-35" />
 
       {/* Content */}
-      <div className="relative z-10 flex h-full flex-col items-center justify-center">
-        <div className="text-[18px] font-black leading-none tracking-[0.24em] text-[#e7d39d]">
-          {titleTop}
+      <div className="relative z-10 flex h-full flex-col items-center">
+        {/* MATCHED TITLE SYSTEM */}
+        <div className="mt-3 flex flex-col items-center">
+          <div className="text-[18px] font-black uppercase leading-none tracking-[0.26em] text-[#e7d39d]">
+            {titleTop}
+          </div>
+
+          <div className="mt-4 text-[18px] font-semibold uppercase leading-none tracking-[0.26em] text-white">
+            {titleBottom}
+          </div>
         </div>
 
-        <div className="mt-3 text-[18px] font-semibold leading-none tracking-[0.24em] text-white">
-          {titleBottom}
-        </div>
-
-        <div className="mt-7 text-[11px] font-medium leading-[1.7] text-white/70">
+        {/* Body copy */}
+        <div className="mt-12 text-center text-[11px] font-medium leading-[1.75] text-white/72">
           {text}
         </div>
 
-        <div className="mt-6 text-[34px] font-light leading-none text-[#d8c792]/90">
+        {/* Arrow */}
+        <div className="mt-auto mb-1 text-[34px] font-light leading-none text-[#d8c792]/90">
           ›
         </div>
       </div>
