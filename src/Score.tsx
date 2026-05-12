@@ -286,11 +286,13 @@ export default function Score({
       const h = holesByTee[holeNo][day.tee];
       const gross = grossFor(team, p, h.hole);
       const shotCount = shots(Number(p.handicap || 0), h.si);
+      const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
       const points = gross == null ? null : stableford(gross, h.par, shotCount);
 
       return {
         ...h,
         gross,
+        net,
         points,
       };
     });
@@ -699,6 +701,7 @@ function PlayerScorecard({
   day,
   playerScorecardRows,
 }: any) {
+  const [scoreMode, setScoreMode] = useState<"gross" | "net">("gross");
   const { p, team } = cardPlayer;
 
   const front = playerScorecardRows(p, team, 1, 9);
@@ -706,8 +709,12 @@ function PlayerScorecard({
   const all = [...front, ...back];
 
   const parTotal = all.reduce((sum, h) => sum + Number(h.par || 0), 0);
-  const grossTotal = all.reduce(
-    (sum, h) => sum + (h.gross == null ? 0 : Number(h.gross)),
+  const scoreTotal = all.reduce(
+    (sum, h) =>
+      sum +
+      (h[scoreMode] == null
+        ? 0
+        : Number(h[scoreMode])),
     0
   );
   const stTotal = all.reduce(
@@ -741,20 +748,48 @@ function PlayerScorecard({
             </div>
           </div>
 
-          <button
-            onClick={close}
-            className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-3 py-1.5 text-xs font-bold text-[#efe6bf]"
-          >
-            Close
-          </button>
+          <div className="flex flex-col items-end gap-2">
+            <button
+              onClick={close}
+              className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-3 py-1.5 text-xs font-bold text-[#efe6bf]"
+            >
+              Close
+            </button>
+
+            <div className="flex rounded-full border border-[#d1c79f]/25 bg-black/60 p-1">
+              <button
+                onClick={() => setScoreMode("gross")}
+                className={cx(
+                  "rounded-full px-2.5 py-1 text-[9px] font-black tracking-[0.12em]",
+                  scoreMode === "gross"
+                    ? "bg-[#d1c79f] text-black"
+                    : "text-white/45"
+                )}
+              >
+                GROSS
+              </button>
+
+              <button
+                onClick={() => setScoreMode("net")}
+                className={cx(
+                  "rounded-full px-2.5 py-1 text-[9px] font-black tracking-[0.12em]",
+                  scoreMode === "net"
+                    ? "bg-[#d1c79f] text-black"
+                    : "text-white/45"
+                )}
+              >
+                NET
+              </button>
+            </div>
+          </div>
         </div>
 
-        <ScorecardTable title="FRONT" rows={front} />
-        <ScorecardTable title="BACK" rows={back} />
+        <ScorecardTable title="FRONT" rows={front} team={team} scoreMode={scoreMode} />
+        <ScorecardTable title="BACK" rows={back} team={team} scoreMode={scoreMode} />
 
         <div className="mt-3 grid grid-cols-3 gap-2">
           <SummaryBox label="PAR" value={parTotal} />
-          <SummaryBox label="GROSS" value={grossTotal} />
+          <SummaryBox label={scoreMode.toUpperCase()} value={scoreTotal} />
           <SummaryBox label="STB" value={stTotal} />
         </div>
       </div>
@@ -762,10 +797,11 @@ function PlayerScorecard({
   );
 }
 
-function ScorecardTable({ title, rows }: any) {
+function ScorecardTable({ title, rows, team, scoreMode }: any) {
   const parTotal = rows.reduce((sum: number, h: any) => sum + Number(h.par || 0), 0);
-  const grossTotal = rows.reduce(
-    (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
+  const scoreTotal = rows.reduce(
+    (sum: number, h: any) =>
+      sum + (h[scoreMode] == null ? 0 : Number(h[scoreMode])),
     0
   );
   const pointsTotal = rows.reduce(
@@ -775,12 +811,29 @@ function ScorecardTable({ title, rows }: any) {
 
   return (
     <div className="mt-3 overflow-hidden rounded-[20px] border border-[#d1c79f]/20 bg-black/50">
-      <div className="grid grid-cols-[54px_repeat(9,1fr)_44px] bg-[#6f2a33]/70 px-1.5 py-2.5 text-center text-[9px] font-black tracking-[0.12em] text-white/80">
-        <div>HOLE</div>
+      <div
+        className={cx(
+          "relative grid grid-cols-[54px_repeat(9,1fr)_44px] overflow-hidden px-1.5 py-2.5 text-center text-[9px] font-black tracking-[0.12em] text-white/85",
+          team === "blue" ? "bg-[#253f96]/80" : "bg-[#6f2a33]/80"
+        )}
+      >
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.18]"
+          style={{
+            backgroundImage:
+              "linear-gradient(135deg, rgba(255,255,255,0.20) 0 1px, transparent 1px 8px)",
+          }}
+        />
+
+        <div className="relative z-10">HOLE</div>
+
         {rows.map((h: any) => (
-          <div key={h.hole}>{h.hole}</div>
+          <div className="relative z-10" key={h.hole}>
+            {h.hole}
+          </div>
         ))}
-        <div>{title}</div>
+
+        <div className="relative z-10">{title}</div>
       </div>
 
       <ScorecardRow
@@ -791,13 +844,13 @@ function ScorecardTable({ title, rows }: any) {
       />
 
       <ScorecardRow
-        label="GROSS"
+        label={scoreMode.toUpperCase()}
         values={rows.map((h: any) => ({
-          value: h.gross == null ? "-" : h.gross,
+          value: h[scoreMode] == null ? "-" : h[scoreMode],
           par: h.par,
-          gross: h.gross,
+          gross: h[scoreMode],
         }))}
-        total={grossTotal}
+        total={scoreTotal}
         scoreSymbols
       />
 
