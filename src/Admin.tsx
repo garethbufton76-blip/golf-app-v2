@@ -30,6 +30,8 @@ export default function Admin({
   setTeamNames,
   eventLocked,
   setEventLocked,
+  eventStarted,
+  setEventStarted,
   pairingLocks,
   setPairingLocks,
 }: any) {
@@ -109,6 +111,15 @@ export default function Admin({
     }));
   };
 
+  const startEvent = () => {
+    if (!eventLocked) {
+      setEventLocked(true);
+    }
+
+    setEventStarted(true);
+    setScreen("home");
+  };
+
   const shownPlayers = roster[editingTeam].slice(0, players);
 
   return (
@@ -141,14 +152,20 @@ export default function Admin({
         </div>
 
         <button
-          onClick={() => setScreen("home")}
+          onClick={() => {
+            if (eventStarted) {
+              setScreen("home");
+            } else {
+              setScreen("admin");
+            }
+          }}
           className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold"
         >
-          Back
+          {eventStarted ? "Home" : "Setup"}
         </button>
       </div>
 
-      <StatusPanel eventLocked={eventLocked} />
+      <StatusPanel eventLocked={eventLocked} eventStarted={eventStarted} />
 
       {adminMode === "event" && (
         <>
@@ -257,6 +274,8 @@ export default function Admin({
             <LockPanel
               eventLocked={eventLocked}
               setEventLocked={setEventLocked}
+              eventStarted={eventStarted}
+              startEvent={startEvent}
             />
           </div>
         </>
@@ -491,6 +510,27 @@ export default function Admin({
                   </div>
                 );
               })}
+
+              {eventLocked && !eventStarted && (
+                <div className="rounded-[24px] border border-[#d1c79f]/30 bg-black/60 p-4">
+                  <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
+                    READY TO GO LIVE
+                  </div>
+
+                  <div className="mt-2 text-[11px] leading-5 text-white/55">
+                    Once the pairings are set, start the event to open the live
+                    scoreboard and match scoring.
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={startEvent}
+                    className="mt-4 w-full rounded-[18px] bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black"
+                  >
+                    START EVENT
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -499,7 +539,7 @@ export default function Admin({
   );
 }
 
-function StatusPanel({ eventLocked }: any) {
+function StatusPanel({ eventLocked, eventStarted }: any) {
   return (
     <div className="mt-3 rounded-[20px] border border-[#d1c79f]/20 bg-black/40 p-3">
       <div className="flex items-center justify-between">
@@ -509,26 +549,37 @@ function StatusPanel({ eventLocked }: any) {
           </div>
 
           <div className="mt-1 text-sm font-black tracking-[0.12em] text-white">
-            {eventLocked ? "EVENT LOCKED" : "SETUP OPEN"}
+            {eventStarted
+              ? "EVENT LIVE"
+              : eventLocked
+              ? "EVENT LOCKED"
+              : "SETUP OPEN"}
           </div>
         </div>
 
         <div
           className={cx(
             "rounded-full px-3 py-1 text-[10px] font-black tracking-[0.14em]",
-            eventLocked
+            eventStarted
+              ? "bg-[#4ade80] text-black"
+              : eventLocked
               ? "bg-[#d1c79f] text-black"
               : "border border-white/15 bg-black/35 text-white/60"
           )}
         >
-          {eventLocked ? "PLAY MODE" : "ADMIN MODE"}
+          {eventStarted ? "LIVE" : eventLocked ? "READY" : "ADMIN"}
         </div>
       </div>
     </div>
   );
 }
 
-function LockPanel({ eventLocked, setEventLocked }: any) {
+function LockPanel({
+  eventLocked,
+  setEventLocked,
+  eventStarted,
+  startEvent,
+}: any) {
   return (
     <div className="rounded-[24px] border border-[#d1c79f]/25 bg-black/55 p-4">
       <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
@@ -542,16 +593,33 @@ function LockPanel({ eventLocked, setEventLocked }: any) {
 
       <button
         type="button"
+        disabled={eventStarted}
         onClick={() => setEventLocked((v: boolean) => !v)}
         className={cx(
           "mt-4 w-full rounded-[18px] px-4 py-4 text-sm font-black tracking-[0.16em]",
-          eventLocked
+          eventStarted
+            ? "border border-white/10 bg-black/25 text-white/25"
+            : eventLocked
             ? "border border-[#d1c79f]/30 bg-black/35 text-[#efe6bf]"
             : "bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
         )}
       >
-        {eventLocked ? "UNLOCK EVENT SETUP" : "LOCK EVENT SETUP"}
+        {eventStarted
+          ? "EVENT IS LIVE"
+          : eventLocked
+          ? "UNLOCK EVENT SETUP"
+          : "LOCK EVENT SETUP"}
       </button>
+
+      {eventLocked && !eventStarted && (
+        <button
+          type="button"
+          onClick={startEvent}
+          className="mt-3 w-full rounded-[18px] bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black shadow-[0_0_24px_rgba(74,222,128,0.25)]"
+        >
+          START EVENT
+        </button>
+      )}
     </div>
   );
 }
