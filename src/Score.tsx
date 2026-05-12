@@ -126,6 +126,7 @@ export default function Score({
     }
 
     if (/foursomes/i.test(day.format)) return Math.round(total * 0.5);
+
     if (/chapman|pinehurst|greensomes/i.test(day.format))
       return Math.round(total * 0.6);
 
@@ -174,12 +175,14 @@ export default function Score({
 
     if (isBetterBall) {
       const allPlayers = [...match.red, ...match.blue];
+
       const lowMarker = Math.min(
         ...allPlayers.map((p: any) => Number(p.handicap || 0))
       );
 
       const redNets = match.red.map((p: any, i: number) => {
         const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
+
         const strokeCount = shots(
           Math.max(0, Number(p.handicap || 0) - lowMarker),
           selectedHole.si
@@ -197,6 +200,7 @@ export default function Score({
 
       const blueNets = match.blue.map((p: any, i: number) => {
         const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
+
         const strokeCount = shots(
           Math.max(0, Number(p.handicap || 0) - lowMarker),
           selectedHole.si
@@ -712,34 +716,34 @@ function PlayerScorecard({
   );
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4">
-      <div className="max-h-[92vh] w-full max-w-[390px] overflow-y-auto rounded-[28px] border border-[#d1c79f]/25 bg-black/95 p-4 shadow-2xl backdrop-blur-xl">
-        <div className="mb-4 flex items-start justify-between gap-3">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-3">
+      <div className="max-h-[88vh] w-full max-w-[360px] overflow-hidden rounded-[26px] border border-[#d1c79f]/25 bg-black/95 p-3 shadow-2xl backdrop-blur-xl">
+        <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <div className="text-[10px] font-bold tracking-[0.28em] text-[#d1c79f]/70">
+            <div className="text-[9px] font-bold tracking-[0.26em] text-[#d1c79f]/70">
               PLAYER SCORECARD
             </div>
 
-            <div className="mt-3 text-[28px] font-black leading-none text-white">
+            <div className="mt-2 text-[25px] font-black leading-none text-white">
               {first(p.name)}
             </div>
 
-            <div className="mt-3 text-[11px] font-bold tracking-[0.24em] text-[#d1c79f]/65">
+            <div className="mt-2 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]/65">
               PLAYING HCP {p.handicap}
             </div>
 
-            <div className="mt-3 text-[11px] font-bold tracking-[0.24em] text-white/45">
+            <div className="mt-2 text-[10px] font-bold tracking-[0.22em] text-white/45">
               ST MICHAELS • {day.tee.toUpperCase()} TEE
             </div>
 
-            <div className="mt-2 text-[11px] font-bold tracking-[0.24em] text-white/35">
+            <div className="mt-1.5 text-[10px] font-bold tracking-[0.22em] text-white/35">
               {day.label} • {day.teeTime || "8:00"}
             </div>
           </div>
 
           <button
             onClick={close}
-            className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-4 py-2 text-sm font-bold text-[#efe6bf]"
+            className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-3 py-1.5 text-xs font-bold text-[#efe6bf]"
           >
             Close
           </button>
@@ -748,7 +752,7 @@ function PlayerScorecard({
         <ScorecardTable title="FRONT" rows={front} />
         <ScorecardTable title="BACK" rows={back} />
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
+        <div className="mt-3 grid grid-cols-3 gap-2">
           <SummaryBox label="PAR" value={parTotal} />
           <SummaryBox label="GROSS" value={grossTotal} />
           <SummaryBox label="STB" value={stTotal} />
@@ -770,8 +774,8 @@ function ScorecardTable({ title, rows }: any) {
   );
 
   return (
-    <div className="mt-4 overflow-hidden rounded-[22px] border border-[#d1c79f]/20 bg-black/50">
-      <div className="grid grid-cols-[64px_repeat(9,1fr)_54px] bg-[#6f2a33]/70 px-2 py-3 text-center text-[11px] font-black tracking-[0.14em] text-white/80">
+    <div className="mt-3 overflow-hidden rounded-[20px] border border-[#d1c79f]/20 bg-black/50">
+      <div className="grid grid-cols-[54px_repeat(9,1fr)_44px] bg-[#6f2a33]/70 px-1.5 py-2.5 text-center text-[9px] font-black tracking-[0.12em] text-white/80">
         <div>HOLE</div>
         {rows.map((h: any) => (
           <div key={h.hole}>{h.hole}</div>
@@ -788,8 +792,13 @@ function ScorecardTable({ title, rows }: any) {
 
       <ScorecardRow
         label="GROSS"
-        values={rows.map((h: any) => (h.gross == null ? "-" : h.gross))}
+        values={rows.map((h: any) => ({
+          value: h.gross == null ? "-" : h.gross,
+          par: h.par,
+          gross: h.gross,
+        }))}
         total={grossTotal}
+        scoreSymbols
       />
 
       <ScorecardRow
@@ -801,33 +810,85 @@ function ScorecardTable({ title, rows }: any) {
   );
 }
 
-function ScorecardRow({ label, values, total, muted = false }: any) {
+function ScorecardRow({
+  label,
+  values,
+  total,
+  muted = false,
+  scoreSymbols = false,
+}: any) {
   return (
     <div
       className={cx(
-        "grid grid-cols-[64px_repeat(9,1fr)_54px] px-2 py-4 text-center text-[13px] font-black",
+        "grid grid-cols-[54px_repeat(9,1fr)_44px] px-1.5 py-3 text-center text-[11px] font-black",
         muted ? "text-white/55" : "text-white"
       )}
     >
-      <div className="text-[11px] tracking-[0.16em]">{label}</div>
+      <div className="text-[9px] tracking-[0.14em]">{label}</div>
 
       {values.map((v: any, i: number) => (
-        <div key={i}>{v}</div>
+        <div key={i} className="flex items-center justify-center">
+          {scoreSymbols ? <ScoreSymbol item={v} /> : v}
+        </div>
       ))}
 
-      <div className="text-[22px] leading-none">{total}</div>
+      <div className="text-[20px] leading-none">{total}</div>
     </div>
   );
 }
 
+function ScoreSymbol({ item }: any) {
+  if (!item || item.value === "-" || item.gross == null) {
+    return <span>-</span>;
+  }
+
+  const gross = Number(item.gross);
+  const par = Number(item.par);
+  const diff = gross - par;
+
+  if (diff <= -2) {
+    return (
+      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d1c79f] text-[11px] font-black text-black shadow-[0_0_10px_rgba(209,199,159,0.55)]">
+        {item.value}
+      </span>
+    );
+  }
+
+  if (diff === -1) {
+    return (
+      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#d1c79f] text-[11px] font-black text-[#efe6bf]">
+        {item.value}
+      </span>
+    );
+  }
+
+  if (diff === 1) {
+    return (
+      <span className="flex h-6 w-6 items-center justify-center rounded-[6px] border border-white/45 text-[11px] font-black text-white">
+        {item.value}
+      </span>
+    );
+  }
+
+  if (diff >= 2) {
+    return (
+      <span className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-white/20 text-[11px] font-black text-white">
+        {item.value}
+      </span>
+    );
+  }
+
+  return <span>{item.value}</span>;
+}
+
 function SummaryBox({ label, value }: any) {
   return (
-    <div className="rounded-[20px] border border-[#d1c79f]/20 bg-black/55 px-3 py-5 text-center">
-      <div className="text-[10px] font-bold tracking-[0.24em] text-white/45">
+    <div className="rounded-[18px] border border-[#d1c79f]/20 bg-black/55 px-2 py-4 text-center">
+      <div className="text-[9px] font-bold tracking-[0.22em] text-white/45">
         {label}
       </div>
 
-      <div className="mt-3 text-[34px] font-black leading-none text-white">
+      <div className="mt-2 text-[30px] font-black leading-none text-white">
         {value}
       </div>
     </div>
