@@ -40,6 +40,8 @@ export default function Score({
 
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
   const [selectedHole, setSelectedHole] = useState<any>(null);
+  const [cardPlayer, setCardPlayer] = useState<any>(null);
+
   const [draft, setDraft] = useState<any>({
     red: 4,
     blue: 4,
@@ -124,7 +126,8 @@ export default function Score({
     }
 
     if (/foursomes/i.test(day.format)) return Math.round(total * 0.5);
-    if (/chapman|pinehurst|greensomes/i.test(day.format)) return Math.round(total * 0.6);
+    if (/chapman|pinehurst|greensomes/i.test(day.format))
+      return Math.round(total * 0.6);
 
     return Math.round(total);
   }
@@ -269,6 +272,26 @@ export default function Score({
     setSelectedHole(null);
   }
 
+  function grossFor(team: string, p: any, hole: number) {
+    return scorecards[playerKey(team, p)]?.[hole] ?? null;
+  }
+
+  function playerScorecardRows(p: any, team: string, from: number, to: number) {
+    return Array.from({ length: to - from + 1 }, (_, i) => {
+      const holeNo = from + i;
+      const h = holesByTee[holeNo][day.tee];
+      const gross = grossFor(team, p, h.hole);
+      const shotCount = shots(Number(p.handicap || 0), h.si);
+      const points = gross == null ? null : stableford(gross, h.par, shotCount);
+
+      return {
+        ...h,
+        gross,
+        points,
+      };
+    });
+  }
+
   const Hole = ({ h }: any) => {
     const detail = holesByTee[h.hole][day.tee];
     const status = h.status;
@@ -359,20 +382,17 @@ export default function Score({
           )}
         >
           <div
-            className="absolute inset-0 opacity-[0.12] mix-blend-soft-light"
+            className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
             style={{
               backgroundImage: `
-                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
-                radial-gradient(circle at 60% 30%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
-                radial-gradient(circle at 85% 22%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
-                radial-gradient(circle at 35% 65%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
-                radial-gradient(circle at 70% 72%, rgba(255,255,255,0.9) 0 8%, transparent 9%)
+                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
+                radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
               `,
-              backgroundSize: "120px 120px",
+              backgroundSize: "80px 80px",
             }}
           />
 
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_55%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]" />
 
           <div className="relative z-10">
             <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
@@ -399,6 +419,7 @@ export default function Score({
                 teamLogos={teamLogos}
                 isAmbrose={isAmbrose}
                 getTeeShotCount={getTeeShotCount}
+                setCardPlayer={setCardPlayer}
               />
 
               <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
@@ -411,6 +432,7 @@ export default function Score({
                 teamLogos={teamLogos}
                 isAmbrose={isAmbrose}
                 getTeeShotCount={getTeeShotCount}
+                setCardPlayer={setCardPlayer}
               />
             </div>
 
@@ -444,6 +466,15 @@ export default function Score({
           </div>
         </div>
       </div>
+
+      {cardPlayer && (
+        <PlayerScorecard
+          cardPlayer={cardPlayer}
+          close={() => setCardPlayer(null)}
+          day={day}
+          playerScorecardRows={playerScorecardRows}
+        />
+      )}
 
       {selectedHole && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
@@ -611,6 +642,7 @@ function TeamPlayers({
   teamLogos,
   isAmbrose,
   getTeeShotCount,
+  setCardPlayer,
 }: any) {
   const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
   const logoSize =
@@ -623,9 +655,12 @@ function TeamPlayers({
           key={`${p.name}-${i}`}
           className="flex w-[64px] flex-col items-center"
         >
-          <div className="flex h-[64px] items-center justify-center">
+          <button
+            onClick={() => setCardPlayer({ team, p })}
+            className="flex h-[64px] items-center justify-center"
+          >
             <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
-          </div>
+          </button>
 
           <div className="mt-1 w-full truncate text-[11px] leading-tight text-white">
             {first(p.name)}
@@ -650,6 +685,151 @@ function TeamPlayers({
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function PlayerScorecard({
+  cardPlayer,
+  close,
+  day,
+  playerScorecardRows,
+}: any) {
+  const { p, team } = cardPlayer;
+
+  const front = playerScorecardRows(p, team, 1, 9);
+  const back = playerScorecardRows(p, team, 10, 18);
+  const all = [...front, ...back];
+
+  const parTotal = all.reduce((sum, h) => sum + Number(h.par || 0), 0);
+  const grossTotal = all.reduce(
+    (sum, h) => sum + (h.gross == null ? 0 : Number(h.gross)),
+    0
+  );
+  const stTotal = all.reduce(
+    (sum, h) => sum + (h.points == null ? 0 : Number(h.points)),
+    0
+  );
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-4">
+      <div className="max-h-[92vh] w-full max-w-[390px] overflow-y-auto rounded-[28px] border border-[#d1c79f]/25 bg-black/95 p-4 shadow-2xl backdrop-blur-xl">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[10px] font-bold tracking-[0.28em] text-[#d1c79f]/70">
+              PLAYER SCORECARD
+            </div>
+
+            <div className="mt-3 text-[28px] font-black leading-none text-white">
+              {first(p.name)}
+            </div>
+
+            <div className="mt-3 text-[11px] font-bold tracking-[0.24em] text-[#d1c79f]/65">
+              PLAYING HCP {p.handicap}
+            </div>
+
+            <div className="mt-3 text-[11px] font-bold tracking-[0.24em] text-white/45">
+              ST MICHAELS • {day.tee.toUpperCase()} TEE
+            </div>
+
+            <div className="mt-2 text-[11px] font-bold tracking-[0.24em] text-white/35">
+              {day.label} • {day.teeTime || "8:00"}
+            </div>
+          </div>
+
+          <button
+            onClick={close}
+            className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-4 py-2 text-sm font-bold text-[#efe6bf]"
+          >
+            Close
+          </button>
+        </div>
+
+        <ScorecardTable title="FRONT" rows={front} />
+        <ScorecardTable title="BACK" rows={back} />
+
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <SummaryBox label="PAR" value={parTotal} />
+          <SummaryBox label="GROSS" value={grossTotal} />
+          <SummaryBox label="STB" value={stTotal} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScorecardTable({ title, rows }: any) {
+  const parTotal = rows.reduce((sum: number, h: any) => sum + Number(h.par || 0), 0);
+  const grossTotal = rows.reduce(
+    (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
+    0
+  );
+  const pointsTotal = rows.reduce(
+    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
+    0
+  );
+
+  return (
+    <div className="mt-4 overflow-hidden rounded-[22px] border border-[#d1c79f]/20 bg-black/50">
+      <div className="grid grid-cols-[64px_repeat(9,1fr)_54px] bg-[#6f2a33]/70 px-2 py-3 text-center text-[11px] font-black tracking-[0.14em] text-white/80">
+        <div>HOLE</div>
+        {rows.map((h: any) => (
+          <div key={h.hole}>{h.hole}</div>
+        ))}
+        <div>{title}</div>
+      </div>
+
+      <ScorecardRow
+        label="PAR"
+        values={rows.map((h: any) => h.par)}
+        total={parTotal}
+        muted
+      />
+
+      <ScorecardRow
+        label="GROSS"
+        values={rows.map((h: any) => (h.gross == null ? "-" : h.gross))}
+        total={grossTotal}
+      />
+
+      <ScorecardRow
+        label="STB"
+        values={rows.map((h: any) => (h.points == null ? "-" : h.points))}
+        total={pointsTotal}
+      />
+    </div>
+  );
+}
+
+function ScorecardRow({ label, values, total, muted = false }: any) {
+  return (
+    <div
+      className={cx(
+        "grid grid-cols-[64px_repeat(9,1fr)_54px] px-2 py-4 text-center text-[13px] font-black",
+        muted ? "text-white/55" : "text-white"
+      )}
+    >
+      <div className="text-[11px] tracking-[0.16em]">{label}</div>
+
+      {values.map((v: any, i: number) => (
+        <div key={i}>{v}</div>
+      ))}
+
+      <div className="text-[22px] leading-none">{total}</div>
+    </div>
+  );
+}
+
+function SummaryBox({ label, value }: any) {
+  return (
+    <div className="rounded-[20px] border border-[#d1c79f]/20 bg-black/55 px-3 py-5 text-center">
+      <div className="text-[10px] font-bold tracking-[0.24em] text-white/45">
+        {label}
+      </div>
+
+      <div className="mt-3 text-[34px] font-black leading-none text-white">
+        {value}
+      </div>
     </div>
   );
 }
