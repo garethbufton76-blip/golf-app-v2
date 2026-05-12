@@ -13,7 +13,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
           className="absolute inset-0 h-full w-full object-cover"
         />
 
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0 bg-black/8" />
 
         <div className="relative z-10 flex h-full flex-col px-6 pt-8 pb-7">
           <div className="flex justify-center">
@@ -24,7 +24,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
             />
           </div>
 
-          <div className="mt-[390px] grid grid-cols-2 gap-4">
+          <div className="mt-[388px] grid grid-cols-2 gap-4">
             <ModeCard
               titleTop="WEEKEND"
               titleBottom="MODE"
@@ -42,7 +42,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
             />
           </div>
 
-          <div className="mt-auto text-center text-[11px] uppercase tracking-[0.42em] text-white/28">
+          <div className="mt-auto text-center text-[10px] uppercase tracking-[0.46em] text-white/32">
             Premium Matchplay Scoring
           </div>
         </div>
@@ -67,36 +67,36 @@ function ModeCard({
   return (
     <button
       onClick={onClick}
-      className={`relative h-[238px] overflow-hidden rounded-[32px] border border-[#d7c792]/45 px-5 py-6 text-center shadow-[0_14px_50px_rgba(0,0,0,0.62)] backdrop-blur-[3px] active:scale-[0.985] ${
-        tone === "red" ? "bg-[#120005]/82" : "bg-[#000915]/82"
+      className={`relative h-[246px] overflow-hidden rounded-[34px] border border-[#d7c792]/42 px-5 py-6 text-center shadow-[0_18px_55px_rgba(0,0,0,0.72)] backdrop-blur-[4px] active:scale-[0.985] ${
+        tone === "red" ? "bg-[#090001]/88" : "bg-[#00060d]/88"
       }`}
     >
       <div
         className={`absolute inset-0 ${
           tone === "red"
-            ? "bg-gradient-to-b from-[#5e0818]/20 via-black/20 to-black/70"
-            : "bg-gradient-to-b from-[#0a3474]/20 via-black/20 to-black/70"
+            ? "bg-gradient-to-b from-[#5d0717]/18 via-black/30 to-black/82"
+            : "bg-gradient-to-b from-[#07356e]/18 via-black/30 to-black/82"
         }`}
       />
 
-      <div className="relative z-10 flex h-full flex-col items-center">
-        <div className="mb-4 h-[1px] w-[62px] bg-gradient-to-r from-transparent via-[#ecdcae] to-transparent opacity-75" />
+      <div className="pointer-events-none absolute inset-x-6 top-8 h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-70" />
 
-        <div className="text-[22px] font-black leading-none tracking-[0.16em] text-[#ecdcae]">
+      <div className="pointer-events-none absolute inset-x-6 top-[118px] h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-45" />
+
+      <div className="relative z-10 flex h-full flex-col items-center">
+        <div className="mt-7 text-[20px] font-black leading-none tracking-[0.28em] text-[#e7d39d]">
           {titleTop}
         </div>
 
-        <div className="mt-3 text-[21px] font-black leading-none tracking-[0.16em] text-white">
+        <div className="mt-3 text-[20px] font-semibold leading-none tracking-[0.30em] text-white">
           {titleBottom}
         </div>
 
-        <div className="mt-6 h-[1px] w-full bg-gradient-to-r from-transparent via-[#ecdcae] to-transparent opacity-55" />
-
-        <div className="mt-5 text-[12px] font-medium leading-[1.55] text-white/72">
+        <div className="mt-8 text-[12px] font-medium leading-[1.45] text-white/68">
           {text}
         </div>
 
-        <div className="mt-auto text-[28px] leading-none text-[#d8c792]">
+        <div className="mt-auto text-[28px] font-light leading-none text-[#d8c792]/85">
           ›
         </div>
       </div>
