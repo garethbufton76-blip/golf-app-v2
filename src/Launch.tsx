@@ -16,6 +16,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
         <div className="absolute inset-0 bg-black/8" />
 
         <div className="relative z-10 flex h-full flex-col px-6 pt-8 pb-7">
+          {/* DUEL Logo */}
           <div className="flex justify-center">
             <img
               src="https://i.ibb.co/23Rs55J9/DUEL-LOGO.png"
@@ -24,7 +25,8 @@ export default function Launch({ onWeekend, onQuick }: Props) {
             />
           </div>
 
-          <div className="mt-[388px] grid grid-cols-2 gap-4">
+          {/* Panels */}
+          <div className="mt-[330px] grid grid-cols-2 gap-4">
             <ModeCard
               titleTop="WEEKEND"
               titleBottom="MODE"
@@ -42,6 +44,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
             />
           </div>
 
+          {/* Footer */}
           <div className="mt-auto text-center text-[10px] uppercase tracking-[0.46em] text-white/32">
             Premium Matchplay Scoring
           </div>
@@ -67,10 +70,11 @@ function ModeCard({
   return (
     <button
       onClick={onClick}
-      className={`relative h-[246px] overflow-hidden rounded-[34px] border border-[#d7c792]/42 px-5 py-6 text-center shadow-[0_18px_55px_rgba(0,0,0,0.72)] backdrop-blur-[4px] active:scale-[0.985] ${
-        tone === "red" ? "bg-[#090001]/88" : "bg-[#00060d]/88"
+      className={`relative h-[246px] overflow-hidden rounded-[34px] border border-[#d7c792]/42 px-5 py-6 text-center shadow-[0_18px_55px_rgba(0,0,0,0.82)] backdrop-blur-[5px] active:scale-[0.985] ${
+        tone === "red" ? "bg-[#040001]/96" : "bg-[#00030a]/96"
       }`}
     >
+      {/* Overlay */}
       <div
         className={`absolute inset-0 ${
           tone === "red"
@@ -79,24 +83,26 @@ function ModeCard({
         }`}
       />
 
+      {/* Gold divider lines */}
       <div className="pointer-events-none absolute inset-x-6 top-8 h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-70" />
 
       <div className="pointer-events-none absolute inset-x-6 top-[118px] h-[1px] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-45" />
 
-      <div className="relative z-10 flex h-full flex-col items-center">
-        <div className="mt-7 text-[20px] font-black leading-none tracking-[0.28em] text-[#e7d39d]">
+      {/* Content */}
+      <div className="relative z-10 flex h-full flex-col items-center justify-center">
+        <div className="text-[18px] font-black leading-none tracking-[0.24em] text-[#e7d39d]">
           {titleTop}
         </div>
 
-        <div className="mt-3 text-[20px] font-semibold leading-none tracking-[0.30em] text-white">
+        <div className="mt-3 text-[18px] font-semibold leading-none tracking-[0.24em] text-white">
           {titleBottom}
         </div>
 
-        <div className="mt-8 text-[12px] font-medium leading-[1.45] text-white/68">
+        <div className="mt-7 text-[11px] font-medium leading-[1.7] text-white/70">
           {text}
         </div>
 
-        <div className="mt-auto text-[28px] font-light leading-none text-[#d8c792]/85">
+        <div className="mt-6 text-[34px] font-light leading-none text-[#d8c792]/90">
           ›
         </div>
       </div>
