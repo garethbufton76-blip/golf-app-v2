@@ -7,15 +7,22 @@ import {
   homeTotals,
   makeRoster,
 } from "./data";
+
+import Launch from "./Launch";
 import Home from "./Home";
 import Roster from "./Roster";
 import Score from "./Score";
 import Admin from "./Admin";
 
+type AppMode = "launch" | "weekend" | "quick";
+
 export default function App() {
+  const [mode, setMode] = useState<AppMode>("launch");
+
   const [screen, setScreen] = useState("home");
   const [players, setPlayers] = useState(2);
   const [days, setDays] = useState(1);
+
   const [dayConfigs, setDayConfigs] = useState(
     Array.from({ length: 4 }, (_, i) => ({
       label: `Day ${i + 1}`,
@@ -27,12 +34,20 @@ export default function App() {
   );
 
   const [roster, setRoster] = useState(makeRoster);
+
   const [activeDay, setActiveDay] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(0);
+
   const [states, setStates] = useState({});
   const [scorecards, setScorecards] = useState({});
+
   const [dayLocks, setDayLocks] = useState({});
-  const [teamLogos, setTeamLogos] = useState({ Red: "", Blue: "" });
+
+  const [teamLogos, setTeamLogos] = useState({
+    Red: "",
+    Blue: "",
+  });
+
   const [teamNames, setTeamNames] = useState({
     Red: "Team Red",
     Blue: "Team Blue",
@@ -56,6 +71,54 @@ export default function App() {
     setSelectedMatch(i);
     setScreen("score");
   };
+
+  // =========================
+  // LAUNCH SCREEN
+  // =========================
+
+  if (mode === "launch") {
+    return (
+      <Launch
+        onWeekend={() => setMode("weekend")}
+        onQuick={() => setMode("quick")}
+      />
+    );
+  }
+
+  // =========================
+  // QUICK GAME PLACEHOLDER
+  // =========================
+
+  if (mode === "quick") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-black text-white">
+        <div className="flex h-[780px] w-[390px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0d0d0d] p-8 text-center">
+          <div className="mb-4 text-[42px] font-black tracking-[0.25em] text-[#e7dbb2]">
+            QUICK
+          </div>
+
+          <div className="mb-8 text-sm uppercase tracking-[0.35em] text-white/50">
+            Fast Social Golf
+          </div>
+
+          <div className="mb-10 max-w-[260px] text-white/70">
+            Quick Game setup is the next build phase.
+          </div>
+
+          <button
+            onClick={() => setMode("launch")}
+            className="rounded-full border border-[#d8c792]/30 bg-[#d8c792] px-8 py-4 text-lg font-bold text-black"
+          >
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================
+  // WEEKEND MODE
+  // =========================
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
