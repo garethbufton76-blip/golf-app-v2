@@ -24,6 +24,7 @@ export default function App() {
   const [days, setDays] = useState(1);
 
   const [eventLocked, setEventLocked] = useState(false);
+  const [eventStarted, setEventStarted] = useState(false);
   const [pairingLocks, setPairingLocks] = useState({});
 
   const [dayConfigs, setDayConfigs] = useState(
@@ -37,13 +38,10 @@ export default function App() {
   );
 
   const [roster, setRoster] = useState(makeRoster);
-
   const [activeDay, setActiveDay] = useState(0);
   const [selectedMatch, setSelectedMatch] = useState(0);
-
   const [states, setStates] = useState({});
   const [scorecards, setScorecards] = useState({});
-
   const [dayLocks, setDayLocks] = useState({});
 
   const [teamLogos, setTeamLogos] = useState({
@@ -78,7 +76,10 @@ export default function App() {
   if (mode === "launch") {
     return (
       <Launch
-        onWeekend={() => setMode("weekend")}
+        onWeekend={() => {
+          setMode("weekend");
+          setScreen("admin");
+        }}
         onQuick={() => setMode("quick")}
       />
     );
@@ -130,7 +131,7 @@ export default function App() {
         <div className="absolute inset-0 bg-black/15" />
 
         <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
-          {screen === "home" && (
+          {screen === "home" && eventStarted && (
             <Home
               setScreen={setScreen}
               dayConfigs={dayConfigs}
@@ -183,7 +184,7 @@ export default function App() {
             />
           )}
 
-          {screen === "score" && (
+          {screen === "score" && eventStarted && (
             <Score
               setScreen={setScreen}
               dayConfigs={dayConfigs}
@@ -202,7 +203,7 @@ export default function App() {
             />
           )}
 
-          {screen === "admin" && (
+          {(screen === "admin" || !eventStarted) && (
             <Admin
               setScreen={setScreen}
               players={players}
@@ -221,12 +222,14 @@ export default function App() {
               setTeamNames={setTeamNames}
               eventLocked={eventLocked}
               setEventLocked={setEventLocked}
+              eventStarted={eventStarted}
+              setEventStarted={setEventStarted}
               pairingLocks={pairingLocks}
               setPairingLocks={setPairingLocks}
             />
           )}
 
-          {screen === "home" && (
+          {screen === "home" && eventStarted && (
             <button
               onClick={() => setScreen("admin")}
               className="absolute left-4 top-4"
