@@ -5,30 +5,27 @@ export const cx = (...v: any[]) => v.filter(Boolean).join(" ");
 export const gold =
   "bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black font-semibold";
 
-export const dark =
-  "border border-[#d1c79f]/25 bg-black/40 text-white/90";
+export const dark = "border border-[#d1c79f]/25 bg-black/40 text-white/90";
 
 export const panel =
   "rounded-[24px] border border-[#d1c79f]/25 bg-black/40 backdrop-blur-xl";
+
+export const inputClass =
+  "w-full rounded-xl border border-[#d1c79f]/25 bg-black/45 px-3 py-2 text-sm text-white outline-none";
 
 export const TEAM: any = {
   red: {
     label: "R",
     title: "Team Red",
-    grad:
-      "from-[#9e2535] via-[#6f1725] to-[#2b080f]",
-    bg:
-      "from-[#381018] via-[#101010] to-black",
+    grad: "from-[#9e2535] via-[#6f1725] to-[#2b080f]",
+    bg: "from-[#381018] via-[#101010] to-black",
     dot: "bg-[#ff6d6d]",
   },
-
   blue: {
     label: "B",
     title: "Team Blue",
-    grad:
-      "from-[#244fb4] via-[#132a70] to-[#07102c]",
-    bg:
-      "from-[#10224e] via-[#101010] to-black",
+    grad: "from-[#244fb4] via-[#132a70] to-[#07102c]",
+    bg: "from-[#10224e] via-[#101010] to-black",
     dot: "bg-[#67a6ff]",
   },
 };
@@ -36,20 +33,25 @@ export const TEAM: any = {
 export const BACKGROUND_IMAGES: any = {
   home:
     "https://i.ibb.co/B5MCPFwV/hf-20260406-212338-4e6f71fe-a63d-4837-9341-31237b0552c3.png",
+  rosterP: "",
+  rosterB: "",
+  score: "",
+  admin: "",
 };
 
-export const playerOptions = [1, 2, 4, 6, 8];
+export const playerOptions = [1, 2, 4, 6, 8, 10, 12];
 export const dayOptions = [1, 2, 3, 4];
 
 export const formats = [
   "Singles Match Play",
   "2-Ball Better Ball",
+  "4 Player Stableford",
+  "Foursomes",
   "2-Ball Ambrose",
   "Stableford",
   "Par / Bogey",
-  "Foursomes",
-  "Greensomes",
   "Chapman (Pinehurst)",
+  "Greensomes",
 ];
 
 export const minPlayers: any = {
@@ -59,10 +61,12 @@ export const minPlayers: any = {
   "2-Ball Better Ball": 2,
   "2-Ball Ambrose": 2,
   Foursomes: 2,
-  Greensomes: 2,
   "Chapman (Pinehurst)": 2,
+  Greensomes: 2,
+  "4 Player Stableford": 4,
 };
 
+export const times = ["7:00", "7:30", "8:00", "8:30", "9:00", "9:30", "10:00"];
 export const tees = ["Blue", "White", "Gold", "Red"];
 
 export const names = [
@@ -72,6 +76,12 @@ export const names = [
   ["Jimmy Neale", "13.0"],
   ["Hayden Abercrombie", "16.0"],
   ["Areef Vohra", "19.0"],
+  ["Player 7", "21.0"],
+  ["Player 8", "23.0"],
+  ["Player 9", "25.0"],
+  ["Player 10", "27.0"],
+  ["Player 11", "29.0"],
+  ["Player 12", "31.0"],
 ];
 
 export const holeRows = [
@@ -101,16 +111,7 @@ export const holesByTee: any = Object.fromEntries(
     Object.fromEntries(
       tees.map((tee, i) => {
         const [metres, si, par] = v.slice(i * 3, i * 3 + 3);
-
-        return [
-          tee,
-          {
-            hole,
-            metres,
-            si,
-            par,
-          },
-        ];
+        return [tee, { hole, metres, si, par }];
       })
     ),
   ])
@@ -122,43 +123,25 @@ export const blankHoles = () =>
     status: "pending",
   }));
 
-export const first = (name = "Player") =>
-  String(name).split(" ")[0];
+export const first = (name = "Player") => String(name).split(" ")[0];
 
 export const validFormats = (players: number) =>
-  formats.filter(
-    (f) => players >= (minPlayers[f] || 1)
-  );
+  formats.filter((f) => players >= (minPlayers[f] || 1));
 
-export const matchCount = (
-  players: number,
-  format: string
-) =>
-  /singles|stableford|par|bogey/i.test(format) &&
-  !/4 Player/i.test(format)
+export const matchCount = (players: number, format: string) =>
+  /singles|stableford|par|bogey/i.test(format) && !/4 Player/i.test(format)
     ? players
     : Math.max(1, Math.ceil(players / 2));
 
-export const keyFor = (day: number, match: number) =>
-  `${day}-${match}`;
+export const keyFor = (day: number, match: number) => `${day}-${match}`;
 
-export const shots = (
-  allowance: number,
-  si: number
-) =>
-  allowance < si
-    ? 0
-    : 1 + Math.floor((allowance - si) / 18);
+export function shots(allowance: number, si: number) {
+  return allowance < si ? 0 : 1 + Math.floor((allowance - si) / 18);
+}
 
-export const stableford = (
-  gross: number,
-  par: number,
-  shotCount: number
-) =>
-  Math.max(
-    0,
-    2 + (par - (Number(gross) - shotCount))
-  );
+export function stableford(gross: number, par: number, shotCount: number) {
+  return Math.max(0, 2 + (par - (Number(gross) - shotCount)));
+}
 
 export function rosterMeta(list: any[]) {
   return list.map((p, i) => ({
@@ -174,7 +157,7 @@ export function rosterMeta(list: any[]) {
 }
 
 export function makeRoster() {
-  const makePlayer = ([name, handicap]: any) => ({
+  const makePlayer = ([name, handicap]: any[]) => ({
     name,
     handicap,
     photo: "",
@@ -182,12 +165,8 @@ export function makeRoster() {
 
   return {
     Red: rosterMeta(names.map(makePlayer)),
-
     Blue: rosterMeta(
-      [
-        ["Hayden Abercrombie", "4.0"],
-        ...names.slice(1),
-      ].map(makePlayer)
+      [["Hayden Abercrombie", "4.0"], ...names.slice(1)].map(makePlayer)
     ),
   };
 }
@@ -214,10 +193,7 @@ export function playersForMatch(
     })
   );
 
-  if (
-    /singles|stableford|par|bogey/i.test(format) &&
-    !/4 Player/i.test(format)
-  ) {
+  if (/singles|stableford|par|bogey/i.test(format) && !/4 Player/i.test(format)) {
     return {
       red: red[index] ? [red[index]] : [],
       blue: blue[index] ? [blue[index]] : [],
@@ -231,22 +207,10 @@ export function playersForMatch(
 }
 
 export function getResult(holes: any[]) {
-  const done = holes.filter(
-    (h) => h.status !== "pending"
-  );
-
-  const red = done.filter(
-    (h) => h.status === "red"
-  ).length;
-
-  const blue = done.filter(
-    (h) => h.status === "blue"
-  ).length;
-
-  const as = done.filter(
-    (h) => h.status === "as"
-  ).length;
-
+  const done = holes.filter((h) => h.status !== "pending");
+  const red = done.filter((h) => h.status === "red").length;
+  const blue = done.filter((h) => h.status === "blue").length;
+  const as = done.filter((h) => h.status === "as").length;
   const diff = red - blue;
   const left = 18 - done.length;
 
@@ -284,57 +248,58 @@ export function getResult(holes: any[]) {
   };
 }
 
-export function Button({
-  active,
-  onClick,
-  children,
-  className = "",
-}: any) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cx(
-        "rounded-xl py-2 text-sm",
-        active ? gold : dark,
-        className
-      )}
-    >
-      {children}
-    </button>
-  );
+export function matchSummary(holes: any[]) {
+  const done = holes.filter((h) => h.status !== "pending");
+  const result = getResult(holes);
+  const official: any = { red: 0, blue: 0 };
+  const live: any = { red: 0, blue: 0 };
+
+  if (done.length === 18) {
+    const red = done.filter((h) => h.status === "red").length;
+    const blue = done.filter((h) => h.status === "blue").length;
+
+    if (red > blue) official.red = 1;
+    else if (blue > red) official.blue = 1;
+    else {
+      official.red = 0.5;
+      official.blue = 0.5;
+    }
+  }
+
+  if (done.length !== 18) {
+    if (result.leader) live[result.leader] = 1;
+    else if (done.length) {
+      live.red = 0.5;
+      live.blue = 0.5;
+    }
+  }
+
+  return { official, live };
 }
 
-export function MatchButtons({
-  count,
-  active = 0,
-  setActive,
-}: any) {
-  return (
-    <div
-      className="grid gap-3"
-      style={{
-        gridTemplateColumns: `repeat(${Math.min(
-          6,
-          count
-        )}, minmax(0, 1fr))`,
-      }}
-    >
-      {Array.from(
-        { length: count },
-        (_, i) => (
-          <Button
-            key={i}
-            active={i === active}
-            onClick={() => setActive(i)}
-            className="rounded-2xl py-3"
-          >
-            Match {i + 1}
-          </Button>
-        )
-      )}
-    </div>
-  );
+export function homeTotals(
+  dayConfigs: any[],
+  days: number,
+  players: number,
+  states: any
+) {
+  const total: any = {
+    official: { red: 0, blue: 0 },
+    live: { red: 0, blue: 0 },
+  };
+
+  dayConfigs.slice(0, days).forEach((day, d) => {
+    for (let m = 0; m < matchCount(players, day.format); m++) {
+      const s = matchSummary(states[keyFor(d, m)] || blankHoles());
+
+      total.official.red += s.official.red;
+      total.official.blue += s.official.blue;
+      total.live.red += s.live.red;
+      total.live.blue += s.live.blue;
+    }
+  });
+
+  return total;
 }
 
 export function Logo({
@@ -346,44 +311,108 @@ export function Logo({
 }: any) {
   const t = TEAM[team] || TEAM.red;
 
-  if (src) {
+  const defaultLogo =
+    team === "red" ? "/red-logo.png" : team === "blue" ? "/blue-logo.png" : "";
+
+  const logoSrc = src || defaultLogo;
+
+  if (logoSrc) {
     return (
-      <img
-        src={src}
-        alt=""
+      <span
         className={cx(
-          "aspect-square rounded-full object-cover",
+          "inline-flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full",
           size
         )}
-      />
+      >
+        <img
+          src={logoSrc}
+          alt=""
+          className="h-full w-full rounded-full object-cover"
+        />
+      </span>
     );
   }
 
   return (
-    <div
+    <span
       className={cx(
         "relative inline-flex aspect-square shrink-0 items-center justify-center overflow-hidden rounded-full",
         size
       )}
     >
-      <div
-        className={cx(
-          "absolute inset-0 bg-gradient-to-br",
-          t.grad
-        )}
-      />
+      <span className={cx("absolute inset-0 bg-gradient-to-br", t.grad)} />
 
-      <div
+      <span
         className={cx(
-          "font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#fff4c8] via-[#d1c79f] to-[#8f8256]",
-          letterClass ||
-            (small
-              ? "text-[18px]"
-              : "text-[58px]")
+          "relative font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#fff4c8] via-[#d1c79f] to-[#8f8256]",
+          letterClass || (small ? "text-[18px]" : "text-[58px]")
         )}
       >
         {t.label}
-      </div>
+      </span>
+    </span>
+  );
+}
+
+export function AdminIcon() {
+  return (
+    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d1c79f]/50 bg-gradient-to-br from-[#efe6bf] via-[#d1c79f] to-[#8f8256] text-sm font-black text-black">
+      ⚙
+    </div>
+  );
+}
+
+export function Button({ active, onClick, children, className = "" }: any) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx("rounded-xl py-2 text-sm", active ? gold : dark, className)}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function Select({ value, onChange, options, darkMode = false }: any) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={cx(
+        "w-full rounded-xl border px-2.5 py-2 text-sm font-semibold outline-none",
+        darkMode
+          ? "border-[#d1c79f]/25 bg-[#0e241b]/80 text-white"
+          : "border-[#d1c79f]/30 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+      )}
+    >
+      {options.map((o: any) => (
+        <option key={o} value={o} className="bg-[#111] text-white">
+          {o}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+export function MatchButtons({ count, active = 0, setActive }: any) {
+  return (
+    <div
+      className="grid gap-3"
+      style={{
+        gridTemplateColumns: `repeat(${Math.min(6, count)}, minmax(0, 1fr))`,
+      }}
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <Button
+          key={i}
+          active={i === active}
+          onClick={() => setActive(i)}
+          className="rounded-2xl py-3"
+        >
+          Match {i + 1}
+        </Button>
+      ))}
     </div>
   );
 }
