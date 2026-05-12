@@ -7,6 +7,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
       <div className="relative h-[780px] w-[390px] overflow-hidden rounded-3xl bg-black">
+        {/* Background */}
         <img
           src="/launch-bg.jpg"
           alt=""
@@ -15,6 +16,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
 
         <div className="absolute inset-0 bg-black/10" />
 
+        {/* Content */}
         <div className="relative z-10 flex h-full flex-col px-6 pt-8 pb-7">
           {/* DUEL Logo */}
           <div className="flex justify-center">
@@ -26,7 +28,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
           </div>
 
           {/* Mode Panels */}
-          <div className="mt-[445px] flex justify-center gap-3">
+          <div className="mt-[445px] grid grid-cols-2 gap-4">
             <ModeCard
               titleTop="WEEKEND"
               titleBottom="MODE"
@@ -66,7 +68,7 @@ function ModeCard({
   return (
     <button
       onClick={onClick}
-      className={`relative h-[160px] w-[148px] overflow-hidden rounded-[26px] border px-3 py-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-[7px] transition active:scale-[0.985] ${
+      className={`relative h-[160px] w-full overflow-hidden rounded-[26px] border px-3 py-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-[7px] transition active:scale-[0.985] ${
         tone === "red"
           ? "border-[#d7c792]/65 bg-[#100002]/95"
           : "border-[#d7c792]/65 bg-[#000714]/95"
@@ -81,12 +83,12 @@ function ModeCard({
         }`}
       />
 
-      {/* Inner border */}
+      {/* Inner Border */}
       <div className="absolute inset-[3px] rounded-[23px] border border-[#d7c792]/25" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full flex-col items-center justify-center">
-        {/* Small heading */}
+        {/* Top Title */}
         <div className="text-[13px] font-black uppercase leading-none tracking-[0.30em] text-[#ead9a7]">
           {titleTop}
         </div>
@@ -94,7 +96,7 @@ function ModeCard({
         {/* Divider */}
         <div className="mt-4 h-[1px] w-[74%] bg-gradient-to-r from-transparent via-[#ead9a7] to-transparent opacity-60" />
 
-        {/* Main title */}
+        {/* Main Title */}
         <div className="mt-4 text-[28px] font-light uppercase leading-none tracking-[0.20em] text-white">
           {titleBottom}
         </div>
