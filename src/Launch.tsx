@@ -26,7 +26,7 @@ export default function Launch({ onWeekend, onQuick }: Props) {
           </div>
 
           {/* Mode Panels */}
-          <div className="mt-[445px] grid grid-cols-2 gap-3">
+          <div className="mt-[445px] flex justify-center gap-3">
             <ModeCard
               titleTop="WEEKEND"
               titleBottom="MODE"
@@ -66,7 +66,7 @@ function ModeCard({
   return (
     <button
       onClick={onClick}
-      className={`relative h-[160px] overflow-hidden rounded-[26px] border px-3 py-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-[7px] transition active:scale-[0.985] ${
+      className={`relative h-[160px] w-[148px] overflow-hidden rounded-[26px] border px-3 py-4 text-center shadow-[0_20px_60px_rgba(0,0,0,0.85)] backdrop-blur-[7px] transition active:scale-[0.985] ${
         tone === "red"
           ? "border-[#d7c792]/65 bg-[#100002]/95"
           : "border-[#d7c792]/65 bg-[#000714]/95"
