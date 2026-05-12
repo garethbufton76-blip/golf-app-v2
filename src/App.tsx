@@ -23,6 +23,9 @@ export default function App() {
   const [players, setPlayers] = useState(2);
   const [days, setDays] = useState(1);
 
+  const [eventLocked, setEventLocked] = useState(false);
+  const [pairingLocks, setPairingLocks] = useState({});
+
   const [dayConfigs, setDayConfigs] = useState(
     Array.from({ length: 4 }, (_, i) => ({
       label: `Day ${i + 1}`,
@@ -72,10 +75,6 @@ export default function App() {
     setScreen("score");
   };
 
-  // =========================
-  // LAUNCH SCREEN
-  // =========================
-
   if (mode === "launch") {
     return (
       <Launch
@@ -84,10 +83,6 @@ export default function App() {
       />
     );
   }
-
-  // =========================
-  // QUICK GAME PLACEHOLDER
-  // =========================
 
   if (mode === "quick") {
     return (
@@ -115,10 +110,6 @@ export default function App() {
       </div>
     );
   }
-
-  // =========================
-  // WEEKEND MODE
-  // =========================
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
@@ -167,6 +158,9 @@ export default function App() {
               setActiveDay={setActiveDay}
               teamLogos={teamLogos}
               teamNames={teamNames}
+              eventLocked={eventLocked}
+              pairingLocks={pairingLocks}
+              setPairingLocks={setPairingLocks}
             />
           )}
 
@@ -183,6 +177,9 @@ export default function App() {
               setActiveDay={setActiveDay}
               teamLogos={teamLogos}
               teamNames={teamNames}
+              eventLocked={eventLocked}
+              pairingLocks={pairingLocks}
+              setPairingLocks={setPairingLocks}
             />
           )}
 
@@ -200,6 +197,8 @@ export default function App() {
               startMatch={selectedMatch}
               teamLogos={teamLogos}
               teamNames={teamNames}
+              eventLocked={eventLocked}
+              pairingLocks={pairingLocks}
             />
           )}
 
@@ -220,6 +219,10 @@ export default function App() {
               setTeamLogos={setTeamLogos}
               teamNames={teamNames}
               setTeamNames={setTeamNames}
+              eventLocked={eventLocked}
+              setEventLocked={setEventLocked}
+              pairingLocks={pairingLocks}
+              setPairingLocks={setPairingLocks}
             />
           )}
 
