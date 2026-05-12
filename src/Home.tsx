@@ -14,6 +14,8 @@ function DayButtons({
 }: any) {
   const shown = dayConfigs.slice(0, days);
 
+  if (shown.length <= 1) return null;
+
   return (
     <div
       className="grid gap-2"
@@ -44,52 +46,44 @@ export default function Home({
   totals,
   openMatch,
   teamLogos,
-  teamNames,
 }: any) {
   const count = matchCount(players, dayConfigs[activeDay].format);
 
   return (
     <>
       <div className="flex justify-center mt-4">
-        <img
-          src="https://i.ibb.co/23Rs55J9/DUEL-LOGO.png"
-          alt="DUEL"
-          className="h-20 object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.65)]"
-        />
+        <div className="relative">
+          <img
+            src="https://i.ibb.co/23Rs55J9/DUEL-LOGO.png"
+            alt="DUEL"
+            className="h-20 object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.65)]"
+          />
+        </div>
       </div>
 
       <div className="mt-[108px] grid grid-cols-2 text-center">
-        <button onClick={() => setScreen("rosterP")}>
-          <Logo
-            team="red"
-            size="mx-auto h-36 w-36"
-            src={teamLogos.Red}
-          />
+        {["red", "blue"].map((team: any) => (
+          <button
+            key={team}
+            onClick={() =>
+              setScreen(team === "red" ? "rosterP" : "rosterB")
+            }
+          >
+            <Logo
+              team={team}
+              size="mx-auto h-44 w-44"
+              src={
+                teamLogos[
+                  team === "red" ? "Red" : "Blue"
+                ]
+              }
+            />
 
-          <div className="mt-2 text-[11px] font-semibold tracking-[0.18em] text-white/75">
-            {teamNames.Red}
-          </div>
-
-          <div className="text-[140px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
-            {totals.official.red}
-          </div>
-        </button>
-
-        <button onClick={() => setScreen("rosterB")}>
-          <Logo
-            team="blue"
-            size="mx-auto h-36 w-36"
-            src={teamLogos.Blue}
-          />
-
-          <div className="mt-2 text-[11px] font-semibold tracking-[0.18em] text-white/75">
-            {teamNames.Blue}
-          </div>
-
-          <div className="text-[140px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
-            {totals.official.blue}
-          </div>
-        </button>
+            <div className="mt-3 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
+              {totals.official[team]}
+            </div>
+          </button>
+        ))}
       </div>
 
       <div className="mt-3 flex justify-center">
@@ -107,18 +101,14 @@ export default function Home({
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
-        {days > 1 && (
-          <div className="mb-2">
-            <DayButtons
-              dayConfigs={dayConfigs}
-              days={days}
-              active={activeDay}
-              setActive={setActiveDay}
-            />
-          </div>
-        )}
+        <DayButtons
+          dayConfigs={dayConfigs}
+          days={days}
+          active={activeDay}
+          setActive={setActiveDay}
+        />
 
-        <div className="text-[9px] tracking-[0.22em] text-white/60">
+        <div className="mt-2 text-[9px] tracking-[0.22em] text-white/60">
           MATCHES
         </div>
 
