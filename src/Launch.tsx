@@ -9,80 +9,91 @@ export default function Launch({
 }: Props) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
-      <div className="relative h-[780px] w-[390px] overflow-hidden rounded-3xl border border-white/10 bg-black">
+      <div className="relative h-[780px] w-[390px] overflow-hidden rounded-3xl bg-black">
         {/* Background */}
-        <div className="absolute inset-0">
-          <img
-            src="/launch-bg.jpg"
-            alt=""
-            className="h-full w-full object-cover opacity-45"
-          />
+        <img
+          src="/launch-bg.jpg"
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover"
+        />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/35 to-black/80" />
-        </div>
+        {/* Soft darkening only */}
+        <div className="absolute inset-0 bg-black/20" />
 
-        {/* Gold centre line */}
-        <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#e7d39d] to-transparent opacity-70" />
+        {/* Gold divider */}
+        <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-transparent via-[#e8d39c] to-transparent opacity-80" />
 
         {/* Content */}
-        <div className="relative z-10 flex h-full flex-col items-center px-8 pt-16 pb-10">
+        <div className="relative z-10 flex h-full flex-col items-center px-6 pt-10 pb-8">
           {/* Logo */}
-          <div className="mb-3 text-[64px] font-black tracking-[0.35em] text-[#e7d39d]">
+          <div className="mb-3 text-[68px] font-black tracking-[0.34em] text-[#e8d39c] drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]">
             DUEL
           </div>
 
-          <div className="mb-14 text-center text-sm uppercase tracking-[0.45em] text-white/45">
+          <div className="mb-[300px] text-center text-[14px] uppercase tracking-[0.42em] text-white/60">
             Golf Event Platform
           </div>
 
-          {/* Weekend Mode */}
-          <button
-            onClick={onWeekend}
-            className="group relative mb-6 w-full overflow-hidden rounded-[34px] border border-[#d8c792]/20 bg-black/45 p-8 text-left transition-all duration-300 hover:scale-[1.015]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-[#45030f]/60 via-[#24160a]/20 to-[#001a36]/60 opacity-90" />
+          {/* Mode buttons */}
+          <div className="mt-auto flex w-full items-end justify-between gap-4">
+            {/* Weekend */}
+            <button
+              onClick={onWeekend}
+              className="relative h-[250px] flex-1 overflow-hidden rounded-[34px] border border-[#d7c792]/45 bg-[#350008]/72 px-5 py-7 text-left shadow-[0_10px_40px_rgba(0,0,0,0.45)] backdrop-blur-[2px] transition-all duration-300 active:scale-[0.985]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-[#5e0818]/20 via-transparent to-black/30" />
 
-            <div className="relative z-10">
-              <div className="mb-3 text-[34px] font-black leading-none tracking-[0.12em] text-[#f0e2b3]">
-                WEEKEND
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="text-[34px] font-black leading-[0.95] tracking-[0.08em] text-[#ecdcae]">
+                  WEEKEND
+                </div>
+
+                <div className="mb-5 text-[34px] font-black leading-[0.95] tracking-[0.08em] text-white">
+                  MODE
+                </div>
+
+                <div className="mb-5 h-[1px] w-full bg-gradient-to-r from-transparent via-[#ecdcae] to-transparent opacity-60" />
+
+                <div className="mt-auto text-[13px] leading-[1.65] text-white/72">
+                  Multi-day golf trips,
+                  live scoring, pairings,
+                  team formats and
+                  locked event
+                  management.
+                </div>
               </div>
+            </button>
 
-              <div className="mb-5 text-[34px] font-black leading-none tracking-[0.12em] text-white">
-                MODE
+            {/* Quick */}
+            <button
+              onClick={onQuick}
+              className="relative h-[250px] flex-1 overflow-hidden rounded-[34px] border border-[#d7c792]/45 bg-[#00142e]/72 px-5 py-7 text-left shadow-[0_10px_40px_rgba(0,0,0,0.45)] backdrop-blur-[2px] transition-all duration-300 active:scale-[0.985]"
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-[#0a3474]/20 via-transparent to-black/30" />
+
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="text-[34px] font-black leading-[0.95] tracking-[0.08em] text-[#ecdcae]">
+                  QUICK
+                </div>
+
+                <div className="mb-5 text-[34px] font-black leading-[0.95] tracking-[0.08em] text-white">
+                  GAME
+                </div>
+
+                <div className="mb-5 h-[1px] w-full bg-gradient-to-r from-transparent via-[#ecdcae] to-transparent opacity-60" />
+
+                <div className="mt-auto text-[13px] leading-[1.65] text-white/72">
+                  Fast social golf setup
+                  for casual rounds and
+                  same-day matches
+                  with mates.
+                </div>
               </div>
-
-              <div className="max-w-[240px] text-sm leading-relaxed text-white/65">
-                Multi-day golf trips, live scoring, pairings,
-                team formats and locked event management.
-              </div>
-            </div>
-          </button>
-
-          {/* Quick Game */}
-          <button
-            onClick={onQuick}
-            className="group relative w-full overflow-hidden rounded-[34px] border border-white/10 bg-black/45 p-8 text-left transition-all duration-300 hover:scale-[1.015]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-[#1f1f1f]/40 to-black/60" />
-
-            <div className="relative z-10">
-              <div className="mb-3 text-[34px] font-black leading-none tracking-[0.12em] text-[#f0e2b3]">
-                QUICK
-              </div>
-
-              <div className="mb-5 text-[34px] font-black leading-none tracking-[0.12em] text-white">
-                GAME
-              </div>
-
-              <div className="max-w-[240px] text-sm leading-relaxed text-white/65">
-                Fast social golf setup for casual rounds
-                and same-day matches with mates.
-              </div>
-            </div>
-          </button>
+            </button>
+          </div>
 
           {/* Footer */}
-          <div className="mt-auto text-center text-[11px] uppercase tracking-[0.45em] text-white/25">
+          <div className="mt-6 text-center text-[11px] uppercase tracking-[0.42em] text-white/30">
             Premium Matchplay Scoring
           </div>
         </div>
