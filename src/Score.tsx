@@ -350,60 +350,78 @@ export default function Score({
       <div className="relative flex-1 overflow-y-auto pb-[220px]">
         <div
           className={cx(
-            "mt-6 rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
+            "relative mt-6 overflow-hidden rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
             result.leader === "red"
-              ? "bg-gradient-to-b from-[#7c2430]/80 to-[#47151d]/80"
+              ? "bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
               : result.leader === "blue"
-              ? "bg-gradient-to-b from-[#415aaf]/80 to-[#29386c]/80"
-              : "bg-gradient-to-b from-[#5c5c5c]/70 to-[#2d2d2d]/70"
+              ? "bg-gradient-to-b from-[#415aaf]/85 to-[#29386c]/85"
+              : "bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
           )}
         >
-          <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
-            <div>
-              {day.label.toUpperCase()} • ST MICHAELS • {day.tee.toUpperCase()}
+          <div
+            className="absolute inset-0 opacity-[0.12] mix-blend-soft-light"
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
+                radial-gradient(circle at 60% 30%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
+                radial-gradient(circle at 85% 22%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
+                radial-gradient(circle at 35% 65%, rgba(255,255,255,0.9) 0 8%, transparent 9%),
+                radial-gradient(circle at 70% 72%, rgba(255,255,255,0.9) 0 8%, transparent 9%)
+              `,
+              backgroundSize: "120px 120px",
+            }}
+          />
+
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.16),transparent_55%)]" />
+
+          <div className="relative z-10">
+            <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
+              <div>
+                {day.label.toUpperCase()} • ST MICHAELS • {day.tee.toUpperCase()}
+              </div>
+
+              <button
+                onClick={() => setScreen("home")}
+                className="text-sm font-semibold tracking-normal text-white/85"
+              >
+                Back
+              </button>
             </div>
 
-            <button
-              onClick={() => setScreen("home")}
-              className="text-sm font-semibold tracking-normal text-white/85"
-            >
-              Back
-            </button>
-          </div>
-
-          <div className="mb-2 text-center text-[11px] font-extrabold tracking-[0.32em] text-white/80">
-            {day.format.toUpperCase()}
-          </div>
-
-          <div className="grid grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)] items-start gap-3">
-            <TeamPlayers
-              team="red"
-              players={match.red}
-              teamLogos={teamLogos}
-              isAmbrose={isAmbrose}
-              getTeeShotCount={getTeeShotCount}
-            />
-
-            <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
-              VS
+            <div className="mb-2 text-center text-[11px] font-extrabold tracking-[0.32em] text-white/80">
+              {day.format.toUpperCase()}
             </div>
 
-            <TeamPlayers
-              team="blue"
-              players={match.blue}
-              teamLogos={teamLogos}
-              isAmbrose={isAmbrose}
-              getTeeShotCount={getTeeShotCount}
-            />
-          </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)] items-start gap-3">
+              <TeamPlayers
+                team="red"
+                players={match.red}
+                teamLogos={teamLogos}
+                isAmbrose={isAmbrose}
+                getTeeShotCount={getTeeShotCount}
+              />
 
-          <div className="mt-1 text-center">
-            <div className="text-[20px] font-extrabold tracking-[0.08em]">
-              {displayMain}
+              <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
+                VS
+              </div>
+
+              <TeamPlayers
+                team="blue"
+                players={match.blue}
+                teamLogos={teamLogos}
+                isAmbrose={isAmbrose}
+                getTeeShotCount={getTeeShotCount}
+              />
             </div>
 
-            <div className="mt-0.5 text-[10px] tracking-[0.16em] text-white/55">
-              {result.sub}
+            <div className="mt-1 text-center">
+              <div className="text-[20px] font-extrabold tracking-[0.08em]">
+                {displayMain}
+              </div>
+
+              <div className="mt-0.5 text-[10px] tracking-[0.16em] text-white/55">
+                {result.sub}
+              </div>
             </div>
           </div>
         </div>
