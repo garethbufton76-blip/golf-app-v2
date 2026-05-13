@@ -59,7 +59,7 @@ export default function Home({
         />
       </div>
 
-      <div className="mt-[126px] grid grid-cols-2 text-center">
+      <div className="mt-[138px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
             key={team}
@@ -67,24 +67,32 @@ export default function Home({
               setScreen(team === "red" ? "rosterP" : "rosterB")
             }
           >
-            <Logo
-              team={team}
-              size="mx-auto h-44 w-44"
-              src={
-                teamLogos[
-                  team === "red" ? "Red" : "Blue"
-                ]
-              }
-            />
+            <div
+              className="
+                mx-auto
+                w-fit
+                drop-shadow-[0_18px_30px_rgba(0,0,0,0.65)]
+              "
+            >
+              <Logo
+                team={team}
+                size="mx-auto h-28 w-28"
+                src={
+                  teamLogos[
+                    team === "red" ? "Red" : "Blue"
+                  ]
+                }
+              />
+            </div>
 
-            <div className="mt-3 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
+            <div className="mt-6 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
               {totals.official[team]}
             </div>
           </button>
         ))}
       </div>
 
-      <div className="mt-3 flex justify-center">
+      <div className="mt-2 flex justify-center">
         <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/55 px-4 py-2 backdrop-blur-xl">
           <b>{totals.live.red}</b>
 
