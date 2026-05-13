@@ -21,7 +21,7 @@ export default function Launch({ onWeekend, onQuick }: any) {
             <img
               src="/launch-logo.png"
               alt="Launch Logo"
-              className="h-[150px] w-auto object-contain"
+              className="h-[105px] w-auto object-contain"
             />
           </div>
 
