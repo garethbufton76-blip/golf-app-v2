@@ -34,6 +34,10 @@ export default function Admin({
   setEventStarted,
   pairingLocks,
   setPairingLocks,
+  eventDetails,
+  setEventDetails,
+  savedPlayers,
+  setSavedPlayers,
 }: any) {
   const [adminMode, setAdminMode] = useState("event");
   const [editingTeam, setEditingTeam] = useState("Red");
@@ -124,8 +128,9 @@ export default function Admin({
 
   return (
     <>
+      {/* HEADER */}
       <div className="flex items-center justify-between pt-2">
-        <div className="flex gap-2">
+        <div className="flex gap-2 overflow-x-auto">
           <Button
             active={adminMode === "event"}
             onClick={() => setAdminMode("event")}
@@ -143,6 +148,14 @@ export default function Admin({
           </Button>
 
           <Button
+            active={adminMode === "players"}
+            onClick={() => setAdminMode("players")}
+            className="px-3 py-2 text-xs"
+          >
+            Players
+          </Button>
+
+          <Button
             active={adminMode === "pairings"}
             onClick={() => setAdminMode("pairings")}
             className="px-3 py-2 text-xs"
@@ -155,20 +168,85 @@ export default function Admin({
           onClick={() => {
             if (eventStarted) {
               setScreen("home");
-            } else {
-              setScreen("admin");
             }
           }}
           className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold"
         >
-          {eventStarted ? "Home" : "Setup"}
+          Home
         </button>
       </div>
 
-      <StatusPanel eventLocked={eventLocked} eventStarted={eventStarted} />
+      {/* STATUS */}
+      <StatusPanel
+        eventLocked={eventLocked}
+        eventStarted={eventStarted}
+      />
 
+      {/* EVENT */}
       {adminMode === "event" && (
-        <>
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          {/* EVENT DETAILS */}
+          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4 backdrop-blur-xl">
+            <div className="mb-3 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
+              EVENT DETAILS
+            </div>
+
+            <div className="space-y-3">
+              <InputGroup
+                label="EVENT NAME"
+                value={eventDetails.name}
+                disabled={eventLocked}
+                onChange={(v: string) =>
+                  setEventDetails((e: any) => ({
+                    ...e,
+                    name: v,
+                  }))
+                }
+              />
+
+              <InputGroup
+                label="LOCATION"
+                value={eventDetails.location}
+                disabled={eventLocked}
+                onChange={(v: string) =>
+                  setEventDetails((e: any) => ({
+                    ...e,
+                    location: v,
+                  }))
+                }
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <InputGroup
+                  label="START DATE"
+                  type="date"
+                  value={eventDetails.startDate}
+                  disabled={eventLocked}
+                  onChange={(v: string) =>
+                    setEventDetails((e: any) => ({
+                      ...e,
+                      startDate: v,
+                    }))
+                  }
+                />
+
+                <InputGroup
+                  label="END DATE"
+                  type="date"
+                  value={eventDetails.endDate}
+                  disabled={eventLocked}
+                  onChange={(v: string) =>
+                    setEventDetails((e: any) => ({
+                      ...e,
+                      endDate: v,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* CONFIG */}
           <div className="mt-3 grid grid-cols-2 gap-3">
             <AdminPicker
               title="PLAYERS / TEAM"
@@ -187,7 +265,8 @@ export default function Admin({
             />
           </div>
 
-          <div className="mt-3 flex-1 space-y-3 overflow-y-auto pb-3">
+          {/* DAYS */}
+          <div className="mt-3 space-y-3">
             {dayConfigs.slice(0, days).map((day: any, i: number) => {
               const locked = Boolean(eventLocked || dayLocks[i]);
 
@@ -208,7 +287,7 @@ export default function Admin({
                       </div>
 
                       <div className="mt-1 text-[10px] text-white/45">
-                        {locked ? "EVENT SETUP LOCKED" : "SETUP OPEN"}
+                        {locked ? "EVENT LOCKED" : "SETUP OPEN"}
                       </div>
                     </div>
 
@@ -261,26 +340,24 @@ export default function Admin({
                         onChange={(v: any) => setDay(i, "format", v)}
                         options={validFormats(players)}
                       />
-
-                      <div className="mt-2 text-[10px] text-white/45">
-                        Only formats valid for the selected team size are shown.
-                      </div>
                     </div>
                   </div>
                 </div>
               );
             })}
-
-            <LockPanel
-              eventLocked={eventLocked}
-              setEventLocked={setEventLocked}
-              eventStarted={eventStarted}
-              startEvent={startEvent}
-            />
           </div>
-        </>
+
+          {/* LOCK PANEL */}
+          <LockPanel
+            eventLocked={eventLocked}
+            setEventLocked={setEventLocked}
+            eventStarted={eventStarted}
+            startEvent={startEvent}
+          />
+        </div>
       )}
 
+      {/* TEAMS */}
       {adminMode === "teams" && (
         <div className="mt-3 flex-1 overflow-y-auto pb-3">
           <div className="mb-4 rounded-[20px] border border-[#d1c79f]/25 bg-black/40 p-3">
@@ -326,11 +403,6 @@ export default function Admin({
                     }))
                   }
                 />
-
-                <div className="mt-1 text-[11px] leading-4 text-white/45">
-                  Names, photos and handicaps remain editable. Handicap changes
-                  apply to future matches.
-                </div>
               </div>
             </div>
           </div>
@@ -349,11 +421,6 @@ export default function Admin({
             >
               {teamNames.Blue || "Team Blue"}
             </Button>
-          </div>
-
-          <div className="mb-3 rounded-[18px] border border-[#d1c79f]/20 bg-black/35 p-3 text-[11px] leading-5 text-white/55">
-            Weekend lock protects the event structure. Player handicaps are live
-            and can be adjusted during the weekend.
           </div>
 
           <div className="space-y-3">
@@ -421,6 +488,91 @@ export default function Admin({
         </div>
       )}
 
+      {/* PLAYER DATABASE */}
+      {adminMode === "players" && (
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4">
+            <div className="mb-2 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
+              SAVED PLAYERS
+            </div>
+
+            <div className="text-[11px] leading-5 text-white/50">
+              Store regular players for future weekends and quick setup.
+            </div>
+          </div>
+
+          <div className="mt-3 space-y-3">
+            {savedPlayers.map((p: any) => (
+              <div
+                key={p.id}
+                className="rounded-[22px] border border-white/15 bg-black/40 p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <Logo
+                    team="blue"
+                    size="h-14 w-14"
+                    src={p.photo}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[15px] font-semibold text-white">
+                          {p.name}
+                        </div>
+
+                        <div className="mt-1 text-[11px] text-white/45">
+                          {p.homeClub || "No Home Club"}
+                        </div>
+                      </div>
+
+                      <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-xs font-bold text-[#d1c79f]">
+                        {p.handicap}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] text-white/55">
+                        {p.preferredTee}
+                      </div>
+
+                      {p.regular && (
+                        <div className="rounded-full border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-3 py-1 text-[10px] font-bold text-[#d1c79f]">
+                          REGULAR PLAYER
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setSavedPlayers((players: any[]) => [
+                  ...players,
+                  {
+                    id: String(Date.now()),
+                    name: "New Player",
+                    nickname: "",
+                    handicap: "0.0",
+                    homeClub: "",
+                    preferredTee: "Blue",
+                    photo: "",
+                    regular: false,
+                  },
+                ])
+              }
+              className="w-full rounded-[20px] border border-dashed border-[#d1c79f]/25 bg-black/35 py-4 text-sm font-semibold text-[#d1c79f]"
+            >
+              + Add Saved Player
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PAIRINGS */}
       {adminMode === "pairings" && (
         <div className="mt-3 flex-1 overflow-y-auto pb-3">
           {!eventLocked ? (
@@ -430,16 +582,8 @@ export default function Admin({
               </div>
 
               <div className="mt-3 text-sm leading-6 text-white/65">
-                Lock the weekend setup before setting daily pairings. This keeps
-                formats, days and team sizes stable.
+                Lock the weekend setup before setting pairings.
               </div>
-
-              <button
-                onClick={() => setAdminMode("event")}
-                className="mt-5 rounded-full bg-[#d1c79f] px-5 py-2 text-sm font-bold text-black"
-              >
-                Go to Event Lock
-              </button>
             </div>
           ) : (
             <div className="space-y-3">
@@ -449,7 +593,7 @@ export default function Admin({
                 return (
                   <div
                     key={day.label}
-                    className="rounded-[24px] border border-[#d1c79f]/20 bg-black/40 p-4 backdrop-blur-xl"
+                    className="rounded-[24px] border border-[#d1c79f]/20 bg-black/40 p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -458,11 +602,7 @@ export default function Admin({
                         </div>
 
                         <div className="mt-1 text-[11px] text-white/45">
-                          {day.format} • {day.tee} tee • {day.teeTime}
-                        </div>
-
-                        <div className="mt-3 inline-flex rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-[10px] font-bold tracking-[0.14em] text-[#d1c79f]">
-                          {locked ? "PAIRINGS LOCKED" : "PAIRINGS OPEN"}
+                          {day.format} • {day.teeTime}
                         </div>
                       </div>
 
@@ -481,7 +621,7 @@ export default function Admin({
                             : "border-white/15 bg-black/35 text-white/70"
                         )}
                       >
-                        {locked ? "Unlock" : "Lock"}
+                        {locked ? "LOCKED" : "OPEN"}
                       </button>
                     </div>
 
@@ -502,35 +642,9 @@ export default function Admin({
                         Edit Blue Order
                       </button>
                     </div>
-
-                    <div className="mt-3 text-[10px] leading-4 text-white/40">
-                      Pairings are usually set after each day. Lock the day once
-                      tee times or matches are agreed.
-                    </div>
                   </div>
                 );
               })}
-
-              {eventLocked && !eventStarted && (
-                <div className="rounded-[24px] border border-[#d1c79f]/30 bg-black/60 p-4">
-                  <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
-                    READY TO GO LIVE
-                  </div>
-
-                  <div className="mt-2 text-[11px] leading-5 text-white/55">
-                    Once the pairings are set, start the event to open the live
-                    scoreboard and match scoring.
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={startEvent}
-                    className="mt-4 w-full rounded-[18px] bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black"
-                  >
-                    START EVENT
-                  </button>
-                </div>
-              )}
             </div>
           )}
         </div>
@@ -581,14 +695,9 @@ function LockPanel({
   startEvent,
 }: any) {
   return (
-    <div className="rounded-[24px] border border-[#d1c79f]/25 bg-black/55 p-4">
+    <div className="mt-4 rounded-[24px] border border-[#d1c79f]/25 bg-black/55 p-4">
       <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
-        EVENT LOCK CONTROL
-      </div>
-
-      <div className="mt-2 text-[11px] leading-5 text-white/55">
-        Locking protects days, formats, course, tees and player count. Team
-        names, photos and handicaps stay editable.
+        EVENT CONTROL
       </div>
 
       <button
@@ -605,17 +714,17 @@ function LockPanel({
         )}
       >
         {eventStarted
-          ? "EVENT IS LIVE"
+          ? "EVENT LIVE"
           : eventLocked
-          ? "UNLOCK EVENT SETUP"
-          : "LOCK EVENT SETUP"}
+          ? "UNLOCK EVENT"
+          : "LOCK EVENT"}
       </button>
 
       {eventLocked && !eventStarted && (
         <button
           type="button"
           onClick={startEvent}
-          className="mt-3 w-full rounded-[18px] bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black shadow-[0_0_24px_rgba(74,222,128,0.25)]"
+          className="mt-3 w-full rounded-[18px] bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black"
         >
           START EVENT
         </button>
@@ -624,7 +733,13 @@ function LockPanel({
   );
 }
 
-function AdminPicker({ title, options, value, setValue, locked = false }: any) {
+function AdminPicker({
+  title,
+  options,
+  value,
+  setValue,
+  locked = false,
+}: any) {
   return (
     <div
       className={cx(
@@ -648,6 +763,33 @@ function AdminPicker({ title, options, value, setValue, locked = false }: any) {
           </Button>
         ))}
       </div>
+    </div>
+  );
+}
+
+function InputGroup({
+  label,
+  value,
+  onChange,
+  disabled = false,
+  type = "text",
+}: any) {
+  return (
+    <div>
+      <div className="mb-1.5 text-[9px] tracking-[0.14em] text-white/50">
+        {label}
+      </div>
+
+      <input
+        type={type}
+        disabled={disabled}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cx(
+          "w-full rounded-[14px] border border-[#d1c79f]/20 bg-black/40 px-4 py-3 text-sm text-white outline-none",
+          disabled && "opacity-45"
+        )}
+      />
     </div>
   );
 }
