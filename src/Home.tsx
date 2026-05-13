@@ -36,6 +36,11 @@ function DayButtons({
   );
 }
 
+function formatScore(value: any) {
+  const n = Number(value || 0);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
+
 export default function Home({
   setScreen,
   dayConfigs,
@@ -51,7 +56,6 @@ export default function Home({
 
   return (
     <>
-      {/* TOP LOGO */}
       <div className="flex justify-center mt-2">
         <img
           src="/launch-logo.png"
@@ -60,7 +64,6 @@ export default function Home({
         />
       </div>
 
-      {/* TEAM AREA */}
       <div className="mt-[92px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
@@ -69,51 +72,40 @@ export default function Home({
               setScreen(team === "red" ? "rosterP" : "rosterB")
             }
           >
-            {/* LOGO */}
-            <div
-              className="
-                mx-auto
-                w-fit
-                drop-shadow-[0_28px_55px_rgba(0,0,0,0.92)]
-              "
-            >
+            <div className="mx-auto w-fit drop-shadow-[0_30px_60px_rgba(0,0,0,0.95)]">
               <Logo
                 team={team}
                 size="mx-auto h-28 w-28"
-                src={
-                  teamLogos[
-                    team === "red" ? "Red" : "Blue"
-                  ]
-                }
+                src={teamLogos[team === "red" ? "Red" : "Blue"]}
               />
             </div>
 
-            {/* SCORE */}
-            <div className="mt-4 text-[96px] font-black leading-none tracking-[-0.08em] text-transparent bg-clip-text bg-gradient-to-b from-[#fff4c8] via-[#d1c79f] to-[#8f8256] drop-shadow-[0_14px_24px_rgba(0,0,0,0.75)]">
-              {Number(totals.official[team]).toFixed(1)}
+            <div
+              className="mt-8 text-[104px] font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.85)]"
+              style={{
+                fontFamily:
+                  'Impact, "Arial Black", "Helvetica Neue Condensed Black", sans-serif',
+                WebkitTextStroke: "1px rgba(255,255,255,0.12)",
+              }}
+            >
+              {formatScore(totals.official[team])}
             </div>
           </button>
         ))}
       </div>
 
-      {/* LIVE */}
-      <div className="-mt-1 flex justify-center">
-        <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/55 px-5 py-2.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.55)]">
-          <b className="text-[22px]">
-            {totals.live.red}
-          </b>
+      <div className="mt-1 flex justify-center">
+        <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/60 px-5 py-2.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.65)]">
+          <b className="text-[22px]">{formatScore(totals.live.red)}</b>
 
-          <span className="text-[11px] tracking-[0.24em] text-white/65">
+          <span className="text-[11px] tracking-[0.24em] text-[#d1c79f]">
             LIVE
           </span>
 
-          <b className="text-[22px]">
-            {totals.live.blue}
-          </b>
+          <b className="text-[22px]">{formatScore(totals.live.blue)}</b>
         </div>
       </div>
 
-      {/* MATCH PANEL */}
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
@@ -129,10 +121,7 @@ export default function Home({
         </div>
 
         <div className="mt-1.5">
-          <MatchButtons
-            count={count}
-            setActive={openMatch}
-          />
+          <MatchButtons count={count} setActive={openMatch} />
         </div>
       </div>
     </>
