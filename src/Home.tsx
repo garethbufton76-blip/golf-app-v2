@@ -51,15 +51,15 @@ export default function Home({
 
   return (
     <>
-      <div className="flex justify-center mt-3">
+      <div className="flex justify-center mt-2">
         <img
           src="/launch-logo.png"
           alt="DUEL"
-          className="h-[22px] w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
+          className="h-[34px] w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
         />
       </div>
 
-      <div className="mt-[132px] grid grid-cols-2 text-center">
+      <div className="mt-[126px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
             key={team}
