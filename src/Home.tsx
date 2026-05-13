@@ -89,23 +89,27 @@ export default function Home({
             </div>
 
             {/* SCORE */}
-            <div className="mt-1 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
-              {totals.official[team]}
+            <div className="mt-4 text-[96px] font-black leading-none tracking-[-0.08em] text-transparent bg-clip-text bg-gradient-to-b from-[#fff4c8] via-[#d1c79f] to-[#8f8256] drop-shadow-[0_14px_24px_rgba(0,0,0,0.75)]">
+              {Number(totals.official[team]).toFixed(1)}
             </div>
           </button>
         ))}
       </div>
 
       {/* LIVE */}
-      <div className="-mt-2 flex justify-center">
-        <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/55 px-4 py-2 backdrop-blur-xl">
-          <b>{totals.live.red}</b>
+      <div className="-mt-1 flex justify-center">
+        <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/55 px-5 py-2.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.55)]">
+          <b className="text-[22px]">
+            {totals.live.red}
+          </b>
 
-          <span className="text-[11px] tracking-[0.18em] text-white/65">
+          <span className="text-[11px] tracking-[0.24em] text-white/65">
             LIVE
           </span>
 
-          <b>{totals.live.blue}</b>
+          <b className="text-[22px]">
+            {totals.live.blue}
+          </b>
         </div>
       </div>
 
