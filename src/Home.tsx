@@ -38,10 +38,7 @@ function DayButtons({
 
 function formatScore(value: any) {
   const n = Number(value || 0);
-
-  return Number.isInteger(n)
-    ? String(n)
-    : n.toFixed(1);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
 }
 
 export default function Home({
@@ -55,14 +52,10 @@ export default function Home({
   openMatch,
   teamLogos,
 }: any) {
-  const count = matchCount(
-    players,
-    dayConfigs[activeDay].format
-  );
+  const count = matchCount(players, dayConfigs[activeDay].format);
 
   return (
     <>
-      {/* TOP LOGO */}
       <div className="flex justify-center mt-2">
         <img
           src="/launch-logo.png"
@@ -71,87 +64,50 @@ export default function Home({
         />
       </div>
 
-      {/* TEAM AREA */}
       <div className="mt-[92px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
             key={team}
             onClick={() =>
-              setScreen(
-                team === "red"
-                  ? "rosterP"
-                  : "rosterB"
-              )
+              setScreen(team === "red" ? "rosterP" : "rosterB")
             }
           >
-            {/* TEAM LOGO */}
-            <div
-              className="
-                mx-auto
-                w-fit
-                drop-shadow-[0_30px_60px_rgba(0,0,0,0.95)]
-              "
-            >
+            <div className="mx-auto w-fit drop-shadow-[0_30px_60px_rgba(0,0,0,0.95)]">
               <Logo
                 team={team}
                 size="mx-auto h-28 w-28"
-                src={
-                  teamLogos[
-                    team === "red"
-                      ? "Red"
-                      : "Blue"
-                  ]
-                }
+                src={teamLogos[team === "red" ? "Red" : "Blue"]}
               />
             </div>
 
-            {/* SCORE */}
             <div
-              className="
-                mt-8
-                text-[104px]
-                font-black
-                leading-[0.82]
-                tracking-[-0.12em]
-                text-white
-                drop-shadow-[0_14px_18px_rgba(0,0,0,0.85)]
-              "
+              className="mt-8 text-[104px] font-black leading-[0.82] tracking-[-0.12em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.85)]"
               style={{
                 fontFamily:
                   'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                transform:
-                  "scaleY(1.5) scaleX(0.82)",
+                transform: "scaleY(1.2) scaleX(0.82)",
                 transformOrigin: "center",
-                WebkitTextStroke:
-                  "1px rgba(255,255,255,0.08)",
+                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
               }}
             >
-              {formatScore(
-                totals.official[team]
-              )}
+              {formatScore(totals.official[team])}
             </div>
           </button>
         ))}
       </div>
 
-      {/* LIVE SCORES */}
-      <div className="mt-1 flex justify-center">
+      <div className="mt-[34px] flex justify-center">
         <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/60 px-5 py-2.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.65)]">
-          <b className="text-[22px]">
-            {formatScore(totals.live.red)}
-          </b>
+          <b className="text-[22px]">{formatScore(totals.live.red)}</b>
 
           <span className="text-[11px] tracking-[0.24em] text-[#d1c79f]">
             LIVE
           </span>
 
-          <b className="text-[22px]">
-            {formatScore(totals.live.blue)}
-          </b>
+          <b className="text-[22px]">{formatScore(totals.live.blue)}</b>
         </div>
       </div>
 
-      {/* MATCH PANEL */}
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
@@ -167,10 +123,7 @@ export default function Home({
         </div>
 
         <div className="mt-1.5">
-          <MatchButtons
-            count={count}
-            setActive={openMatch}
-          />
+          <MatchButtons count={count} setActive={openMatch} />
         </div>
       </div>
     </>
