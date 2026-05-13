@@ -31,12 +31,12 @@ export const TEAM: any = {
 };
 
 export const BACKGROUND_IMAGES: any = {
-  home:
-    "https://i.ibb.co/B5MCPFwV/hf-20260406-212338-4e6f71fe-a63d-4837-9341-31237b0552c3.png",
-  rosterP: "",
-  rosterB: "",
-  score: "",
-  admin: "",
+  launch: "/launch-bg.jpg",
+  admin: "/admin-home-bg.jpg",
+  home: "/admin-home-bg.jpg",
+  score: "/score-bg.jpg",
+  rosterP: "/roster-red-bg.jpg",
+  rosterB: "/roster-blue-bg.jpg",
 };
 
 export const playerOptions = [1, 2, 4, 6, 8, 10, 12];
