@@ -27,6 +27,37 @@ export default function App() {
   const [eventStarted, setEventStarted] = useState(false);
   const [pairingLocks, setPairingLocks] = useState({});
 
+  const [eventDetails, setEventDetails] = useState({
+    name: "Dual in the Dunes",
+    location: "St Michaels Golf Club",
+    startDate: "",
+    endDate: "",
+    notes: "",
+  });
+
+  const [savedPlayers, setSavedPlayers] = useState([
+    {
+      id: "gareth",
+      name: "Gareth Bufton",
+      nickname: "Gareth",
+      handicap: "4.0",
+      homeClub: "",
+      preferredTee: "Blue",
+      photo: "",
+      regular: true,
+    },
+    {
+      id: "mark",
+      name: "Mark McLeod",
+      nickname: "Mark",
+      handicap: "7.0",
+      homeClub: "",
+      preferredTee: "Blue",
+      photo: "",
+      regular: true,
+    },
+  ]);
+
   const [dayConfigs, setDayConfigs] = useState(
     Array.from({ length: 4 }, (_, i) => ({
       label: `Day ${i + 1}`,
@@ -226,6 +257,10 @@ export default function App() {
               setEventStarted={setEventStarted}
               pairingLocks={pairingLocks}
               setPairingLocks={setPairingLocks}
+              eventDetails={eventDetails}
+              setEventDetails={setEventDetails}
+              savedPlayers={savedPlayers}
+              setSavedPlayers={setSavedPlayers}
             />
           )}
 
