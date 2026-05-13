@@ -55,7 +55,7 @@ export default function Home({
         <img
           src="/launch-logo.png"
           alt="DUEL"
-          className="h-4 w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
+          className="h-[22px] w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
         />
       </div>
 
