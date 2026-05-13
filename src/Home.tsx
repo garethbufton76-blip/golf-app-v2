@@ -51,17 +51,15 @@ export default function Home({
 
   return (
     <>
-      <div className="flex justify-center mt-4">
-        <div className="relative">
-          <img
-            src="https://i.ibb.co/23Rs55J9/DUEL-LOGO.png"
-            alt="DUEL"
-            className="h-20 object-contain opacity-95 drop-shadow-[0_10px_30px_rgba(0,0,0,0.65)]"
-          />
-        </div>
+      <div className="flex justify-center mt-3">
+        <img
+          src="/launch-logo.png"
+          alt="DUEL"
+          className="h-4 w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
+        />
       </div>
 
-      <div className="mt-[108px] grid grid-cols-2 text-center">
+      <div className="mt-[132px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
             key={team}
