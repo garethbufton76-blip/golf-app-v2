@@ -51,15 +51,17 @@ export default function Home({
 
   return (
     <>
+      {/* TOP LOGO */}
       <div className="flex justify-center mt-2">
         <img
           src="/launch-logo.png"
           alt="DUEL"
-          className="h-[34px] w-auto object-contain opacity-95 drop-shadow-[0_6px_18px_rgba(0,0,0,0.65)]"
+          className="h-[34px] w-auto object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.75)]"
         />
       </div>
 
-      <div className="mt-[138px] grid grid-cols-2 text-center">
+      {/* TEAM AREA */}
+      <div className="mt-[92px] grid grid-cols-2 text-center">
         {["red", "blue"].map((team: any) => (
           <button
             key={team}
@@ -67,11 +69,12 @@ export default function Home({
               setScreen(team === "red" ? "rosterP" : "rosterB")
             }
           >
+            {/* LOGO */}
             <div
               className="
                 mx-auto
                 w-fit
-                drop-shadow-[0_18px_30px_rgba(0,0,0,0.65)]
+                drop-shadow-[0_28px_55px_rgba(0,0,0,0.92)]
               "
             >
               <Logo
@@ -85,14 +88,16 @@ export default function Home({
               />
             </div>
 
-            <div className="mt-6 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
+            {/* SCORE */}
+            <div className="mt-1 text-[180px] font-black leading-none text-transparent bg-clip-text bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d]">
               {totals.official[team]}
             </div>
           </button>
         ))}
       </div>
 
-      <div className="mt-2 flex justify-center">
+      {/* LIVE */}
+      <div className="-mt-2 flex justify-center">
         <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/55 px-4 py-2 backdrop-blur-xl">
           <b>{totals.live.red}</b>
 
@@ -104,6 +109,7 @@ export default function Home({
         </div>
       </div>
 
+      {/* MATCH PANEL */}
       <div
         className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
       >
