@@ -453,7 +453,7 @@ export default function Score({
         </div>
 
         <div className="relative mt-4 rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
-          <div className="mb-4">
+          <div className="mb-2">
             <div className="text-[10px] tracking-[0.22em] text-white/60">
               HOLE TRACKER
             </div>
@@ -814,13 +814,13 @@ function PlayerScorecard({
         {/* CONTENT */}
         <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[88px]">
           {/* HERO - lowered text/logo a little, but still above scorecard */}
-          <div className="flex min-h-[288px] flex-col justify-end px-3 pb-4">
-            <div className="mb-4">
-              <Logo team={team} size="h-[82px] w-[82px]" src={teamLogo} />
+          <div className="flex min-h-[238px] flex-col justify-end px-3 pb-2">
+            <div className="mb-2">
+              <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
             </div>
 
             <div
-              className="text-[40px] font-black uppercase leading-[0.82] tracking-[-0.055em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
+              className="text-[34px] font-black uppercase leading-[0.82] tracking-[-0.055em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
               style={{
                 fontFamily:
                   'Impact, "Arial Narrow", "Arial Black", sans-serif',
@@ -834,11 +834,11 @@ function PlayerScorecard({
             </div>
 
             <div
-              className="mt-3 h-[2px] w-[116px]"
+              className="mt-2 h-[2px] w-[108px]"
               style={{ backgroundColor: accentSoft }}
             />
 
-            <div className="mt-3 space-y-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-white">
+            <div className="mt-2 space-y-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
               <div className="flex items-center gap-2.5">
                 <span className="text-[#d1a354]">▣</span>
                 <span>{day.label.toUpperCase()}</span>
@@ -864,7 +864,7 @@ function PlayerScorecard({
             <NineScoreTable title="BACK" rows={back} accent={accent} />
 
             <div
-              className="grid grid-cols-3 items-center px-3 py-2.5 text-center text-white"
+              className="grid grid-cols-3 items-center px-3 py-1.5 text-center text-white"
               style={{
                 background: `linear-gradient(90deg, ${accentDeep}, ${accent}, ${accentDeep})`,
               }}
@@ -874,7 +874,7 @@ function PlayerScorecard({
                   Par
                 </div>
 
-                <div className="mt-0.5 text-[25px] font-black leading-none">
+                <div className="mt-0.5 text-[20px] font-black leading-none">
                   {parTotal}
                 </div>
               </div>
@@ -884,7 +884,7 @@ function PlayerScorecard({
                   Total
                 </div>
 
-                <div className="mt-0.5 text-[25px] font-black leading-none">
+                <div className="mt-0.5 text-[20px] font-black leading-none">
                   {grossTotal || "-"}
                 </div>
               </div>
@@ -894,13 +894,13 @@ function PlayerScorecard({
                   To Par
                 </div>
 
-                <div className="mt-0.5 text-[25px] font-black leading-none">
+                <div className="mt-0.5 text-[20px] font-black leading-none">
                   {scoreLabel}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-2 text-[7px] font-bold uppercase tracking-[0.08em] text-white/70">
+            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-1.5 text-[6px] font-bold uppercase tracking-[0.06em] text-white/70">
               <Legend icon="◎" label="Eagle+" />
               <Legend icon="○" label="Birdie" />
               <Legend icon="□" label="Bogey" />
@@ -908,7 +908,7 @@ function PlayerScorecard({
             </div>
           </div>
 
-          <div className="mt-2 text-center text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
+          <div className="mt-1.5 text-center text-[9px] font-black uppercase tracking-[0.2em] text-white/70">
             {teamName} • {day.format}
           </div>
         </div>
@@ -936,7 +936,7 @@ function NineScoreTable({ title, rows, accent }: any) {
   return (
     <div>
       <div
-        className="grid grid-cols-[46px_repeat(9,1fr)_38px] px-1.5 py-1.5 text-center text-[8px] font-black uppercase text-white"
+        className="grid grid-cols-[42px_repeat(9,1fr)_36px] px-1 py-1 text-center text-[7px] font-black uppercase text-white"
         style={{
           background: `linear-gradient(90deg, rgba(0,0,0,0.2), ${accent}, rgba(0,0,0,0.2))`,
         }}
@@ -950,7 +950,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{title}</div>
       </div>
 
-      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] border-b border-white/5 bg-[#262626] px-1.5 py-2 text-center text-[11px] font-black text-white/55">
+      <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] border-b border-white/5 bg-[#262626] px-1 py-1.5 text-center text-[10px] font-black text-white/55">
         <div className="text-left uppercase">Par</div>
 
         {rows.map((h: any) => (
@@ -960,7 +960,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{parTotal}</div>
       </div>
 
-      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] border-b border-white/5 bg-[#1d1d1d] px-1.5 py-2 text-center text-[11px] font-black text-white">
+      <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] border-b border-white/5 bg-[#1d1d1d] px-1 py-1.5 text-center text-[10px] font-black text-white">
         <div className="text-left uppercase">Score</div>
 
         {rows.map((h: any) => (
@@ -972,7 +972,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{grossTotal || "-"}</div>
       </div>
 
-      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] bg-[#171717] px-1.5 py-2 text-center text-[11px] font-black text-[#d1a354]">
+      <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] bg-[#171717] px-1 py-1.5 text-center text-[10px] font-black text-[#d1a354]">
         <div className="text-left uppercase">STB</div>
 
         {rows.map((h: any) => (
@@ -992,7 +992,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff <= -2) {
     return (
-      <span className="flex h-[21px] w-[21px] items-center justify-center rounded-full border-2 border-red-500 text-[10px] font-black text-white shadow-[0_0_10px_rgba(239,68,68,0.45)]">
+      <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-red-500 text-[9px] font-black text-white shadow-[0_0_10px_rgba(239,68,68,0.45)]">
         {gross}
       </span>
     );
@@ -1000,7 +1000,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff === -1) {
     return (
-      <span className="flex h-[21px] w-[21px] items-center justify-center rounded-full border-2 border-red-500 text-[10px] font-black text-white">
+      <span className="flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-red-500 text-[9px] font-black text-white">
         {gross}
       </span>
     );
@@ -1008,7 +1008,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff === 1) {
     return (
-      <span className="flex h-[21px] w-[21px] items-center justify-center border-2 border-white/55 text-[10px] font-black text-white">
+      <span className="flex h-[18px] w-[18px] items-center justify-center border-2 border-white/55 text-[9px] font-black text-white">
         {gross}
       </span>
     );
@@ -1016,7 +1016,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff >= 2) {
     return (
-      <span className="flex h-[21px] w-[21px] items-center justify-center border-4 border-white/55 text-[10px] font-black text-white">
+      <span className="flex h-[18px] w-[18px] items-center justify-center border-3 border-white/55 text-[9px] font-black text-white">
         {gross}
       </span>
     );
@@ -1084,3 +1084,4 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
       </div>
     </div>
   );
+}
