@@ -706,9 +706,9 @@ function PlayerScorecard({
   const { p, team } = cardPlayer;
 
   const isBlue = team === "blue";
-  const accent = isBlue ? "#0f47c9" : "#b5121b";
-  const accentDeep = isBlue ? "#061a44" : "#300407";
-  const accentSoft = isBlue ? "#1e5cff" : "#ef1d2a";
+  const accent = isBlue ? "#1f4aa8" : "#9f1720";
+  const accentDeep = isBlue ? "#081b49" : "#32070b";
+  const accentSoft = isBlue ? "#3a63c7" : "#c62828";
   const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
 
@@ -806,15 +806,10 @@ function PlayerScorecard({
         {/* CLOSE */}
         <button
           onClick={close}
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-3 rounded-full border border-[#d1c79f]/35 bg-black/55 px-3 py-2 text-white shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl"
+          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#d1c79f]/25 bg-black/35 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] text-[24px] font-black leading-none text-black">
-            ×
-          </span>
-
-          <span className="pr-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#efe6bf]">
-            Close
-          </span>
+          <span className="text-xl leading-none">‹</span>
+          <span>Back</span>
         </button>
 
         {/* CONTENT */}
@@ -871,9 +866,7 @@ function PlayerScorecard({
 
             <div
               className="grid grid-cols-3 items-center px-3 py-2 text-center text-white"
-              style={{
-                background: `linear-gradient(90deg, ${accentDeep}, ${accent}, ${accentDeep})`,
-              }}
+              style={{ backgroundColor: accent }}
             >
               <div>
                 <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
@@ -943,9 +936,7 @@ function NineScoreTable({ title, rows, accent }: any) {
     <div>
       <div
         className="grid grid-cols-[42px_repeat(9,1fr)_36px] px-1 py-1.5 text-center text-[7px] font-black uppercase text-white"
-        style={{
-          background: `linear-gradient(90deg, rgba(0,0,0,0.2), ${accent}, rgba(0,0,0,0.2))`,
-        }}
+        style={{ backgroundColor: accent }}
       >
         <div>Hole</div>
 
@@ -1090,4 +1081,3 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
       </div>
     </div>
   );
-}
