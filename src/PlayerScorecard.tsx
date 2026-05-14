@@ -249,7 +249,7 @@ export default function PlayerScorecard({
           </div>
 
           {/* SCORECARD */}
-          <div className="mt-auto min-h-[651px] overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
 
             <NineScoreTable
               title="FRONT"
