@@ -11,10 +11,10 @@ export default function PlayerScorecard({
 
   const isBlue = team === "blue";
 
-  // Matte team colours matched to roster backgrounds
-  const accent = isBlue ? "#1f4aa8" : "#9f1720";
-  const accentDeep = isBlue ? "#081b49" : "#32070b";
-  const accentSoft = isBlue ? "#3a63c7" : "#c62828";
+  const accent = isBlue ? "#173f94" : "#8f070d";
+  const accentBright = isBlue ? "#2557c8" : "#c50812";
+  const accentDeep = isBlue ? "#061733" : "#250304";
+  const bgImage = isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg";
   const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
 
@@ -29,11 +29,6 @@ export default function PlayerScorecard({
 
   const grossTotal = all.reduce(
     (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
-    0
-  );
-
-  const pointsTotal = all.reduce(
-    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
     0
   );
 
@@ -57,10 +52,10 @@ export default function PlayerScorecard({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
-        {/* Background */}
+        {/* BACKGROUND */}
         <div className="absolute inset-0">
           <img
-            src={isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg"}
+            src={bgImage}
             alt=""
             className="absolute inset-0 h-full w-full object-cover object-center"
           />
@@ -69,55 +64,45 @@ export default function PlayerScorecard({
             className="absolute inset-0"
             style={{
               background: `
-                radial-gradient(circle at 78% 12%, ${accentSoft}40, transparent 30%),
-                radial-gradient(circle at 20% 28%, rgba(255,255,255,0.08), transparent 22%),
-                linear-gradient(180deg, rgba(0,0,0,0.20) 0%, ${accentDeep}72 48%, rgba(0,0,0,0.96) 100%)
+                radial-gradient(circle at 76% 22%, ${accentBright}33, transparent 32%),
+                radial-gradient(circle at 28% 34%, rgba(255,255,255,0.08), transparent 24%),
+                linear-gradient(180deg, rgba(0,0,0,0.16) 0%, ${accentDeep}44 42%, rgba(0,0,0,0.98) 100%)
               `,
             }}
           />
 
-          <div
-            className="absolute inset-0 opacity-[0.13]"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.03) 11px, transparent 12px),
-                radial-gradient(circle at 60px 60px, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.025) 10px, transparent 11px)
-              `,
-              backgroundSize: "82px 82px",
-            }}
-          />
-
-          <div className="absolute right-[-52px] top-[82px] opacity-[0.11]">
+          <div className="absolute right-[-54px] top-[128px] opacity-[0.10]">
             <Logo team={team} size="h-[220px] w-[220px]" src={teamLogo} />
           </div>
 
           {p.photo ? (
-            <img
-              src={p.photo}
-              alt=""
-              className="absolute right-[-32px] top-[-44px] h-[58%] w-[76%] object-cover object-top drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
-            />
-          ) : (
-            <div className="absolute right-[16px] top-[74px] h-[258px] w-[220px] rounded-full bg-white/5 blur-2xl" />
-          )}
+            <>
+              <img
+                src={p.photo}
+                alt=""
+                className="absolute right-[-24px] top-[10px] h-[52%] w-[68%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
+              />
+              <div className="absolute right-0 top-[39%] h-[18%] w-[72%] bg-gradient-to-b from-transparent via-black/20 to-black/80" />
+            </>
+          ) : null}
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/10 to-black/86" />
-          <div className="absolute inset-x-0 bottom-0 h-[43%] bg-gradient-to-t from-black via-black/96 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/8 to-black/88" />
+          <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-black via-black/96 to-transparent" />
         </div>
 
-        {/* Back pill */}
+        {/* BACK / CLOSE PILL - intentionally small, matching app back pills */}
         <button
           onClick={close}
-          className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#d1c79f]/25 bg-black/35 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="absolute left-5 top-7 z-20 inline-flex items-center gap-2 rounded-full border border-[#d1c79f]/25 bg-black/38 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-[0_8px_22px_rgba(0,0,0,0.45)] backdrop-blur-xl"
         >
           <span className="text-xl leading-none">‹</span>
           <span>Back</span>
         </button>
 
-        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[94px]">
-          {/* Player identity */}
-          <div className="flex min-h-[232px] flex-col justify-end px-3 pb-2">
-            <div className="mb-2">
+        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[118px]">
+          {/* PLAYER IDENTITY BLOCK */}
+          <div className="flex min-h-[390px] flex-col justify-end px-3 pb-4">
+            <div className="mb-4">
               <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
             </div>
 
@@ -135,11 +120,11 @@ export default function PlayerScorecard({
             </div>
 
             <div
-              className="mt-2 h-[2px] w-[108px]"
-              style={{ backgroundColor: accentSoft }}
+              className="mt-3 h-[2px] w-[108px]"
+              style={{ backgroundColor: accentBright }}
             />
 
-            <div className="mt-2 space-y-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
+            <div className="mt-3 space-y-1.5 text-[8px] font-black uppercase tracking-[0.16em] text-white">
               <div className="flex items-center gap-2.5">
                 <span className="text-[#d1a354]">▣</span>
                 <span>{day.label.toUpperCase()}</span>
@@ -159,13 +144,13 @@ export default function PlayerScorecard({
             </div>
           </div>
 
-          {/* Scorecard */}
-          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/20 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          {/* SCORECARD PANEL */}
+          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable title="FRONT" rows={front} accent={accent} />
             <NineScoreTable title="BACK" rows={back} accent={accent} />
 
             <div
-              className="grid grid-cols-3 items-center px-3 py-2 text-center text-white"
+              className="grid grid-cols-3 items-center px-3 py-2.5 text-center text-white"
               style={{ backgroundColor: accent }}
             >
               <Summary label="Par" value={parTotal} />
@@ -173,7 +158,7 @@ export default function PlayerScorecard({
               <Summary label="To Par" value={scoreLabel} />
             </div>
 
-            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-1.5 text-[6px] font-bold uppercase tracking-[0.06em] text-white/70">
+            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-2 text-[6px] font-bold uppercase tracking-[0.06em] text-white/70">
               <Legend icon="◎" label="Eagle+" />
               <Legend icon="○" label="Birdie" />
               <Legend icon="□" label="Bogey" />
@@ -181,7 +166,7 @@ export default function PlayerScorecard({
             </div>
           </div>
 
-          <div className="mt-1.5 text-center text-[9px] font-black uppercase tracking-[0.2em] text-white/70">
+          <div className="mt-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/55">
             {teamName} • {day.format}
           </div>
         </div>
