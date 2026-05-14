@@ -10,6 +10,8 @@ export default function PlayerScorecard({
   const { p, team } = cardPlayer;
 
   const isBlue = team === "blue";
+
+  // Matte team colours matched to roster backgrounds
   const accent = isBlue ? "#1f4aa8" : "#9f1720";
   const accentDeep = isBlue ? "#081b49" : "#32070b";
   const accentSoft = isBlue ? "#3a63c7" : "#c62828";
@@ -20,17 +22,23 @@ export default function PlayerScorecard({
   const back = playerScorecardRows(p, team, 10, 18);
   const all = [...front, ...back];
 
-  const parTotal = all.reduce((sum, h) => sum + Number(h.par || 0), 0);
-  const grossTotal = all.reduce(
-    (sum, h) => sum + (h.gross == null ? 0 : Number(h.gross)),
+  const parTotal = all.reduce(
+    (sum: number, h: any) => sum + Number(h.par || 0),
     0
   );
+
+  const grossTotal = all.reduce(
+    (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
+    0
+  );
+
   const pointsTotal = all.reduce(
-    (sum, h) => sum + (h.points == null ? 0 : Number(h.points)),
+    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
     0
   );
 
   const scoreVsPar = grossTotal ? grossTotal - parTotal : null;
+
   const scoreLabel =
     scoreVsPar == null
       ? "-"
@@ -49,7 +57,7 @@ export default function PlayerScorecard({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
-        {/* BACKGROUND / TEAM TONE */}
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             src={isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg"}
@@ -61,16 +69,15 @@ export default function PlayerScorecard({
             className="absolute inset-0"
             style={{
               background: `
-                radial-gradient(circle at 78% 12%, ${accentSoft}44, transparent 30%),
+                radial-gradient(circle at 78% 12%, ${accentSoft}40, transparent 30%),
                 radial-gradient(circle at 20% 28%, rgba(255,255,255,0.08), transparent 22%),
-                linear-gradient(180deg, rgba(0,0,0,0.22) 0%, ${accentDeep}77 48%, rgba(0,0,0,0.96) 100%)
+                linear-gradient(180deg, rgba(0,0,0,0.20) 0%, ${accentDeep}72 48%, rgba(0,0,0,0.96) 100%)
               `,
             }}
           />
 
-          {/* SUBTLE GOLF BALL / TOPO TEXTURE */}
           <div
-            className="absolute inset-0 opacity-[0.16]"
+            className="absolute inset-0 opacity-[0.13]"
             style={{
               backgroundImage: `
                 radial-gradient(circle at 20px 20px, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.03) 11px, transparent 12px),
@@ -80,19 +87,10 @@ export default function PlayerScorecard({
             }}
           />
 
-          <div
-            className="absolute inset-0 opacity-[0.10]"
-            style={{
-              backgroundImage:
-                "linear-gradient(120deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 12px)",
-            }}
-          />
-
           <div className="absolute right-[-52px] top-[82px] opacity-[0.11]">
             <Logo team={team} size="h-[220px] w-[220px]" src={teamLogo} />
           </div>
 
-          {/* PLAYER IMAGE - pushed higher and right like the reference */}
           {p.photo ? (
             <img
               src={p.photo}
@@ -107,7 +105,7 @@ export default function PlayerScorecard({
           <div className="absolute inset-x-0 bottom-0 h-[43%] bg-gradient-to-t from-black via-black/96 to-transparent" />
         </div>
 
-        {/* CLOSE */}
+        {/* Back pill */}
         <button
           onClick={close}
           className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#d1c79f]/25 bg-black/35 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
@@ -116,9 +114,8 @@ export default function PlayerScorecard({
           <span>Back</span>
         </button>
 
-        {/* CONTENT */}
         <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[94px]">
-          {/* HERO - lowered text/logo a little, but still above scorecard */}
+          {/* Player identity */}
           <div className="flex min-h-[232px] flex-col justify-end px-3 pb-2">
             <div className="mb-2">
               <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
@@ -127,8 +124,7 @@ export default function PlayerScorecard({
             <div
               className="text-[34px] font-black uppercase leading-[0.82] tracking-[-0.055em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
               style={{
-                fontFamily:
-                  'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
               }}
             >
               {nameParts.length ? (
@@ -163,7 +159,7 @@ export default function PlayerScorecard({
             </div>
           </div>
 
-          {/* SCORECARD - compact so totals and footer fit */}
+          {/* Scorecard */}
           <div className="mt-auto overflow-hidden rounded-[18px] border border-white/20 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable title="FRONT" rows={front} accent={accent} />
             <NineScoreTable title="BACK" rows={back} accent={accent} />
@@ -172,35 +168,9 @@ export default function PlayerScorecard({
               className="grid grid-cols-3 items-center px-3 py-2 text-center text-white"
               style={{ backgroundColor: accent }}
             >
-              <div>
-                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
-                  Par
-                </div>
-
-                <div className="mt-0.5 text-[22px] font-black leading-none">
-                  {parTotal}
-                </div>
-              </div>
-
-              <div className="border-x border-white/20">
-                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
-                  Total
-                </div>
-
-                <div className="mt-0.5 text-[22px] font-black leading-none">
-                  {grossTotal || "-"}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
-                  To Par
-                </div>
-
-                <div className="mt-0.5 text-[22px] font-black leading-none">
-                  {scoreLabel}
-                </div>
-              </div>
+              <Summary label="Par" value={parTotal} />
+              <Summary label="Total" value={grossTotal || "-"} bordered />
+              <Summary label="To Par" value={scoreLabel} />
             </div>
 
             <div className="grid grid-cols-4 gap-1 bg-black px-2 py-1.5 text-[6px] font-bold uppercase tracking-[0.06em] text-white/70">
@@ -243,43 +213,35 @@ function NineScoreTable({ title, rows, accent }: any) {
         style={{ backgroundColor: accent }}
       >
         <div>Hole</div>
-
         {rows.map((h: any) => (
           <div key={h.hole}>{h.hole}</div>
         ))}
-
         <div>{title}</div>
       </div>
 
       <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] border-b border-white/5 bg-[#262626] px-1 py-2 text-center text-[10px] font-black text-white/55">
         <div className="text-left uppercase">Par</div>
-
         {rows.map((h: any) => (
           <div key={h.hole}>{h.par}</div>
         ))}
-
         <div>{parTotal}</div>
       </div>
 
       <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] border-b border-white/5 bg-[#1d1d1d] px-1 py-2 text-center text-[10px] font-black text-white">
         <div className="text-left uppercase">Score</div>
-
         {rows.map((h: any) => (
           <div key={h.hole} className="flex items-center justify-center">
             <ScoreMark gross={h.gross} par={h.par} />
           </div>
         ))}
-
         <div>{grossTotal || "-"}</div>
       </div>
 
       <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] bg-[#171717] px-1 py-2 text-center text-[10px] font-black text-[#d1a354]">
         <div className="text-left uppercase">STB</div>
-
         {rows.map((h: any) => (
           <div key={h.hole}>{h.points == null ? "-" : h.points}</div>
         ))}
-
         <div>{pointsTotal || "-"}</div>
       </div>
     </div>
@@ -317,13 +279,27 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff >= 2) {
     return (
-      <span className="flex h-[18px] w-[18px] items-center justify-center border-3 border-white/55 text-[9px] font-black text-white">
+      <span className="flex h-[18px] w-[18px] items-center justify-center border-[3px] border-white/55 text-[9px] font-black text-white">
         {gross}
       </span>
     );
   }
 
   return <span>{gross}</span>;
+}
+
+function Summary({ label, value, bordered = false }: any) {
+  return (
+    <div className={bordered ? "border-x border-white/20" : ""}>
+      <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
+        {label}
+      </div>
+
+      <div className="mt-0.5 text-[22px] font-black leading-none">
+        {value}
+      </div>
+    </div>
+  );
 }
 
 function Legend({ icon, label }: any) {
