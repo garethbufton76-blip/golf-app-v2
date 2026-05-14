@@ -363,13 +363,9 @@ export default function Score({
           ) : null}
         </div>
 
-        <div className="mt-0.5 text-[13px] font-medium">
-          {h.hole}
-        </div>
+        <div className="mt-0.5 text-[13px] font-medium">{h.hole}</div>
 
-        <div className="mt-1 text-[9px] text-white/50">
-          SI {detail.si}
-        </div>
+        <div className="mt-1 text-[9px] text-white/50">SI {detail.si}</div>
       </button>
     );
   };
@@ -403,7 +399,9 @@ export default function Score({
           <div className="relative z-10">
             <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
               <div>
-                {day.label.toUpperCase()} • ST MICHAELS • {day.tee.toUpperCase()}
+                {day.label.toUpperCase()} •{" "}
+                {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
+                {day.tee.toUpperCase()}
               </div>
 
               <button
@@ -478,6 +476,7 @@ export default function Score({
           cardPlayer={cardPlayer}
           close={() => setCardPlayer(null)}
           day={day}
+          teamLogos={teamLogos}
           playerScorecardRows={playerScorecardRows}
         />
       )}
@@ -577,7 +576,9 @@ export default function Score({
                       return (
                         <button
                           key={`red-${p.name}`}
-                          onClick={() => selectTeeShot(selectedHole.hole, "red", p)}
+                          onClick={() =>
+                            selectTeeShot(selectedHole.hole, "red", p)
+                          }
                           className={cx(
                             "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
                             selected
@@ -657,10 +658,7 @@ function TeamPlayers({
   return (
     <div className="flex items-start justify-center gap-2 text-center">
       {players.map((p: any, i: number) => (
-        <div
-          key={`${p.name}-${i}`}
-          className="flex w-[64px] flex-col items-center"
-        >
+        <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
           <button
             onClick={() => setCardPlayer({ team, p })}
             className="flex h-[64px] items-center justify-center"
@@ -699,253 +697,185 @@ function PlayerScorecard({
   cardPlayer,
   close,
   day,
+  teamLogos,
   playerScorecardRows,
 }: any) {
-  const [scoreMode, setScoreMode] = useState<"gross" | "net">("gross");
   const { p, team } = cardPlayer;
+  const accent = team === "blue" ? "#2f63d6" : "#d34a3f";
+  const darkAccent = team === "blue" ? "#071631" : "#2b0508";
+  const teamName = team === "blue" ? "BLUE" : "RED";
+  const teamLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
 
   const front = playerScorecardRows(p, team, 1, 9);
   const back = playerScorecardRows(p, team, 10, 18);
   const all = [...front, ...back];
 
   const parTotal = all.reduce((sum, h) => sum + Number(h.par || 0), 0);
-  const scoreTotal = all.reduce(
-    (sum, h) =>
-      sum +
-      (h[scoreMode] == null
-        ? 0
-        : Number(h[scoreMode])),
+  const grossTotal = all.reduce(
+    (sum, h) => sum + (h.gross == null ? 0 : Number(h.gross)),
     0
   );
-  const stTotal = all.reduce(
-    (sum, h) => sum + (h.points == null ? 0 : Number(h.points)),
-    0
-  );
+  const scoreVsPar = grossTotal ? grossTotal - parTotal : 0;
+
+  const scoreLabel =
+    !grossTotal ? "-" : scoreVsPar === 0 ? "E" : scoreVsPar > 0 ? `+${scoreVsPar}` : `${scoreVsPar}`;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-3">
-      <div className="max-h-[88vh] w-full max-w-[360px] overflow-hidden rounded-[26px] border border-[#d1c79f]/25 bg-black/95 p-3 shadow-2xl backdrop-blur-xl">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <div>
-            <div className="text-[9px] font-bold tracking-[0.26em] text-[#d1c79f]/70">
-              PLAYER SCORECARD
-            </div>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-3">
+      <div className="relative h-[92vh] w-full max-w-[380px] overflow-hidden rounded-[28px] border border-white/15 bg-black shadow-2xl">
+        <div className="absolute inset-0">
+          {p.photo ? (
+            <img src={p.photo} alt="" className="h-full w-full object-cover" />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{
+                background: `linear-gradient(180deg, ${darkAccent}, #020202 72%)`,
+              }}
+            />
+          )}
 
-            <div className="mt-2 text-[25px] font-black leading-none text-white">
-              {first(p.name)}
-            </div>
-
-            <div className="mt-2 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]/65">
-              PLAYING HCP {p.handicap}
-            </div>
-
-            <div className="mt-2 text-[10px] font-bold tracking-[0.22em] text-white/45">
-              ST MICHAELS • {day.tee.toUpperCase()} TEE
-            </div>
-
-            <div className="mt-1.5 text-[10px] font-bold tracking-[0.22em] text-white/35">
-              {day.label} • {day.teeTime || "8:00"}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-end gap-2">
-            <button
-              onClick={close}
-              className="rounded-full border border-[#d1c79f]/35 bg-[#d1c79f]/10 px-3 py-1.5 text-xs font-bold text-[#efe6bf]"
-            >
-              Close
-            </button>
-
-            <div className="flex rounded-full border border-[#d1c79f]/25 bg-black/60 p-1">
-              <button
-                onClick={() => setScoreMode("gross")}
-                className={cx(
-                  "rounded-full px-2.5 py-1 text-[9px] font-black tracking-[0.12em]",
-                  scoreMode === "gross"
-                    ? "bg-[#d1c79f] text-black"
-                    : "text-white/45"
-                )}
-              >
-                GROSS
-              </button>
-
-              <button
-                onClick={() => setScoreMode("net")}
-                className={cx(
-                  "rounded-full px-2.5 py-1 text-[9px] font-black tracking-[0.12em]",
-                  scoreMode === "net"
-                    ? "bg-[#d1c79f] text-black"
-                    : "text-white/45"
-                )}
-              >
-                NET
-              </button>
-            </div>
-          </div>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/25 to-black/80" />
+          <div className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black via-black/92 to-transparent" />
         </div>
 
-        <ScorecardTable title="FRONT" rows={front} team={team} scoreMode={scoreMode} />
-        <ScorecardTable title="BACK" rows={back} team={team} scoreMode={scoreMode} />
+        <button
+          onClick={close}
+          className="absolute right-4 top-4 z-20 rounded-full border border-white/20 bg-black/50 px-4 py-2 text-xs font-black text-white backdrop-blur-xl"
+        >
+          Close
+        </button>
 
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <SummaryBox label="PAR" value={parTotal} />
-          <SummaryBox label={scoreMode.toUpperCase()} value={scoreTotal} />
-          <SummaryBox label="STB" value={stTotal} />
+        <div className="relative z-10 flex h-full flex-col justify-end p-4">
+          <div className="mb-4 flex items-center gap-3">
+            <Logo team={team} size="h-20 w-20" src={teamLogo} />
+
+            <div className="h-16 w-px bg-white/45" />
+
+            <div className="min-w-0">
+              <div className="truncate text-[26px] font-black uppercase leading-none text-white">
+                {p.name}
+              </div>
+
+              <div className="mt-2 text-[11px] font-bold uppercase tracking-[0.18em] text-white/80">
+                {day.label} • {(day.course || "St Michaels").toUpperCase()}
+              </div>
+
+              <div className="mt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/55">
+                {day.tee} tee • HCP {p.handicap}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-[2px] border border-white/70 bg-[#202020]/95 shadow-[0_18px_45px_rgba(0,0,0,0.55)]">
+            <NineScoreTable title="FRONT" rows={front} accent={accent} />
+            <NineScoreTable title="BACK" rows={back} accent={accent} />
+
+            <div
+              className="grid grid-cols-3 items-center px-4 py-3 text-center text-[18px] font-black uppercase text-white"
+              style={{ backgroundColor: accent }}
+            >
+              <div>
+                <span className="opacity-60">PAR: </span>
+                {parTotal}
+              </div>
+
+              <div>
+                TOTAL: {grossTotal || "-"}
+              </div>
+
+              <div className="opacity-70">{scoreLabel}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 text-center text-[13px] font-black uppercase tracking-[0.18em] text-white">
+            {teamName} TEAM • {day.format}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function ScorecardTable({ title, rows, team, scoreMode }: any) {
+function NineScoreTable({ title, rows, accent }: any) {
   const parTotal = rows.reduce((sum: number, h: any) => sum + Number(h.par || 0), 0);
-  const scoreTotal = rows.reduce(
-    (sum: number, h: any) =>
-      sum + (h[scoreMode] == null ? 0 : Number(h[scoreMode])),
-    0
-  );
-  const pointsTotal = rows.reduce(
-    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
+  const grossTotal = rows.reduce(
+    (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
     0
   );
 
   return (
-    <div className="mt-3 overflow-hidden rounded-[20px] border border-[#d1c79f]/20 bg-black/50">
+    <div>
       <div
-        className={cx(
-          "relative grid grid-cols-[54px_repeat(9,1fr)_44px] overflow-hidden px-1.5 py-2.5 text-center text-[9px] font-black tracking-[0.12em] text-white/85",
-          team === "blue" ? "bg-[#253f96]/80" : "bg-[#6f2a33]/80"
-        )}
+        className="grid grid-cols-[52px_repeat(9,1fr)_44px] px-2 py-2 text-center text-[9px] font-black uppercase text-white"
+        style={{ backgroundColor: accent }}
       >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.18]"
-          style={{
-            backgroundImage:
-              "linear-gradient(135deg, rgba(255,255,255,0.20) 0 1px, transparent 1px 8px)",
-          }}
-        />
-
-        <div className="relative z-10">HOLE</div>
-
+        <div>Hole</div>
         {rows.map((h: any) => (
-          <div className="relative z-10" key={h.hole}>
-            {h.hole}
+          <div key={h.hole}>{h.hole}</div>
+        ))}
+        <div>{title}</div>
+      </div>
+
+      <div className="grid grid-cols-[52px_repeat(9,1fr)_44px] bg-[#252525] px-2 py-3 text-center text-[13px] font-black text-white/55">
+        <div className="text-left uppercase">Par</div>
+        {rows.map((h: any) => (
+          <div key={h.hole}>{h.par}</div>
+        ))}
+        <div>{parTotal}</div>
+      </div>
+
+      <div className="grid grid-cols-[52px_repeat(9,1fr)_44px] bg-[#202020] px-2 py-3 text-center text-[13px] font-black text-white">
+        <div className="text-left uppercase">Score</div>
+        {rows.map((h: any) => (
+          <div key={h.hole} className="flex items-center justify-center">
+            <ScoreMark gross={h.gross} par={h.par} />
           </div>
         ))}
-
-        <div className="relative z-10">{title}</div>
+        <div>{grossTotal || "-"}</div>
       </div>
-
-      <ScorecardRow
-        label="PAR"
-        values={rows.map((h: any) => h.par)}
-        total={parTotal}
-        muted
-      />
-
-      <ScorecardRow
-        label={scoreMode.toUpperCase()}
-        values={rows.map((h: any) => ({
-          value: h[scoreMode] == null ? "-" : h[scoreMode],
-          par: h.par,
-          gross: h[scoreMode],
-        }))}
-        total={scoreTotal}
-        scoreSymbols
-      />
-
-      <ScorecardRow
-        label="STB"
-        values={rows.map((h: any) => (h.points == null ? "-" : h.points))}
-        total={pointsTotal}
-      />
     </div>
   );
 }
 
-function ScorecardRow({
-  label,
-  values,
-  total,
-  muted = false,
-  scoreSymbols = false,
-}: any) {
-  return (
-    <div
-      className={cx(
-        "grid grid-cols-[54px_repeat(9,1fr)_44px] px-1.5 py-3 text-center text-[11px] font-black",
-        muted ? "text-white/55" : "text-white"
-      )}
-    >
-      <div className="text-[9px] tracking-[0.14em]">{label}</div>
+function ScoreMark({ gross, par }: any) {
+  if (gross == null) return <span>-</span>;
 
-      {values.map((v: any, i: number) => (
-        <div key={i} className="flex items-center justify-center">
-          {scoreSymbols ? <ScoreSymbol item={v} /> : v}
-        </div>
-      ))}
-
-      <div className="text-[20px] leading-none">{total}</div>
-    </div>
-  );
-}
-
-function ScoreSymbol({ item }: any) {
-  if (!item || item.value === "-" || item.gross == null) {
-    return <span>-</span>;
-  }
-
-  const gross = Number(item.gross);
-  const par = Number(item.par);
-  const diff = gross - par;
+  const diff = Number(gross) - Number(par);
 
   if (diff <= -2) {
     return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d1c79f] text-[11px] font-black text-black shadow-[0_0_10px_rgba(209,199,159,0.55)]">
-        {item.value}
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[13px] font-black text-black">
+        {gross}
       </span>
     );
   }
 
   if (diff === -1) {
     return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#d1c79f] text-[11px] font-black text-[#efe6bf]">
-        {item.value}
+      <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white text-[13px] font-black text-white">
+        {gross}
       </span>
     );
   }
 
   if (diff === 1) {
     return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-[6px] border border-white/45 text-[11px] font-black text-white">
-        {item.value}
+      <span className="flex h-7 w-7 items-center justify-center border-2 border-white/70 text-[13px] font-black text-white">
+        {gross}
       </span>
     );
   }
 
   if (diff >= 2) {
     return (
-      <span className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-white/20 text-[11px] font-black text-white">
-        {item.value}
+      <span className="flex h-7 w-7 items-center justify-center border-4 border-white/70 text-[13px] font-black text-white">
+        {gross}
       </span>
     );
   }
 
-  return <span>{item.value}</span>;
-}
-
-function SummaryBox({ label, value }: any) {
-  return (
-    <div className="rounded-[18px] border border-[#d1c79f]/20 bg-black/55 px-2 py-4 text-center">
-      <div className="text-[9px] font-bold tracking-[0.22em] text-white/45">
-        {label}
-      </div>
-
-      <div className="mt-2 text-[30px] font-black leading-none text-white">
-        {value}
-      </div>
-    </div>
-  );
+  return <span>{gross}</span>;
 }
 
 function ScoreBox({ team, players, score, setScore, par }: any) {
@@ -962,9 +892,7 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
             : "bg-[#3f56a0] text-[#d6e1ff]"
         )}
       >
-        <span className="block truncate">
-          {namesText}
-        </span>
+        <span className="block truncate">{namesText}</span>
       </div>
 
       <div className="relative h-[92px]">
