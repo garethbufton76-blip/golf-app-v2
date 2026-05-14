@@ -747,13 +747,19 @@ function PlayerScorecard({
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
         {/* BACKGROUND / TEAM TONE */}
         <div className="absolute inset-0">
+          <img
+            src={isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg"}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+
           <div
             className="absolute inset-0"
             style={{
               background: `
                 radial-gradient(circle at 78% 12%, ${accentSoft}44, transparent 30%),
                 radial-gradient(circle at 20% 28%, rgba(255,255,255,0.08), transparent 22%),
-                linear-gradient(180deg, #050608 0%, ${accentDeep} 46%, #020202 100%)
+                linear-gradient(180deg, rgba(0,0,0,0.22) 0%, ${accentDeep}77 48%, rgba(0,0,0,0.96) 100%)
               `,
             }}
           />
@@ -787,7 +793,7 @@ function PlayerScorecard({
             <img
               src={p.photo}
               alt=""
-              className="absolute right-[-32px] top-[-34px] h-[57%] w-[76%] object-cover object-top drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
+              className="absolute right-[-32px] top-[-44px] h-[58%] w-[76%] object-cover object-top drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
             />
           ) : (
             <div className="absolute right-[16px] top-[74px] h-[258px] w-[220px] rounded-full bg-white/5 blur-2xl" />
@@ -800,21 +806,21 @@ function PlayerScorecard({
         {/* CLOSE */}
         <button
           onClick={close}
-          className="absolute left-4 top-4 z-20 flex items-center gap-3 text-white"
+          className="absolute left-4 top-4 z-20 inline-flex items-center gap-3 rounded-full border border-[#d1c79f]/35 bg-black/55 px-3 py-2 text-white shadow-[0_12px_32px_rgba(0,0,0,0.55)] backdrop-blur-xl"
         >
-          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/45 text-[30px] leading-none backdrop-blur-xl">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] text-[24px] font-black leading-none text-black">
             ×
           </span>
 
-          <span className="text-[12px] font-black uppercase tracking-[0.24em]">
+          <span className="pr-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#efe6bf]">
             Close
           </span>
         </button>
 
         {/* CONTENT */}
-        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[82px]">
+        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[94px]">
           {/* HERO - lowered text/logo a little, but still above scorecard */}
-          <div className="flex min-h-[218px] flex-col justify-end px-3 pb-2">
+          <div className="flex min-h-[232px] flex-col justify-end px-3 pb-2">
             <div className="mb-2">
               <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
             </div>
