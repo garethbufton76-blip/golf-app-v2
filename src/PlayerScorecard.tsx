@@ -99,9 +99,9 @@ export default function PlayerScorecard({
           <span>Back</span>
         </button>
 
-        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[118px]">
+        <div className="relative z-10 flex h-full flex-col px-3 pb-5 pt-[118px]">
           {/* PLAYER IDENTITY BLOCK */}
-          <div className="flex min-h-[390px] flex-col justify-end px-3 pb-4">
+          <div className="flex min-h-[300px] flex-col justify-end px-3 pb-4">
             <div className="mb-4">
               <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
             </div>
@@ -145,7 +145,7 @@ export default function PlayerScorecard({
           </div>
 
           {/* SCORECARD PANEL */}
-          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          <div className="mt-auto min-h-[620px] overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable title="FRONT" rows={front} accent={accent} />
             <NineScoreTable title="BACK" rows={back} accent={accent} />
 
