@@ -10,6 +10,8 @@ export default function PlayerScorecard({
   const { p, team } = cardPlayer;
 
   const isBlue = team === "blue";
+
+  // Matte team colours matched to roster backgrounds
   const accent = isBlue ? "#1f4aa8" : "#9f1720";
   const accentDeep = isBlue ? "#081b49" : "#32070b";
   const accentSoft = isBlue ? "#3a63c7" : "#c62828";
@@ -20,11 +22,16 @@ export default function PlayerScorecard({
   const back = playerScorecardRows(p, team, 10, 18);
   const all = [...front, ...back];
 
-  const parTotal = all.reduce((sum: number, h: any) => sum + Number(h.par || 0), 0);
+  const parTotal = all.reduce(
+    (sum: number, h: any) => sum + Number(h.par || 0),
+    0
+  );
+
   const grossTotal = all.reduce(
     (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
     0
   );
+
   const pointsTotal = all.reduce(
     (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
     0
@@ -50,6 +57,7 @@ export default function PlayerScorecard({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
+        {/* Background */}
         <div className="absolute inset-0">
           <img
             src={isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg"}
@@ -61,25 +69,43 @@ export default function PlayerScorecard({
             className="absolute inset-0"
             style={{
               background: `
-                radial-gradient(circle at 78% 12%, ${accentSoft}44, transparent 30%),
+                radial-gradient(circle at 78% 12%, ${accentSoft}40, transparent 30%),
                 radial-gradient(circle at 20% 28%, rgba(255,255,255,0.08), transparent 22%),
-                linear-gradient(180deg, rgba(0,0,0,0.22) 0%, ${accentDeep}77 48%, rgba(0,0,0,0.96) 100%)
+                linear-gradient(180deg, rgba(0,0,0,0.20) 0%, ${accentDeep}72 48%, rgba(0,0,0,0.96) 100%)
               `,
             }}
           />
 
-          {p.photo && (
+          <div
+            className="absolute inset-0 opacity-[0.13]"
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.03) 11px, transparent 12px),
+                radial-gradient(circle at 60px 60px, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.025) 10px, transparent 11px)
+              `,
+              backgroundSize: "82px 82px",
+            }}
+          />
+
+          <div className="absolute right-[-52px] top-[82px] opacity-[0.11]">
+            <Logo team={team} size="h-[220px] w-[220px]" src={teamLogo} />
+          </div>
+
+          {p.photo ? (
             <img
               src={p.photo}
               alt=""
               className="absolute right-[-32px] top-[-44px] h-[58%] w-[76%] object-cover object-top drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
             />
+          ) : (
+            <div className="absolute right-[16px] top-[74px] h-[258px] w-[220px] rounded-full bg-white/5 blur-2xl" />
           )}
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/10 to-black/86" />
           <div className="absolute inset-x-0 bottom-0 h-[43%] bg-gradient-to-t from-black via-black/96 to-transparent" />
         </div>
 
+        {/* Back pill */}
         <button
           onClick={close}
           className="absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-full border border-[#d1c79f]/25 bg-black/35 px-4 py-1.5 text-sm font-semibold text-white/90 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl"
@@ -89,6 +115,7 @@ export default function PlayerScorecard({
         </button>
 
         <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[94px]">
+          {/* Player identity */}
           <div className="flex min-h-[232px] flex-col justify-end px-3 pb-2">
             <div className="mb-2">
               <Logo team={team} size="h-[72px] w-[72px]" src={teamLogo} />
@@ -107,7 +134,10 @@ export default function PlayerScorecard({
               )}
             </div>
 
-            <div className="mt-2 h-[2px] w-[108px]" style={{ backgroundColor: accentSoft }} />
+            <div
+              className="mt-2 h-[2px] w-[108px]"
+              style={{ backgroundColor: accentSoft }}
+            />
 
             <div className="mt-2 space-y-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
               <div className="flex items-center gap-2.5">
@@ -129,6 +159,7 @@ export default function PlayerScorecard({
             </div>
           </div>
 
+          {/* Scorecard */}
           <div className="mt-auto overflow-hidden rounded-[18px] border border-white/20 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable title="FRONT" rows={front} accent={accent} />
             <NineScoreTable title="BACK" rows={back} accent={accent} />
@@ -160,11 +191,16 @@ export default function PlayerScorecard({
 }
 
 function NineScoreTable({ title, rows, accent }: any) {
-  const parTotal = rows.reduce((sum: number, h: any) => sum + Number(h.par || 0), 0);
+  const parTotal = rows.reduce(
+    (sum: number, h: any) => sum + Number(h.par || 0),
+    0
+  );
+
   const grossTotal = rows.reduce(
     (sum: number, h: any) => sum + (h.gross == null ? 0 : Number(h.gross)),
     0
   );
+
   const pointsTotal = rows.reduce(
     (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
     0
