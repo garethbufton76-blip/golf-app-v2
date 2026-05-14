@@ -122,25 +122,23 @@ export default function PlayerScorecard({
 
           {/* PLAYER IMAGE */}
           {p.photo ? (
-            <>
-              <img
-                src={p.photo}
-                alt=""
-                className="absolute right-[-18px] top-[-8px] h-[50%] w-[66%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
-                style={{
-                  WebkitMaskImage:
-                    "linear-gradient(to bottom, black 0%, black 72%, rgba(0,0,0,0.75) 84%, transparent 100%)",
-                  maskImage:
-                    "linear-gradient(to bottom, black 0%, black 72%, rgba(0,0,0,0.75) 84%, transparent 100%)",
-                }}
-              />
-            </>
+            <img
+              src={p.photo}
+              alt=""
+              className="absolute right-[-18px] top-[-8px] h-[50%] w-[66%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
+              style={{
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.55) 84%, transparent 100%)",
+                maskImage:
+                  "linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.55) 84%, transparent 100%)",
+              }}
+            />
           ) : null}
 
           {/* GLOBAL BLEND */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/8 to-black/88" />
 
-          <div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black via-black/95 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black via-black/92 to-transparent" />
         </div>
 
         {/* BACK BUTTON */}
@@ -156,7 +154,7 @@ export default function PlayerScorecard({
         </button>
 
         {/* CONTENT */}
-        <div className="relative z-10 flex h-full flex-col px-3 pb-2 pt-[102px]">
+        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[102px]">
 
           {/* PLAYER INFO */}
           <div className="flex min-h-[220px] flex-col justify-end px-3 pb-2">
@@ -249,7 +247,7 @@ export default function PlayerScorecard({
           </div>
 
           {/* SCORECARD */}
-          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          <div className="mt-5 overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
 
             <NineScoreTable
               title="FRONT"
