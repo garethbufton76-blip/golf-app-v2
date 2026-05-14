@@ -695,6 +695,7 @@ function TeamPlayers({
 
 
 
+
 function PlayerScorecard({
   cardPlayer,
   close,
@@ -705,8 +706,9 @@ function PlayerScorecard({
   const { p, team } = cardPlayer;
 
   const isBlue = team === "blue";
-  const accent = isBlue ? "#234fb4" : "#b5121b";
-  const accent2 = isBlue ? "#06152f" : "#2b0508";
+  const accent = isBlue ? "#0f47c9" : "#b5121b";
+  const accentDeep = isBlue ? "#061a44" : "#300407";
+  const accentSoft = isBlue ? "#1e5cff" : "#ef1d2a";
   const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
 
@@ -715,19 +717,16 @@ function PlayerScorecard({
   const all = [...front, ...back];
 
   const parTotal = all.reduce((sum, h) => sum + Number(h.par || 0), 0);
-
   const grossTotal = all.reduce(
     (sum, h) => sum + (h.gross == null ? 0 : Number(h.gross)),
     0
   );
-
   const pointsTotal = all.reduce(
     (sum, h) => sum + (h.points == null ? 0 : Number(h.points)),
     0
   );
 
   const scoreVsPar = grossTotal ? grossTotal - parTotal : null;
-
   const scoreLabel =
     scoreVsPar == null
       ? "-"
@@ -746,24 +745,25 @@ function PlayerScorecard({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
-        {/* BACKGROUND SYSTEM */}
+        {/* BACKGROUND / TEAM TONE */}
         <div className="absolute inset-0">
           <div
             className="absolute inset-0"
             style={{
               background: `
-                radial-gradient(circle at 74% 18%, ${accent}55, transparent 34%),
-                radial-gradient(circle at 18% 28%, rgba(255,255,255,0.08), transparent 24%),
-                linear-gradient(180deg, #080808 0%, ${accent2} 42%, #020202 100%)
+                radial-gradient(circle at 78% 12%, ${accentSoft}44, transparent 30%),
+                radial-gradient(circle at 20% 28%, rgba(255,255,255,0.08), transparent 22%),
+                linear-gradient(180deg, #050608 0%, ${accentDeep} 46%, #020202 100%)
               `,
             }}
           />
 
+          {/* SUBTLE GOLF BALL / TOPO TEXTURE */}
           <div
-            className="absolute inset-0 opacity-[0.18]"
+            className="absolute inset-0 opacity-[0.16]"
             style={{
               backgroundImage: `
-                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.035) 11px, transparent 12px),
+                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.14) 0px, rgba(255,255,255,0.03) 11px, transparent 12px),
                 radial-gradient(circle at 60px 60px, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.025) 10px, transparent 11px)
               `,
               backgroundSize: "82px 82px",
@@ -771,30 +771,30 @@ function PlayerScorecard({
           />
 
           <div
-            className="absolute inset-0 opacity-[0.14]"
+            className="absolute inset-0 opacity-[0.10]"
             style={{
               backgroundImage:
                 "linear-gradient(120deg, rgba(255,255,255,0.22) 0 1px, transparent 1px 12px)",
             }}
           />
 
-          <div className="absolute right-[-50px] top-[72px] opacity-[0.12]">
-            <Logo team={team} size="h-[230px] w-[230px]" src={teamLogo} />
+          <div className="absolute right-[-52px] top-[82px] opacity-[0.11]">
+            <Logo team={team} size="h-[220px] w-[220px]" src={teamLogo} />
           </div>
 
-          {/* PLAYER PHOTO / CUTOUT */}
+          {/* PLAYER IMAGE - pushed higher and right like the reference */}
           {p.photo ? (
             <img
               src={p.photo}
               alt=""
-              className="absolute right-[-34px] top-[-38px] h-[58%] w-[76%] object-cover object-top drop-shadow-[0_28px_45px_rgba(0,0,0,0.75)]"
+              className="absolute right-[-32px] top-[-34px] h-[57%] w-[76%] object-cover object-top drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
             />
           ) : (
-            <div className="absolute right-[12px] top-[92px] h-[250px] w-[210px] rounded-full bg-white/5 blur-2xl" />
+            <div className="absolute right-[16px] top-[74px] h-[258px] w-[220px] rounded-full bg-white/5 blur-2xl" />
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/15 to-black/84" />
-          <div className="absolute inset-x-0 bottom-0 h-[44%] bg-gradient-to-t from-black via-black/96 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-black/10 to-black/86" />
+          <div className="absolute inset-x-0 bottom-0 h-[43%] bg-gradient-to-t from-black via-black/96 to-transparent" />
         </div>
 
         {/* CLOSE */}
@@ -812,15 +812,15 @@ function PlayerScorecard({
         </button>
 
         {/* CONTENT */}
-        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[86px]">
-          {/* PLAYER HERO */}
-          <div className="flex min-h-[265px] flex-col justify-end px-3 pb-3">
-            <div className="mb-5">
-              <Logo team={team} size="h-[86px] w-[86px]" src={teamLogo} />
+        <div className="relative z-10 flex h-full flex-col px-3 pb-3 pt-[88px]">
+          {/* HERO - lowered text/logo a little, but still above scorecard */}
+          <div className="flex min-h-[288px] flex-col justify-end px-3 pb-4">
+            <div className="mb-4">
+              <Logo team={team} size="h-[82px] w-[82px]" src={teamLogo} />
             </div>
 
             <div
-              className="text-[42px] font-black uppercase leading-[0.82] tracking-[-0.055em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
+              className="text-[40px] font-black uppercase leading-[0.82] tracking-[-0.055em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
               style={{
                 fontFamily:
                   'Impact, "Arial Narrow", "Arial Black", sans-serif',
@@ -834,73 +834,73 @@ function PlayerScorecard({
             </div>
 
             <div
-              className="mt-4 h-[2px] w-[118px]"
-              style={{ backgroundColor: accent }}
+              className="mt-3 h-[2px] w-[116px]"
+              style={{ backgroundColor: accentSoft }}
             />
 
-            <div className="mt-4 space-y-2 text-[11px] font-black uppercase tracking-[0.14em] text-white">
-              <div className="flex items-center gap-3">
+            <div className="mt-3 space-y-1.5 text-[9px] font-black uppercase tracking-[0.15em] text-white">
+              <div className="flex items-center gap-2.5">
                 <span className="text-[#d1a354]">▣</span>
                 <span>{day.label.toUpperCase()}</span>
                 <span className="text-[#d1a354]">•</span>
                 <span>{(day.course || "ST MICHAELS").toUpperCase()}</span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <span className="text-[#d1a354]">⚑</span>
                 <span>{day.tee.toUpperCase()} TEE</span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 <span className="text-[#d1a354]">♙</span>
                 <span>HCP {p.handicap}</span>
               </div>
             </div>
           </div>
 
-          {/* SCORECARD BOTTOM SECTION */}
-          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/12 bg-black/88 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          {/* SCORECARD - compact so totals and footer fit */}
+          <div className="mt-auto overflow-hidden rounded-[18px] border border-white/20 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable title="FRONT" rows={front} accent={accent} />
             <NineScoreTable title="BACK" rows={back} accent={accent} />
 
             <div
-              className="grid grid-cols-3 items-center px-3 py-3 text-center text-white"
+              className="grid grid-cols-3 items-center px-3 py-2.5 text-center text-white"
               style={{
-                background: `linear-gradient(90deg, ${accent2}, ${accent}, ${accent2})`,
+                background: `linear-gradient(90deg, ${accentDeep}, ${accent}, ${accentDeep})`,
               }}
             >
               <div>
-                <div className="text-[9px] font-black uppercase tracking-[0.2em] opacity-65">
+                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
                   Par
                 </div>
 
-                <div className="mt-1 text-[30px] font-black leading-none">
+                <div className="mt-0.5 text-[25px] font-black leading-none">
                   {parTotal}
                 </div>
               </div>
 
               <div className="border-x border-white/20">
-                <div className="text-[9px] font-black uppercase tracking-[0.2em] opacity-65">
+                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
                   Total
                 </div>
 
-                <div className="mt-1 text-[30px] font-black leading-none">
+                <div className="mt-0.5 text-[25px] font-black leading-none">
                   {grossTotal || "-"}
                 </div>
               </div>
 
               <div>
-                <div className="text-[9px] font-black uppercase tracking-[0.2em] opacity-65">
+                <div className="text-[8px] font-black uppercase tracking-[0.2em] opacity-65">
                   To Par
                 </div>
 
-                <div className="mt-1 text-[30px] font-black leading-none">
+                <div className="mt-0.5 text-[25px] font-black leading-none">
                   {scoreLabel}
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-3 text-[7px] font-bold uppercase tracking-[0.1em] text-white/70">
+            <div className="grid grid-cols-4 gap-1 bg-black px-2 py-2 text-[7px] font-bold uppercase tracking-[0.08em] text-white/70">
               <Legend icon="◎" label="Eagle+" />
               <Legend icon="○" label="Birdie" />
               <Legend icon="□" label="Bogey" />
@@ -908,7 +908,7 @@ function PlayerScorecard({
             </div>
           </div>
 
-          <div className="mt-2 text-center text-[11px] font-black uppercase tracking-[0.22em] text-white/75">
+          <div className="mt-2 text-center text-[10px] font-black uppercase tracking-[0.22em] text-white/70">
             {teamName} • {day.format}
           </div>
         </div>
@@ -936,9 +936,9 @@ function NineScoreTable({ title, rows, accent }: any) {
   return (
     <div>
       <div
-        className="grid grid-cols-[48px_repeat(9,1fr)_40px] px-1.5 py-2 text-center text-[8px] font-black uppercase text-white"
+        className="grid grid-cols-[46px_repeat(9,1fr)_38px] px-1.5 py-1.5 text-center text-[8px] font-black uppercase text-white"
         style={{
-          background: `linear-gradient(90deg, rgba(0,0,0,0.18), ${accent}, rgba(0,0,0,0.18))`,
+          background: `linear-gradient(90deg, rgba(0,0,0,0.2), ${accent}, rgba(0,0,0,0.2))`,
         }}
       >
         <div>Hole</div>
@@ -950,7 +950,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{title}</div>
       </div>
 
-      <div className="grid grid-cols-[48px_repeat(9,1fr)_40px] border-b border-white/5 bg-[#262626] px-1.5 py-2.5 text-center text-[12px] font-black text-white/55">
+      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] border-b border-white/5 bg-[#262626] px-1.5 py-2 text-center text-[11px] font-black text-white/55">
         <div className="text-left uppercase">Par</div>
 
         {rows.map((h: any) => (
@@ -960,7 +960,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{parTotal}</div>
       </div>
 
-      <div className="grid grid-cols-[48px_repeat(9,1fr)_40px] border-b border-white/5 bg-[#1d1d1d] px-1.5 py-2.5 text-center text-[12px] font-black text-white">
+      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] border-b border-white/5 bg-[#1d1d1d] px-1.5 py-2 text-center text-[11px] font-black text-white">
         <div className="text-left uppercase">Score</div>
 
         {rows.map((h: any) => (
@@ -972,7 +972,7 @@ function NineScoreTable({ title, rows, accent }: any) {
         <div>{grossTotal || "-"}</div>
       </div>
 
-      <div className="grid grid-cols-[48px_repeat(9,1fr)_40px] bg-[#171717] px-1.5 py-2.5 text-center text-[12px] font-black text-[#d1a354]">
+      <div className="grid grid-cols-[46px_repeat(9,1fr)_38px] bg-[#171717] px-1.5 py-2 text-center text-[11px] font-black text-[#d1a354]">
         <div className="text-left uppercase">STB</div>
 
         {rows.map((h: any) => (
@@ -992,7 +992,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff <= -2) {
     return (
-      <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-red-500 text-[11px] font-black text-white shadow-[0_0_10px_rgba(239,68,68,0.45)]">
+      <span className="flex h-[21px] w-[21px] items-center justify-center rounded-full border-2 border-red-500 text-[10px] font-black text-white shadow-[0_0_10px_rgba(239,68,68,0.45)]">
         {gross}
       </span>
     );
@@ -1000,7 +1000,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff === -1) {
     return (
-      <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full border-2 border-red-500 text-[11px] font-black text-white">
+      <span className="flex h-[21px] w-[21px] items-center justify-center rounded-full border-2 border-red-500 text-[10px] font-black text-white">
         {gross}
       </span>
     );
@@ -1008,7 +1008,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff === 1) {
     return (
-      <span className="flex h-[22px] w-[22px] items-center justify-center border-2 border-white/55 text-[11px] font-black text-white">
+      <span className="flex h-[21px] w-[21px] items-center justify-center border-2 border-white/55 text-[10px] font-black text-white">
         {gross}
       </span>
     );
@@ -1016,7 +1016,7 @@ function ScoreMark({ gross, par }: any) {
 
   if (diff >= 2) {
     return (
-      <span className="flex h-[22px] w-[22px] items-center justify-center border-4 border-white/55 text-[11px] font-black text-white">
+      <span className="flex h-[21px] w-[21px] items-center justify-center border-4 border-white/55 text-[10px] font-black text-white">
         {gross}
       </span>
     );
@@ -1084,4 +1084,3 @@ function ScoreBox({ team, players, score, setScore, par }: any) {
       </div>
     </div>
   );
-}
