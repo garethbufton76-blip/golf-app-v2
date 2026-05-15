@@ -232,7 +232,7 @@ export default function PlayerScorecard({
         <div
           className={
             showingTeamCard
-              ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[360px]"
+              ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[322px]"
               : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[102px]"
           }
         >
@@ -272,30 +272,49 @@ export default function PlayerScorecard({
               </div>
             </div>
           ) : (
-            <div className="mb-3 grid grid-cols-2 gap-3 px-3">
-              {playersForCard.slice(0, 2).map((player: any) => {
-                const parts = namePartsFor(player);
+            <div className="mb-3 px-3">
+              <div className="grid grid-cols-[1fr_96px_1fr] items-end gap-2">
+                <button
+                  onClick={() => setIndividualPlayer(playersForCard[0])}
+                  className="text-left"
+                >
+                  <PlayerNameBlock
+                    player={playersForCard[0]}
+                    align="left"
+                    namePartsFor={namePartsFor}
+                  />
+                </button>
 
-                return (
-                  <button
-                    key={player.name}
-                    onClick={() => setIndividualPlayer(player)}
-                    className="text-left"
-                  >
-                    <div
-                      className="text-[28px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
-                      style={{
-                        fontFamily:
-                          'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                      }}
-                    >
-                      {parts.map((part) => (
-                        <div key={part}>{part}</div>
-                      ))}
-                    </div>
-                  </button>
-                );
-              })}
+                <div className="pb-1 text-center">
+                  <div
+                    className="mx-auto mb-2 h-[2px] w-[54px]"
+                    style={{ backgroundColor: accentBright }}
+                  />
+
+                  <div className="text-[7px] font-black uppercase tracking-[0.18em] text-white/70">
+                    {day.label.toUpperCase()}
+                  </div>
+
+                  <div className="mt-1 text-[7px] font-black uppercase tracking-[0.14em] text-[#d1a354]">
+                    {(day.course || "ST MICHAELS").toUpperCase()}
+                  </div>
+
+                  <div className="mt-1 text-[7px] font-black uppercase tracking-[0.14em] text-white/55">
+                    {day.tee.toUpperCase()} TEE
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIndividualPlayer(playersForCard[1])}
+                  className="text-right"
+                >
+                  <PlayerNameBlock
+                    player={playersForCard[1]}
+                    align="right"
+                    namePartsFor={namePartsFor}
+                  />
+                </button>
+              </div>
             </div>
           )}
 
@@ -380,6 +399,25 @@ export default function PlayerScorecard({
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PlayerNameBlock({ player, align, namePartsFor }: any) {
+  const parts = namePartsFor(player);
+
+  return (
+    <div
+      className={`text-[28px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
+        align === "right" ? "text-right" : "text-left"
+      }`}
+      style={{
+        fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+      }}
+    >
+      {parts.map((part: string) => (
+        <div key={part}>{part}</div>
+      ))}
     </div>
   );
 }
