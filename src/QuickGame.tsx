@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { cx } from "./data";
 
+const COURSES = ["St Michaels"];
+
 const QUICK_FORMATS = [
   "Singles Match Play",
   "2-Ball Better Ball",
@@ -26,6 +28,7 @@ export default function QuickGame({
   setEventStarted,
   setEventLocked,
 }: any) {
+  const [course, setCourse] = useState("St Michaels");
   const [playersPerTeam, setPlayersPerTeam] = useState(1);
   const [format, setFormat] = useState("Singles Match Play");
   const [tee, setTee] = useState("Blue");
@@ -110,7 +113,7 @@ export default function QuickGame({
       {
         label: "Quick Game",
         teeTime: "",
-        course: "St Michaels",
+        course,
         tee,
         format,
       },
@@ -139,8 +142,32 @@ export default function QuickGame({
           </h1>
         </div>
 
+        <Section title="Course">
+          <div className="relative">
+            <select
+              value={course}
+              onChange={(e) => setCourse(e.target.value)}
+              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/45 bg-black/55 px-4 py-3 pr-10 text-[13px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
+            >
+              {COURSES.map((c) => (
+                <option key={c} value={c} className="bg-black text-white">
+                  {c}
+                </option>
+              ))}
+            </select>
+
+            <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
+              ●
+            </div>
+
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
+              ▾
+            </div>
+          </div>
+        </Section>
+
         {/* 1v1 / 2v2 SELECTOR */}
-        <div className="mb-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 mb-3 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
             const active = playersPerTeam === n;
 
