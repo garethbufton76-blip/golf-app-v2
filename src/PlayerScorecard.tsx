@@ -283,7 +283,7 @@ export default function PlayerScorecard({
             </div>
           ) : (
             <div className="mb-2 px-3">
-              <div className="grid grid-cols-[1fr_92px_1fr] items-end gap-2">
+              <div className="grid grid-cols-[1fr_132px_1fr] items-end gap-1">
                 <button
                   onClick={() => setIndividualPlayer(playersForCard[0])}
                   className="text-left"
@@ -303,7 +303,7 @@ export default function PlayerScorecard({
 
                   {matchScoreLabel ? (
                     <div
-                      className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[20px] font-black uppercase leading-none tracking-[0.02em] text-white"
+                      className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[18px] font-black uppercase leading-none tracking-[0.01em] text-white"
                       style={{ opacity: 0.3 }}
                     >
                       {matchScoreLabel}
@@ -427,8 +427,8 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
     <div
       className={
         showingTeamCard
-          ? "pointer-events-none absolute left-1/2 top-[222px] z-[14] w-[118px] -translate-x-1/2 text-center"
-          : "pointer-events-none absolute right-7 top-[238px] z-[14] w-[132px] text-right"
+          ? "pointer-events-none absolute left-1/2 top-[222px] z-[14] w-[132px] -translate-x-1/2 text-center"
+          : "pointer-events-none absolute right-7 top-[238px] z-[14] w-[150px] text-right"
       }
     >
       <div
@@ -446,13 +446,13 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
           label
         ) : (
           <>
-            <div className="whitespace-nowrap">
+            <div className="whitespace-nowrap text-[17px] leading-none tracking-[0.02em]">
               {label
                 .replace(/\s?(\d+UP|ALL SQUARE|AS)$/i, "")
                 .trim()}
             </div>
 
-            <div>
+            <div className="mt-1 text-[42px] leading-none tracking-[-0.04em]">
               {(
                 label.match(/(\d+UP|ALL SQUARE|AS)$/i) || []
               )[0] || ""}
@@ -728,4 +728,3 @@ function Legend({
     </div>
   );
 }
-
