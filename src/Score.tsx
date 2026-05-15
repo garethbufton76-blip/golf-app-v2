@@ -661,7 +661,7 @@ function TeamPlayers({
       {players.map((p: any, i: number) => (
         <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
           <button
-            onClick={() => setCardPlayer({ team, p, players })}
+            onClick={() => setCardPlayer({ team, p, players, matchScore: displayMain })}
             className="flex h-[64px] items-center justify-center"
           >
             <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
