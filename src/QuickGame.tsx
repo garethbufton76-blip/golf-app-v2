@@ -1,292 +1,320 @@
-import { useMemo, useState } from "react";
-import {
-  BACKGROUND_IMAGES,
-  TEAM,
-  AdminIcon,
-  cx,
-  homeTotals,
-  makeRoster,
-} from "./data";
+// src/QuickGame.tsx
 
-import Launch from "./Launch";
-import Home from "./Home";
-import Roster from "./Roster";
-import Score from "./Score";
-import Admin from "./Admin";
-import QuickGame from "./QuickGame";
+import { useState } from "react";
+import { panel } from "./data";
 
-type AppMode = "launch" | "weekend" | "quick";
+const QUICK_FORMATS = [
+  "Singles Match Play",
+  "2-Ball Better Ball",
+  "2-Ball Ambrose",
+  "Stableford",
+  "2-Ball Better Ball Stableford",
+];
 
-export default function App() {
-  const [mode, setMode] = useState<AppMode>("launch");
+const TEES = ["Blue", "White", "Gold", "Red"];
 
-  const [screen, setScreen] = useState("home");
-  const [players, setPlayers] = useState(2);
-  const [days, setDays] = useState(1);
+export default function QuickGame({
+  setScreen,
+  setPlayers,
+  setTeamNames,
+  setRoster,
+  setDayConfigs,
+  setActiveDay,
+  setStartMatch,
+  setStates,
+  setScorecards,
+  setEventStarted,
+  setEventLocked,
+}: any) {
+  const [playersPerTeam, setPlayersPerTeam] = useState(1);
+  const [format, setFormat] = useState("Singles Match Play");
+  const [tee, setTee] = useState("Blue");
 
-  const [eventLocked, setEventLocked] = useState(false);
-  const [eventStarted, setEventStarted] = useState(false);
-  const [pairingLocks, setPairingLocks] = useState({});
+  const [redName, setRedName] = useState("Team Red");
+  const [blueName, setBlueName] = useState("Team Blue");
 
-  const [eventDetails, setEventDetails] = useState({
-    name: "Dual in the Dunes",
-    location: "St Michaels Golf Club",
-    startDate: "",
-    endDate: "",
-    notes: "",
-  });
-
-  const [savedPlayers, setSavedPlayers] = useState([
-    {
-      id: "gareth",
-      name: "Gareth Bufton",
-      nickname: "Gareth",
-      handicap: "4.0",
-      homeClub: "",
-      preferredTee: "Blue",
-      photo: "",
-      regular: true,
-    },
-    {
-      id: "mark",
-      name: "Mark McLeod",
-      nickname: "Mark",
-      handicap: "7.0",
-      homeClub: "",
-      preferredTee: "Blue",
-      photo: "",
-      regular: true,
-    },
+  const [redPlayers, setRedPlayers] = useState([
+    { name: "Red 1", handicap: 18 },
+    { name: "Red 2", handicap: 18 },
   ]);
 
-  const [dayConfigs, setDayConfigs] = useState(
-    Array.from({ length: 4 }, (_, i) => ({
-      label: `Day ${i + 1}`,
-      teeTime: i < 2 ? "8:00" : "8:30",
-      course: "St Michaels",
-      tee: "Blue",
-      format: "Singles Match Play",
-    }))
-  );
+  const [bluePlayers, setBluePlayers] = useState([
+    { name: "Blue 1", handicap: 18 },
+    { name: "Blue 2", handicap: 18 },
+  ]);
 
-  const [roster, setRoster] = useState(makeRoster);
-  const [activeDay, setActiveDay] = useState(0);
-  const [selectedMatch, setSelectedMatch] = useState(0);
-  const [states, setStates] = useState({});
-  const [scorecards, setScorecards] = useState({});
-  const [dayLocks, setDayLocks] = useState({});
+  function updatePlayer(
+    team: "red" | "blue",
+    index: number,
+    key: string,
+    value: any
+  ) {
+    const setter = team === "red" ? setRedPlayers : setBluePlayers;
 
-  const [teamLogos, setTeamLogos] = useState({
-    Red: "",
-    Blue: "",
-  });
-
-  const [teamNames, setTeamNames] = useState({
-    Red: "Team Red",
-    Blue: "Team Blue",
-  });
-
-  const totals = useMemo(
-    () => homeTotals(dayConfigs, days, players, states),
-    [dayConfigs, days, players, states]
-  );
-
-  const bg =
-    screen === "rosterP"
-      ? TEAM.red.bg
-      : screen === "rosterB"
-      ? TEAM.blue.bg
-      : "from-[#092018] via-[#101010] to-black";
-
-  const bgImage =
-    mode === "quick"
-      ? BACKGROUND_IMAGES.admin || BACKGROUND_IMAGES.home
-      : BACKGROUND_IMAGES[screen] || BACKGROUND_IMAGES.home;
-
-  const openMatch = (i: number) => {
-    setSelectedMatch(i);
-    setScreen("score");
-  };
-
-  function handleQuickScreen(nextScreen: string) {
-    if (nextScreen === "score") {
-      setEventStarted(true);
-      setEventLocked(true);
-      setMode("weekend");
-      setScreen("score");
-      return;
-    }
-
-    if (nextScreen === "home") {
-      setMode("launch");
-      setScreen("home");
-      return;
-    }
-
-    setScreen(nextScreen);
-  }
-
-  if (mode === "launch") {
-    return (
-      <Launch
-        onWeekend={() => {
-          setMode("weekend");
-          setScreen("admin");
-        }}
-        onQuick={() => {
-          setMode("quick");
-          setScreen("quick");
-        }}
-      />
+    setter((current: any[]) =>
+      current.map((p, i) =>
+        i === index
+          ? {
+              ...p,
+              [key]: key === "handicap" ? Number(value) : value,
+            }
+          : p
+      )
     );
   }
 
+  function startQuickGame() {
+    const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
+      id: `quick-red-${i}`,
+      name: p.name || `Red ${i + 1}`,
+      nickname: p.name || `Red ${i + 1}`,
+      handicap: Number(p.handicap || 0),
+      rawHandicap: Number(p.handicap || 0),
+      team: "red",
+      teamId: "red",
+      rosterIndex: i,
+      photo: "",
+      homeClub: "",
+      preferredTee: tee,
+      regular: false,
+    }));
+
+    const blue = bluePlayers.slice(0, playersPerTeam).map((p, i) => ({
+      id: `quick-blue-${i}`,
+      name: p.name || `Blue ${i + 1}`,
+      nickname: p.name || `Blue ${i + 1}`,
+      handicap: Number(p.handicap || 0),
+      rawHandicap: Number(p.handicap || 0),
+      team: "blue",
+      teamId: "blue",
+      rosterIndex: i,
+      photo: "",
+      homeClub: "",
+      preferredTee: tee,
+      regular: false,
+    }));
+
+    setPlayers(playersPerTeam);
+
+    setTeamNames({
+      Red: redName,
+      Blue: blueName,
+    });
+
+    setRoster({
+      Red: red,
+      Blue: blue,
+    });
+
+    setDayConfigs([
+      {
+        label: "Quick Game",
+        teeTime: "",
+        course: "St Michaels",
+        tee,
+        format,
+      },
+    ]);
+
+    setActiveDay(0);
+    setStartMatch(0);
+    setStates({});
+    setScorecards({});
+    setEventStarted(true);
+    setEventLocked(true);
+
+    setScreen("score");
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
-      <div
-        className={cx(
-          "relative h-[780px] w-[390px] overflow-hidden rounded-3xl bg-gradient-to-b",
-          bg
-        )}
-      >
-        {bgImage && (
-          <img
-            src={bgImage}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-        )}
+    <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
+      <div className="relative z-20 mx-auto max-w-[430px]">
+        <div className="mb-5 text-center">
+          <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
+            Quick Game
+          </div>
 
-        <div className="absolute inset-0 bg-black/15" />
-
-        <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
-          {mode === "quick" && (
-            <QuickGame
-              setScreen={handleQuickScreen}
-              setPlayers={setPlayers}
-              setTeamNames={setTeamNames}
-              setRoster={setRoster}
-              setDayConfigs={setDayConfigs}
-              setActiveDay={setActiveDay}
-              setStartMatch={setSelectedMatch}
-              setStates={setStates}
-              setScorecards={setScorecards}
-              setEventStarted={setEventStarted}
-              setEventLocked={setEventLocked}
-            />
-          )}
-
-          {mode !== "quick" && screen === "home" && eventStarted && (
-            <Home
-              setScreen={setScreen}
-              dayConfigs={dayConfigs}
-              days={days}
-              players={players}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              totals={totals}
-              openMatch={openMatch}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-            />
-          )}
-
-          {mode !== "quick" && screen === "rosterP" && (
-            <Roster
-              team="Red"
-              setScreen={setScreen}
-              roster={roster}
-              setRoster={setRoster}
-              players={players}
-              dayConfigs={dayConfigs}
-              days={days}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && screen === "rosterB" && (
-            <Roster
-              team="Blue"
-              setScreen={setScreen}
-              roster={roster}
-              setRoster={setRoster}
-              players={players}
-              dayConfigs={dayConfigs}
-              days={days}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && screen === "score" && eventStarted && (
-            <Score
-              setScreen={setScreen}
-              dayConfigs={dayConfigs}
-              players={players}
-              activeDay={activeDay}
-              roster={roster}
-              states={states}
-              setStates={setStates}
-              scorecards={scorecards}
-              setScorecards={setScorecards}
-              startMatch={selectedMatch}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && (screen === "admin" || !eventStarted) && (
-            <Admin
-              setScreen={setScreen}
-              players={players}
-              setPlayers={setPlayers}
-              days={days}
-              setDays={setDays}
-              dayConfigs={dayConfigs}
-              setDayConfigs={setDayConfigs}
-              roster={roster}
-              setRoster={setRoster}
-              dayLocks={dayLocks}
-              setDayLocks={setDayLocks}
-              teamLogos={teamLogos}
-              setTeamLogos={setTeamLogos}
-              teamNames={teamNames}
-              setTeamNames={setTeamNames}
-              eventLocked={eventLocked}
-              setEventLocked={setEventLocked}
-              eventStarted={eventStarted}
-              setEventStarted={setEventStarted}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-              eventDetails={eventDetails}
-              setEventDetails={setEventDetails}
-              savedPlayers={savedPlayers}
-              setSavedPlayers={setSavedPlayers}
-            />
-          )}
-
-          {mode !== "quick" && screen === "home" && eventStarted && (
-            <button
-              onClick={() => setScreen("admin")}
-              className="absolute left-4 top-4"
-            >
-              <AdminIcon />
-            </button>
-          )}
+          <h1 className="mt-2 text-[34px] font-black uppercase leading-none text-white">
+            Set Up
+          </h1>
         </div>
+
+        <Section title="Players per team">
+          <div className="grid grid-cols-2 gap-2">
+            {[1, 2].map((n) => (
+              <button
+                type="button"
+                key={n}
+                onClick={() => setPlayersPerTeam(n)}
+                className={`rounded-2xl border px-4 py-4 text-lg font-black ${
+                  playersPerTeam === n
+                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                    : "border-white/15 bg-black/45 text-white"
+                }`}
+              >
+                {n} v {n}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Teams">
+          <div className="grid grid-cols-2 gap-3">
+            <TextInput
+              label="Red team"
+              value={redName}
+              onChange={setRedName}
+            />
+
+            <TextInput
+              label="Blue team"
+              value={blueName}
+              onChange={setBlueName}
+            />
+          </div>
+        </Section>
+
+        <Section title="Players">
+          <div className="grid grid-cols-2 gap-3">
+            <PlayerColumn
+              title={redName}
+              team="red"
+              players={redPlayers}
+              count={playersPerTeam}
+              updatePlayer={updatePlayer}
+            />
+
+            <PlayerColumn
+              title={blueName}
+              team="blue"
+              players={bluePlayers}
+              count={playersPerTeam}
+              updatePlayer={updatePlayer}
+            />
+          </div>
+        </Section>
+
+        <Section title="Format">
+          <div className="grid gap-2">
+            {QUICK_FORMATS.map((f) => (
+              <button
+                type="button"
+                key={f}
+                onClick={() => setFormat(f)}
+                className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold ${
+                  format === f
+                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                    : "border-white/15 bg-black/45 text-white"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <Section title="Tee">
+          <div className="grid grid-cols-4 gap-2">
+            {TEES.map((t) => (
+              <button
+                type="button"
+                key={t}
+                onClick={() => setTee(t)}
+                className={`rounded-2xl border px-2 py-3 text-xs font-black uppercase ${
+                  tee === t
+                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                    : "border-white/15 bg-black/45 text-white"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        <div className="mt-5 pb-6">
+          <button
+            type="button"
+            onClick={startQuickGame}
+            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+          >
+            Go
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: any) {
+  return (
+    <div className={`${panel} mt-3 p-4`}>
+      <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/55">
+        {title}
+      </div>
+
+      {children}
+    </div>
+  );
+}
+
+function TextInput({ label, value, onChange }: any) {
+  return (
+    <label className="block">
+      <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/45">
+        {label}
+      </div>
+
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full rounded-2xl border border-white/10 bg-black/55 px-3 py-3 text-sm font-bold text-white outline-none focus:border-[#d1c79f]"
+      />
+    </label>
+  );
+}
+
+function PlayerColumn({
+  title,
+  team,
+  players,
+  count,
+  updatePlayer,
+}: any) {
+  return (
+    <div>
+      <div
+        className={`mb-2 rounded-full px-3 py-1 text-center text-[10px] font-black uppercase tracking-[0.16em] ${
+          team === "red" ? "bg-[#661716]" : "bg-[#2a2e46]"
+        }`}
+      >
+        {title}
+      </div>
+
+      <div className="space-y-3">
+        {players.slice(0, count).map((p: any, i: number) => (
+          <div
+            key={i}
+            className="rounded-2xl border border-white/10 bg-black/40 p-2"
+          >
+            <input
+              value={p.name}
+              onChange={(e) =>
+                updatePlayer(team, i, "name", e.target.value)
+              }
+              className="mb-2 w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
+            />
+
+            <input
+              type="number"
+              value={p.handicap}
+              onChange={(e) =>
+                updatePlayer(team, i, "handicap", e.target.value)
+              }
+              className="w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
