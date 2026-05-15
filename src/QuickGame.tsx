@@ -101,10 +101,6 @@ export default function QuickGame({
       Blue: blueName,
     });
 
-    // IMPORTANT:
-    // The existing weekend scoring engine expects capital roster keys:
-    // roster.Red and roster.Blue.
-    // It then converts these into match.red and match.blue internally.
     setRoster({
       Red: red,
       Blue: blue,
@@ -133,7 +129,7 @@ export default function QuickGame({
   return (
     <div className="relative h-full overflow-y-auto bg-black px-4 pb-36 pt-8 text-white">
       <img
-        src="/admin-bg.jpg"
+        src="/admin-home-bg.jpg"
         alt=""
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45"
       />
