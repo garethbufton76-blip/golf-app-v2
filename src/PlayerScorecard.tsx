@@ -303,7 +303,7 @@ export default function PlayerScorecard({
 
                   {matchScoreLabel ? (
                     <div
-                      className="mb-1 whitespace-nowrap text-[20px] font-black uppercase leading-none tracking-[0.02em] text-white"
+                      className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[20px] font-black uppercase leading-none tracking-[0.02em] text-white"
                       style={{ opacity: 0.3 }}
                     >
                       {matchScoreLabel}
