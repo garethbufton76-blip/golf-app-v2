@@ -39,8 +39,11 @@ export default function PlayerScorecard({
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
   const showStableford = /stableford|stb|points/i.test(day.format || "");
 
-  const matchScoreLabel =
-    cardPlayer.matchScore || cardPlayer.matchStatus || cardPlayer.result || "";
+  const matchScoreLabel = relativeMatchScore(
+    cardPlayer.matchScore || cardPlayer.matchStatus || cardPlayer.result || "",
+    team,
+    cardPlayer.matchLeader
+  );
 
   function rowsForPlayer(player: any, from: number, to: number) {
     return playerScorecardRows(player, team, from, to);
@@ -422,6 +425,30 @@ export default function PlayerScorecard({
   );
 }
 
+function relativeMatchScore(label: string, team: string, matchLeader?: string) {
+  const raw = String(label || "").trim();
+
+  if (!raw) return "";
+  if (/all\s*square|^as$/i.test(raw)) return "ALL SQUARE";
+
+  const upMatch = raw.match(/(\d+)\s*UP/i);
+  if (!upMatch) return raw;
+
+  const holes = upMatch[1];
+
+  if (matchLeader === "red" || matchLeader === "blue") {
+    return matchLeader === team ? `${holes} UP` : `${holes} DOWN`;
+  }
+
+  const leadingTeamText = raw.replace(/\s*\d+\s*UP/i, "").trim().toUpperCase();
+
+  if (leadingTeamText.includes(team.toUpperCase())) {
+    return `${holes} UP`;
+  }
+
+  return `${holes} DOWN`;
+}
+
 function MatchScoreWatermark({ label, showingTeamCard }: any) {
   return (
     <div
@@ -445,19 +472,9 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
         {showingTeamCard ? (
           label
         ) : (
-          <>
-            <div className="whitespace-nowrap text-[17px] leading-none tracking-[0.02em]">
-              {label
-                .replace(/\s?(\d+UP|ALL SQUARE|AS)$/i, "")
-                .trim()}
-            </div>
-
-            <div className="mt-1 text-[42px] leading-none tracking-[-0.04em]">
-              {(
-                label.match(/(\d+UP|ALL SQUARE|AS)$/i) || []
-              )[0] || ""}
-            </div>
-          </>
+          <div className="whitespace-nowrap text-[42px] leading-none tracking-[-0.04em]">
+            {label}
+          </div>
         )}
       </div>
     </div>
@@ -466,19 +483,27 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
 
 function PlayerNameBlock({ player, align, namePartsFor }: any) {
   const parts = namePartsFor(player);
+  const firstName = parts[0] || "";
+  const surname = parts.slice(1).join(" ");
 
   return (
     <div
-      className={`text-[26px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
+      className={`font-black uppercase text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
         align === "right" ? "text-right" : "text-left"
       }`}
       style={{
         fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
       }}
     >
-      {parts.map((part: string) => (
-        <div key={part}>{part}</div>
-      ))}
+      <div className="text-[26px] leading-[0.86] tracking-[0.015em]">
+        {firstName}
+      </div>
+
+      {surname ? (
+        <div className="mt-1 text-[13px] leading-none tracking-[0.08em]">
+          {surname}
+        </div>
+      ) : null}
     </div>
   );
 }
