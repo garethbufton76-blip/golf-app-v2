@@ -299,11 +299,6 @@ export default function PlayerScorecard({
                 </button>
 
                 <div className="pb-1 text-center">
-                  <div
-                    className="mx-auto mb-2 h-[2px] w-[54px]"
-                    style={{ backgroundColor: accentBright }}
-                  />
-
                   {matchScoreLabel ? (
                     <div
                       className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white"
@@ -519,8 +514,6 @@ function DoublesHeroBackground({
 
   return (
     <>
-      <div className="absolute left-1/2 top-0 z-[9] h-[48%] w-[3px] -translate-x-1/2 bg-black/80" />
-
       {left?.photo ? (
         <button
           onClick={() => onPlayerClick(left)}
