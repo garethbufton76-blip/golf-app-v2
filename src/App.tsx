@@ -266,23 +266,26 @@ export default function App() {
               setTeamNames={setTeamNames}
               eventLocked={eventLocked}
               setEventLocked={setEventLocked}
+              eventStarted={eventStarted}
               setEventStarted={setEventStarted}
-              savedPlayers={savedPlayers}
-              setSavedPlayers={setSavedPlayers}
+              pairingLocks={pairingLocks}
+              setPairingLocks={setPairingLocks}
               eventDetails={eventDetails}
               setEventDetails={setEventDetails}
+              savedPlayers={savedPlayers}
+              setSavedPlayers={setSavedPlayers}
             />
           )}
-        </div>
 
-        {screen !== "score" && (
-          <button
-            onClick={() => setScreen("admin")}
-            className="absolute bottom-5 right-5 z-30 flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-black/60 shadow-lg backdrop-blur"
-          >
-            <AdminIcon />
-          </button>
-        )}
+          {screen === "home" && eventStarted && (
+            <button
+              onClick={() => setScreen("admin")}
+              className="absolute left-4 top-4"
+            >
+              <AdminIcon />
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
