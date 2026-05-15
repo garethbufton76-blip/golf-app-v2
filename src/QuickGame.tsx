@@ -109,7 +109,7 @@ export default function QuickGame({
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black px-4 pb-8 pt-8 text-white">
+    <div className="relative h-full overflow-y-auto bg-black px-4 pb-28 pt-8 text-white">
       <img
         src="/admin-bg.jpg"
         alt=""
@@ -229,12 +229,14 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <button
-          onClick={startQuickGame}
-          className="mt-5 w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
-        >
-          Go
-        </button>
+        <div className="sticky bottom-4 z-30 mt-5">
+          <button
+            onClick={startQuickGame}
+            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+          >
+            Go
+          </button>
+        </div>
       </div>
     </div>
   );
