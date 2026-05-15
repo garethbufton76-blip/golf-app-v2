@@ -30,9 +30,9 @@ export default function PlayerScorecard({
   const showingTeamCard = isDoubleFormat && !individualPlayer;
   const activePlayer = individualPlayer || p;
 
-  const accent = isBlue ? "#173f94" : "#8f070d";
-  const accentBright = isBlue ? "#2557c8" : "#c50812";
-  const accentDeep = isBlue ? "#061733" : "#250304";
+  const accent = isBlue ? "#2a2e46" : "#661716";
+  const accentBright = isBlue ? "#343957" : "#7a1b1b";
+  const accentDeep = isBlue ? "#111729" : "#260707";
 
   const bgImage = isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg";
   const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
