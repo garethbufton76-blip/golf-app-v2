@@ -151,9 +151,9 @@ export default function PlayerScorecard({
               className="absolute right-[-18px] top-[-8px] h-[50%] w-[66%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
               style={{
                 WebkitMaskImage:
-                  "linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.55) 84%, transparent 100%)",
+                  "linear-gradient(to bottom, black 0%, black 80%, rgba(0,0,0,0.65) 91%, transparent 100%)",
                 maskImage:
-                  "linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.55) 84%, transparent 100%)",
+                  "linear-gradient(to bottom, black 0%, black 80%, rgba(0,0,0,0.65) 91%, transparent 100%)",
               }}
             />
           ) : null}
@@ -168,7 +168,7 @@ export default function PlayerScorecard({
         <img
           src="/launch-logo.png"
           alt="DUEL"
-          className="absolute left-5 top-7 z-20 h-12 object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]"
+          className="absolute left-5 top-7 z-20 h-[34px] object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]"
         />
 
         {/* CONTENT */}
@@ -283,7 +283,7 @@ export default function PlayerScorecard({
 
             {/* TOTALS */}
             <div
-              className="grid grid-cols-3 items-center px-3 py-2 text-center text-white"
+              className="grid grid-cols-3 items-center px-3 py-3 text-center text-white"
               style={{
                 backgroundColor:
                   accent,
@@ -591,7 +591,7 @@ function Summary({
         {label}
       </div>
 
-      <div className="mt-0.5 text-[22px] font-black leading-none">
+      <div className="mt-0.5 text-[26px] font-black leading-none">
 
         {value}
       </div>
