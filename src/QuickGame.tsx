@@ -129,18 +129,18 @@ export default function QuickGame({
   return (
     <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
       <div className="relative z-20 mx-auto max-w-[430px]">
-        <div className="mb-5 text-center">
+        <div className="mb-2 text-center">
           <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
             Quick Game
           </div>
 
-          <h1 className="mt-2 text-[34px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
+          <h1 className="mt-1 text-[26px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
             Set Up
           </h1>
         </div>
 
         {/* 1v1 / 2v2 SELECTOR */}
-        <div className="mb-4 grid grid-cols-2 gap-3">
+        <div className="mb-2 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
             const active = playersPerTeam === n;
 
@@ -150,19 +150,19 @@ export default function QuickGame({
                 key={n}
                 onClick={() => setPlayersPerTeam(n)}
                 className={cx(
-                  "relative overflow-hidden rounded-[24px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
+                  "relative overflow-hidden rounded-[22px] border px-4 py-3 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
                   active
                     ? "border-[#d1c79f]/80 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9b8d5c] text-black"
                     : "border-white/12 bg-black/42 text-white"
                 )}
               >
-                <div className="text-[34px] font-black uppercase leading-none tracking-[-0.04em]">
+                <div className="text-[28px] font-black uppercase leading-none tracking-[-0.04em]">
                   {n}v{n}
                 </div>
 
                 <div
                   className={cx(
-                    "mt-1 text-[8px] font-black uppercase tracking-[0.2em]",
+                    "mt-0.5 text-[7px] font-black uppercase tracking-[0.2em]",
                     active ? "text-black/55" : "text-white/35"
                   )}
                 >
@@ -202,7 +202,7 @@ export default function QuickGame({
                 key={f}
                 onClick={() => setFormat(f)}
                 className={cx(
-                  "rounded-2xl border px-4 py-3 text-left text-[12px] font-black uppercase tracking-[0.05em] transition-all",
+                  "rounded-2xl border px-3 py-2 text-left text-[10px] font-black uppercase tracking-[0.05em] transition-all",
                   format === f
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
                     : "border-white/12 bg-black/42 text-white/85"
@@ -222,7 +222,7 @@ export default function QuickGame({
                 key={t}
                 onClick={() => setTee(t)}
                 className={cx(
-                  "rounded-2xl border px-2 py-3 text-xs font-black uppercase tracking-[0.08em] transition-all",
+                  "rounded-2xl border px-2 py-2 text-[10px] font-black uppercase tracking-[0.08em] transition-all",
                   tee === t
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
                     : "border-white/12 bg-black/42 text-white"
@@ -234,11 +234,11 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <div className="mt-5 pb-6">
+        <div className="mt-3 pb-4">
           <button
             type="button"
             onClick={startQuickGame}
-            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-3 text-base font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
           >
             Go
           </button>
@@ -261,16 +261,16 @@ function TeamSetupColumn({
   return (
     <div
       className={cx(
-        "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+        "rounded-[24px] border p-2.5 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
         isRed
           ? "border-[#7a2424]/45 bg-[#250305]/54"
           : "border-[#343957]/55 bg-[#060a16]/56"
       )}
     >
-      <div className="mb-3">
+      <div className="mb-2">
         <div
           className={cx(
-            "mb-1 text-[8px] font-black uppercase tracking-[0.24em]",
+            "mb-0.5 text-[7px] font-black uppercase tracking-[0.24em]",
             isRed ? "text-red-200/45" : "text-blue-100/45"
           )}
         >
@@ -281,35 +281,35 @@ function TeamSetupColumn({
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           className={cx(
-            "w-full border-0 bg-transparent p-0 text-[18px] font-black uppercase leading-none text-white outline-none",
+            "w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none",
             "placeholder:text-white/25"
           )}
         />
 
         <div
           className={cx(
-            "mt-2 h-[2px] w-full rounded-full",
+            "mt-1.5 h-[2px] w-full rounded-full",
             isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
           )}
         />
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {players.slice(0, count).map((p: any, i: number) => (
-          <div key={i} className="rounded-[22px] border border-white/8 bg-black/34 p-3">
-            <div className="mb-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/32">
+          <div key={i} className="rounded-[18px] border border-white/8 bg-black/34 p-2.5">
+            <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
               Player {i + 1}
             </div>
 
             <input
               value={p.name}
               onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-              className="w-full border-0 bg-transparent p-0 text-[18px] font-black text-white outline-none placeholder:text-white/25"
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-black text-white outline-none placeholder:text-white/25"
             />
 
-            <div className="mt-3 grid grid-cols-[1fr_54px] items-end gap-2">
+            <div className="mt-2 grid grid-cols-[1fr_46px] items-end gap-2">
               <div>
-                <div className="mb-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/32">
+                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
                   Handicap
                 </div>
 
@@ -319,13 +319,13 @@ function TeamSetupColumn({
                   onChange={(e) =>
                     updatePlayer(tone, i, "handicap", e.target.value)
                   }
-                  className="w-full border-0 bg-transparent p-0 text-[24px] font-black leading-none text-white outline-none"
+                  className="w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none"
                 />
               </div>
 
               <div
                 className={cx(
-                  "rounded-full px-2 py-1 text-center text-[8px] font-black uppercase tracking-[0.12em]",
+                  "rounded-full px-2 py-0.5 text-center text-[7px] font-black uppercase tracking-[0.12em]",
                   isRed ? "bg-[#661716] text-red-100" : "bg-[#2a2e46] text-blue-100"
                 )}
               >
@@ -341,8 +341,8 @@ function TeamSetupColumn({
 
 function Section({ title, children }: any) {
   return (
-    <div className="mt-4 rounded-[28px] border border-white/10 bg-black/46 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/45">
+    <div className="mt-3 rounded-[22px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-white/45">
         {title}
       </div>
 
