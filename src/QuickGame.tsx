@@ -66,20 +66,32 @@ export default function QuickGame({
   function startQuickGame() {
     const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
       id: `quick-red-${i}`,
-      name: p.name,
+      name: p.name || `Red ${i + 1}`,
+      nickname: p.name || `Red ${i + 1}`,
       handicap: Number(p.handicap || 0),
+      rawHandicap: Number(p.handicap || 0),
       team: "red",
+      teamId: "red",
       rosterIndex: i,
       photo: "",
+      homeClub: "",
+      preferredTee: tee,
+      regular: false,
     }));
 
     const blue = bluePlayers.slice(0, playersPerTeam).map((p, i) => ({
       id: `quick-blue-${i}`,
-      name: p.name,
+      name: p.name || `Blue ${i + 1}`,
+      nickname: p.name || `Blue ${i + 1}`,
       handicap: Number(p.handicap || 0),
+      rawHandicap: Number(p.handicap || 0),
       team: "blue",
+      teamId: "blue",
       rosterIndex: i,
       photo: "",
+      homeClub: "",
+      preferredTee: tee,
+      regular: false,
     }));
 
     setPlayers(playersPerTeam);
@@ -89,9 +101,13 @@ export default function QuickGame({
       Blue: blueName,
     });
 
+    // IMPORTANT:
+    // The existing weekend scoring engine expects capital roster keys:
+    // roster.Red and roster.Blue.
+    // It then converts these into match.red and match.blue internally.
     setRoster({
-      red,
-      blue,
+      Red: red,
+      Blue: blue,
     });
 
     setDayConfigs([
@@ -127,6 +143,7 @@ export default function QuickGame({
       <div className="relative z-20 mx-auto max-w-[430px]">
         <div className="mb-6 flex items-center justify-between">
           <button
+            type="button"
             onClick={() => setScreen("home")}
             className="rounded-full border border-[#d1c79f]/25 bg-black/45 px-4 py-1.5 text-sm font-semibold text-white/90 backdrop-blur-xl"
           >
@@ -158,6 +175,7 @@ export default function QuickGame({
           <div className="grid grid-cols-2 gap-2">
             {[1, 2].map((n) => (
               <button
+                type="button"
                 key={n}
                 onClick={() => setPlayersPerTeam(n)}
                 className={`rounded-2xl border px-4 py-4 text-lg font-black ${
@@ -212,6 +230,7 @@ export default function QuickGame({
           <div className="grid gap-2">
             {QUICK_FORMATS.map((f) => (
               <button
+                type="button"
                 key={f}
                 onClick={() => setFormat(f)}
                 className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold ${
@@ -230,6 +249,7 @@ export default function QuickGame({
           <div className="grid grid-cols-4 gap-2">
             {TEES.map((t) => (
               <button
+                type="button"
                 key={t}
                 onClick={() => setTee(t)}
                 className={`rounded-2xl border px-2 py-3 text-xs font-black uppercase ${
@@ -243,19 +263,16 @@ export default function QuickGame({
             ))}
           </div>
         </Section>
-      </div>
 
-      <div className="fixed bottom-6 left-1/2 z-[999] w-[calc(100%-32px)] max-w-[398px] -translate-x-1/2">
-        <button
-          type="button"
-          onClick={() => {
-            console.log("GO CLICKED");
-            startQuickGame();
-          }}
-          className="pointer-events-auto w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
-        >
-          Go
-        </button>
+        <div className="mt-5 pb-6">
+          <button
+            type="button"
+            onClick={startQuickGame}
+            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-4 text-lg font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+          >
+            Go
+          </button>
+        </div>
       </div>
     </div>
   );
