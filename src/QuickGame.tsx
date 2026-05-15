@@ -43,7 +43,12 @@ export default function QuickGame({
     { name: "Blue 2", handicap: 18 },
   ]);
 
-  function updatePlayer(team: "red" | "blue", index: number, key: string, value: any) {
+  function updatePlayer(
+    team: "red" | "blue",
+    index: number,
+    key: string,
+    value: any
+  ) {
     const setter = team === "red" ? setRedPlayers : setBluePlayers;
 
     setter((current: any[]) =>
@@ -105,6 +110,7 @@ export default function QuickGame({
     setScorecards({});
     setEventStarted(true);
     setEventLocked(true);
+
     setScreen("score");
   }
 
@@ -113,12 +119,12 @@ export default function QuickGame({
       <img
         src="/admin-bg.jpg"
         alt=""
-        className="absolute inset-0 h-full w-full object-cover opacity-45"
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45"
       />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black" />
 
-      <div className="relative z-10 mx-auto max-w-[430px]">
+      <div className="relative z-20 mx-auto max-w-[430px]">
         <div className="mb-6 flex items-center justify-between">
           <button
             onClick={() => setScreen("home")}
@@ -168,8 +174,17 @@ export default function QuickGame({
 
         <Section title="Teams">
           <div className="grid grid-cols-2 gap-3">
-            <TextInput label="Red team" value={redName} onChange={setRedName} />
-            <TextInput label="Blue team" value={blueName} onChange={setBlueName} />
+            <TextInput
+              label="Red team"
+              value={redName}
+              onChange={setRedName}
+            />
+
+            <TextInput
+              label="Blue team"
+              value={blueName}
+              onChange={setBlueName}
+            />
           </div>
         </Section>
 
@@ -270,7 +285,13 @@ function TextInput({ label, value, onChange }: any) {
   );
 }
 
-function PlayerColumn({ title, team, players, count, updatePlayer }: any) {
+function PlayerColumn({
+  title,
+  team,
+  players,
+  count,
+  updatePlayer,
+}: any) {
   return (
     <div>
       <div
@@ -283,17 +304,24 @@ function PlayerColumn({ title, team, players, count, updatePlayer }: any) {
 
       <div className="space-y-3">
         {players.slice(0, count).map((p: any, i: number) => (
-          <div key={i} className="rounded-2xl border border-white/10 bg-black/40 p-2">
+          <div
+            key={i}
+            className="rounded-2xl border border-white/10 bg-black/40 p-2"
+          >
             <input
               value={p.name}
-              onChange={(e) => updatePlayer(team, i, "name", e.target.value)}
+              onChange={(e) =>
+                updatePlayer(team, i, "name", e.target.value)
+              }
               className="mb-2 w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
             />
 
             <input
               type="number"
               value={p.handicap}
-              onChange={(e) => updatePlayer(team, i, "handicap", e.target.value)}
+              onChange={(e) =>
+                updatePlayer(team, i, "handicap", e.target.value)
+              }
               className="w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
             />
           </div>
