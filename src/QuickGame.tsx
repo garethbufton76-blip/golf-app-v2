@@ -129,7 +129,7 @@ export default function QuickGame({
   return (
     <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
       <div className="relative z-20 mx-auto max-w-[430px]">
-        <div className="mb-2 text-center">
+        <div className="mb-3 text-center">
           <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
             Quick Game
           </div>
@@ -140,7 +140,7 @@ export default function QuickGame({
         </div>
 
         {/* 1v1 / 2v2 SELECTOR */}
-        <div className="mb-2 grid grid-cols-2 gap-3">
+        <div className="mb-3 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
             const active = playersPerTeam === n;
 
@@ -194,26 +194,6 @@ export default function QuickGame({
           />
         </div>
 
-        <Section title="Format">
-          <div className="grid gap-2">
-            {QUICK_FORMATS.map((f) => (
-              <button
-                type="button"
-                key={f}
-                onClick={() => setFormat(f)}
-                className={cx(
-                  "rounded-2xl border px-3 py-2 text-left text-[10px] font-black uppercase tracking-[0.05em] transition-all",
-                  format === f
-                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/12 bg-black/42 text-white/85"
-                )}
-              >
-                {f}
-              </button>
-            ))}
-          </div>
-        </Section>
-
         <Section title="Tee">
           <div className="grid grid-cols-4 gap-2">
             {TEES.map((t) => (
@@ -234,13 +214,38 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <div className="mt-3 pb-4">
+        <Section title="Format">
+          <div className="relative">
+            <select
+              value={format}
+              onChange={(e) => setFormat(e.target.value)}
+              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
+            >
+              {QUICK_FORMATS.map((f) => (
+                <option key={f} value={f} className="bg-black text-white">
+                  {f}
+                </option>
+              ))}
+            </select>
+
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
+              ▾
+            </div>
+          </div>
+        </Section>
+
+        <div className="mt-4 flex justify-center pb-6">
           <button
             type="button"
             onClick={startQuickGame}
-            className="w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#8f8256] px-6 py-3 text-base font-black uppercase tracking-[0.18em] text-black shadow-[0_16px_40px_rgba(0,0,0,0.55)]"
+            className="flex h-[78px] w-[78px] items-center justify-center rounded-full border border-[#d1c79f]/40 bg-gradient-to-b from-[#245438] via-[#163d2b] to-[#071b13] shadow-[0_18px_40px_rgba(0,0,0,0.65),0_0_22px_rgba(42,115,73,0.45)]"
+            aria-label="Start quick game"
           >
-            Go
+            <img
+              src="/launch-logo.png"
+              alt="DUEL"
+              className="h-[31px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)]"
+            />
           </button>
         </div>
       </div>
@@ -342,7 +347,7 @@ function TeamSetupColumn({
 function Section({ title, children }: any) {
   return (
     <div className="mt-3 rounded-[22px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-white/45">
+      <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
         {title}
       </div>
 
@@ -350,4 +355,3 @@ function Section({ title, children }: any) {
     </div>
   );
 }
-
