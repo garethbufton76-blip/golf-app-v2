@@ -232,7 +232,7 @@ export default function PlayerScorecard({
         <div
           className={
             showingTeamCard
-              ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[322px]"
+              ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[258px]"
               : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[102px]"
           }
         >
@@ -272,8 +272,8 @@ export default function PlayerScorecard({
               </div>
             </div>
           ) : (
-            <div className="mb-3 px-3">
-              <div className="grid grid-cols-[1fr_96px_1fr] items-end gap-2">
+            <div className="mb-2 px-3">
+              <div className="grid grid-cols-[1fr_92px_1fr] items-end gap-2">
                 <button
                   onClick={() => setIndividualPlayer(playersForCard[0])}
                   className="text-left"
@@ -408,7 +408,7 @@ function PlayerNameBlock({ player, align, namePartsFor }: any) {
 
   return (
     <div
-      className={`text-[28px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
+      className={`text-[26px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
         align === "right" ? "text-right" : "text-left"
       }`}
       style={{
