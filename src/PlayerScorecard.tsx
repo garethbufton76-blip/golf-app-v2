@@ -172,10 +172,10 @@ export default function PlayerScorecard({
             }}
           />
 
-          <div className="absolute right-[-54px] top-[128px] opacity-[0.10]">
+          <div className="absolute left-[-96px] top-[24px] opacity-[0.16]">
             <Logo
               team={team}
-              size="h-[220px] w-[220px]"
+              size="h-[340px] w-[340px]"
               src={teamLogo}
             />
           </div>
