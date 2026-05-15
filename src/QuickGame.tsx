@@ -127,14 +127,14 @@ export default function QuickGame({
   }
 
   return (
-    <div className="relative h-full overflow-y-auto bg-black px-4 pb-36 pt-8 text-white">
+    <div className="relative h-full w-full overflow-y-auto bg-black px-4 pb-36 pt-8 text-white">
       <img
         src="/admin-home-bg.jpg"
         alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-45"
+        className="pointer-events-none absolute inset-0 h-full w-full rounded-3xl object-cover opacity-45"
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-black/75 via-black/55 to-black" />
 
       <div className="relative z-20 mx-auto max-w-[430px]">
         <div className="mb-6 flex items-center justify-between">
