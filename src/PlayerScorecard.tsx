@@ -39,6 +39,9 @@ export default function PlayerScorecard({
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
   const showStableford = /stableford|stb|points/i.test(day.format || "");
 
+  const matchScoreLabel =
+    cardPlayer.matchScore || cardPlayer.matchStatus || cardPlayer.result || "";
+
   function rowsForPlayer(player: any, from: number, to: number) {
     return playerScorecardRows(player, team, from, to);
   }
@@ -228,6 +231,13 @@ export default function PlayerScorecard({
           </div>
         ) : null}
 
+        {matchScoreLabel ? (
+          <MatchScoreWatermark
+            label={matchScoreLabel}
+            showingTeamCard={showingTeamCard}
+          />
+        ) : null}
+
         {/* CONTENT */}
         <div
           className={
@@ -290,6 +300,12 @@ export default function PlayerScorecard({
                     className="mx-auto mb-2 h-[2px] w-[54px]"
                     style={{ backgroundColor: accentBright }}
                   />
+
+                  {matchScoreLabel ? (
+                    <div className="mb-1 text-[24px] font-black uppercase leading-none tracking-[0.03em] text-white/18">
+                      {matchScoreLabel}
+                    </div>
+                  ) : null}
 
                   <div className="text-[7px] font-black uppercase tracking-[0.18em] text-white/70">
                     {day.label.toUpperCase()}
@@ -398,6 +414,31 @@ export default function PlayerScorecard({
             {bottomModeLabel}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function MatchScoreWatermark({ label, showingTeamCard }: any) {
+  return (
+    <div
+      className={
+        showingTeamCard
+          ? "pointer-events-none absolute left-1/2 top-[222px] z-[14] w-[118px] -translate-x-1/2 text-center"
+          : "pointer-events-none absolute right-7 top-[292px] z-[14] w-[128px] text-right"
+      }
+    >
+      <div
+        className={
+          showingTeamCard
+            ? "text-[34px] font-black uppercase leading-none tracking-[-0.03em] text-white/10"
+            : "text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white/10"
+        }
+        style={{
+          fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+        }}
+      >
+        {label}
       </div>
     </div>
   );
