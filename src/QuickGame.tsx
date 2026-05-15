@@ -1,7 +1,7 @@
 // src/QuickGame.tsx
 
 import { useState } from "react";
-import { Button, panel } from "./data";
+import { panel } from "./data";
 
 const QUICK_FORMATS = [
   "Singles Match Play",
@@ -21,6 +21,10 @@ export default function QuickGame({
   setDayConfigs,
   setActiveDay,
   setStartMatch,
+  setStates,
+  setScorecards,
+  setEventStarted,
+  setEventLocked,
 }: any) {
   const [playersPerTeam, setPlayersPerTeam] = useState(1);
   const [format, setFormat] = useState("Singles Match Play");
@@ -56,22 +60,25 @@ export default function QuickGame({
 
   function startQuickGame() {
     const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
-      ...p,
-      team: "red",
       id: `quick-red-${i}`,
+      name: p.name,
+      handicap: Number(p.handicap || 0),
+      team: "red",
       rosterIndex: i,
       photo: "",
     }));
 
     const blue = bluePlayers.slice(0, playersPerTeam).map((p, i) => ({
-      ...p,
-      team: "blue",
       id: `quick-blue-${i}`,
+      name: p.name,
+      handicap: Number(p.handicap || 0),
+      team: "blue",
       rosterIndex: i,
       photo: "",
     }));
 
     setPlayers(playersPerTeam);
+
     setTeamNames({
       Red: redName,
       Blue: blueName,
@@ -85,7 +92,7 @@ export default function QuickGame({
     setDayConfigs([
       {
         label: "Quick Game",
-        date: new Date().toISOString().slice(0, 10),
+        teeTime: "",
         course: "St Michaels",
         tee,
         format,
@@ -94,6 +101,10 @@ export default function QuickGame({
 
     setActiveDay(0);
     setStartMatch(0);
+    setStates({});
+    setScorecards({});
+    setEventStarted(true);
+    setEventLocked(true);
     setScreen("score");
   }
 
@@ -105,7 +116,7 @@ export default function QuickGame({
         className="absolute inset-0 h-full w-full object-cover opacity-45"
       />
 
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/45 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/55 to-black" />
 
       <div className="relative z-10 mx-auto max-w-[430px]">
         <div className="mb-6 flex items-center justify-between">
@@ -133,7 +144,7 @@ export default function QuickGame({
           </h1>
 
           <p className="mt-2 text-sm text-white/65">
-            Build a 1v1 or 2v2 match in under a minute.
+            No days. No weekend admin. Just choose the match and go.
           </p>
         </div>
 
