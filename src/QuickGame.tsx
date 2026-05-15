@@ -1,9 +1,8 @@
 // src/QuickGame.tsx
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { cx } from "./data";
-
-const COURSES = ["St Michaels"];
+import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
 
 const QUICK_FORMATS = [
   "Singles Match Play",
@@ -12,8 +11,6 @@ const QUICK_FORMATS = [
   "Stableford",
   "2-Ball Better Ball Stableford",
 ];
-
-const TEES = ["Blue", "White", "Gold", "Red"];
 
 export default function QuickGame({
   setScreen,
@@ -28,10 +25,12 @@ export default function QuickGame({
   setEventStarted,
   setEventLocked,
 }: any) {
-  const [course, setCourse] = useState("St Michaels");
+  const [courseId, setCourseId] = useState("st-michaels");
+  const tees = useMemo(() => getCourseTees(courseId), [courseId]);
+
   const [playersPerTeam, setPlayersPerTeam] = useState(1);
   const [format, setFormat] = useState("Singles Match Play");
-  const [tee, setTee] = useState("Blue");
+  const [tee, setTee] = useState(getDefaultTee(courseId));
 
   const [redName, setRedName] = useState("Team Red");
   const [blueName, setBlueName] = useState("Team Blue");
@@ -46,6 +45,11 @@ export default function QuickGame({
     { name: "Blue 2", handicap: 18 },
   ]);
 
+  function changeCourse(nextCourseId: string) {
+    setCourseId(nextCourseId);
+    setTee(getDefaultTee(nextCourseId));
+  }
+
   function updatePlayer(
     team: "red" | "blue",
     index: number,
@@ -57,16 +61,15 @@ export default function QuickGame({
     setter((current: any[]) =>
       current.map((p, i) =>
         i === index
-          ? {
-              ...p,
-              [key]: key === "handicap" ? Number(value) : value,
-            }
+          ? { ...p, [key]: key === "handicap" ? Number(value) : value }
           : p
       )
     );
   }
 
   function startQuickGame() {
+    const selectedCourse = getCourseById(courseId);
+
     const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
       id: `quick-red-${i}`,
       name: p.name || `Red ${i + 1}`,
@@ -98,22 +101,15 @@ export default function QuickGame({
     }));
 
     setPlayers(playersPerTeam);
-
-    setTeamNames({
-      Red: redName,
-      Blue: blueName,
-    });
-
-    setRoster({
-      Red: red,
-      Blue: blue,
-    });
+    setTeamNames({ Red: redName, Blue: blueName });
+    setRoster({ Red: red, Blue: blue });
 
     setDayConfigs([
       {
         label: "Quick Game",
         teeTime: "",
-        course,
+        courseId,
+        course: selectedCourse.shortName,
         tee,
         format,
       },
@@ -125,7 +121,6 @@ export default function QuickGame({
     setScorecards({});
     setEventStarted(true);
     setEventLocked(true);
-
     setScreen("score");
   }
 
@@ -136,7 +131,6 @@ export default function QuickGame({
           <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
             Quick Game
           </div>
-
           <h1 className="mt-1 text-[26px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
             Set Up
           </h1>
@@ -145,32 +139,25 @@ export default function QuickGame({
         <Section title="Course">
           <div className="relative">
             <select
-              value={course}
-              onChange={(e) => setCourse(e.target.value)}
+              value={courseId}
+              onChange={(e) => changeCourse(e.target.value)}
               className="w-full appearance-none rounded-2xl border border-[#d1c79f]/45 bg-black/55 px-4 py-3 pr-10 text-[13px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
             >
-              {COURSES.map((c) => (
-                <option key={c} value={c} className="bg-black text-white">
-                  {c}
+              {COURSES.map((course) => (
+                <option key={course.id} value={course.id} className="bg-black text-white">
+                  {course.name}
                 </option>
               ))}
             </select>
-
-            <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
-              ●
-            </div>
-
             <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
               ▾
             </div>
           </div>
         </Section>
 
-        {/* 1v1 / 2v2 SELECTOR */}
-        <div className="mt-3 mb-3 grid grid-cols-2 gap-3">
+        <div className="mb-3 mt-3 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
             const active = playersPerTeam === n;
-
             return (
               <button
                 type="button"
@@ -186,7 +173,6 @@ export default function QuickGame({
                 <div className="text-[28px] font-black uppercase leading-none tracking-[-0.04em]">
                   {n}v{n}
                 </div>
-
                 <div
                   className={cx(
                     "mt-0.5 text-[7px] font-black uppercase tracking-[0.2em]",
@@ -200,7 +186,6 @@ export default function QuickGame({
           })}
         </div>
 
-        {/* TEAM / PLAYER PANELS */}
         <div className="grid grid-cols-2 gap-3">
           <TeamSetupColumn
             tone="red"
@@ -210,7 +195,6 @@ export default function QuickGame({
             count={playersPerTeam}
             updatePlayer={updatePlayer}
           />
-
           <TeamSetupColumn
             tone="blue"
             teamName={blueName}
@@ -223,19 +207,19 @@ export default function QuickGame({
 
         <Section title="Tee">
           <div className="grid grid-cols-4 gap-2">
-            {TEES.map((t) => (
+            {tees.map((t) => (
               <button
                 type="button"
-                key={t}
-                onClick={() => setTee(t)}
+                key={t.id}
+                onClick={() => setTee(t.id)}
                 className={cx(
                   "rounded-2xl border px-2 py-2 text-[10px] font-black uppercase tracking-[0.08em] transition-all",
-                  tee === t
+                  tee === t.id
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
                     : "border-white/12 bg-black/42 text-white"
                 )}
               >
-                {t}
+                {t.label}
               </button>
             ))}
           </div>
@@ -254,7 +238,6 @@ export default function QuickGame({
                 </option>
               ))}
             </select>
-
             <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
               ▾
             </div>
@@ -308,16 +291,11 @@ function TeamSetupColumn({
         >
           Team
         </div>
-
         <input
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
-          className={cx(
-            "w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none",
-            "placeholder:text-white/25"
-          )}
+          className="w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
         />
-
         <div
           className={cx(
             "mt-1.5 h-[2px] w-full rounded-full",
@@ -332,7 +310,6 @@ function TeamSetupColumn({
             <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
               Player {i + 1}
             </div>
-
             <input
               value={p.name}
               onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
@@ -344,17 +321,13 @@ function TeamSetupColumn({
                 <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
                   Handicap
                 </div>
-
                 <input
                   type="number"
                   value={p.handicap}
-                  onChange={(e) =>
-                    updatePlayer(tone, i, "handicap", e.target.value)
-                  }
+                  onChange={(e) => updatePlayer(tone, i, "handicap", e.target.value)}
                   className="w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none"
                 />
               </div>
-
               <div
                 className={cx(
                   "rounded-full px-2 py-0.5 text-center text-[7px] font-black uppercase tracking-[0.12em]",
@@ -377,7 +350,6 @@ function Section({ title, children }: any) {
       <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
         {title}
       </div>
-
       {children}
     </div>
   );
