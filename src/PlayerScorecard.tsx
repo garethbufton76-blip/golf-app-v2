@@ -429,7 +429,7 @@ function relativeMatchScore(label: string, team: string, matchLeader?: string) {
   const raw = String(label || "").trim();
 
   if (!raw) return "";
-  if (/all\s*square|^as$/i.test(raw)) return "ALL SQUARE";
+  if (/all\s*square|^as$|^a\/s$/i.test(raw)) return "A/S";
 
   const upMatch = raw.match(/(\d+)\s*UP/i);
   if (!upMatch) return raw;
