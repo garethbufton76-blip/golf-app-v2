@@ -13,6 +13,7 @@ import Home from "./Home";
 import Roster from "./Roster";
 import Score from "./Score";
 import Admin from "./Admin";
+import QuickGame from "./QuickGame";
 
 type AppMode = "launch" | "weekend" | "quick";
 
@@ -104,6 +105,24 @@ export default function App() {
     setScreen("score");
   };
 
+  function handleQuickScreen(nextScreen: string) {
+    if (nextScreen === "score") {
+      setEventStarted(true);
+      setEventLocked(true);
+      setMode("weekend");
+      setScreen("score");
+      return;
+    }
+
+    if (nextScreen === "home") {
+      setMode("launch");
+      setScreen("home");
+      return;
+    }
+
+    setScreen(nextScreen);
+  }
+
   if (mode === "launch") {
     return (
       <Launch
@@ -111,35 +130,25 @@ export default function App() {
           setMode("weekend");
           setScreen("admin");
         }}
-        onQuick={() => setMode("quick")}
+        onQuick={() => {
+          setMode("quick");
+          setScreen("quick");
+        }}
       />
     );
   }
 
   if (mode === "quick") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black text-white">
-        <div className="flex h-[780px] w-[390px] flex-col items-center justify-center rounded-3xl border border-white/10 bg-[#0d0d0d] p-8 text-center">
-          <div className="mb-4 text-[42px] font-black tracking-[0.25em] text-[#e7dbb2]">
-            QUICK
-          </div>
-
-          <div className="mb-8 text-sm uppercase tracking-[0.35em] text-white/50">
-            Fast Social Golf
-          </div>
-
-          <div className="mb-10 max-w-[260px] text-white/70">
-            Quick Game setup is the next build phase.
-          </div>
-
-          <button
-            onClick={() => setMode("launch")}
-            className="rounded-full border border-[#d8c792]/30 bg-[#d8c792] px-8 py-4 text-lg font-bold text-black"
-          >
-            Back
-          </button>
-        </div>
-      </div>
+      <QuickGame
+        setScreen={handleQuickScreen}
+        setPlayers={setPlayers}
+        setTeamNames={setTeamNames}
+        setRoster={setRoster}
+        setDayConfigs={setDayConfigs}
+        setActiveDay={setActiveDay}
+        setStartMatch={setSelectedMatch}
+      />
     );
   }
 
