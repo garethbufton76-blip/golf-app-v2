@@ -1,7 +1,7 @@
 // src/QuickGame.tsx
 
 import { useState } from "react";
-import { panel } from "./data";
+import { cx } from "./data";
 
 const QUICK_FORMATS = [
   "Singles Match Play",
@@ -134,65 +134,65 @@ export default function QuickGame({
             Quick Game
           </div>
 
-          <h1 className="mt-2 text-[34px] font-black uppercase leading-none text-white">
+          <h1 className="mt-2 text-[34px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
             Set Up
           </h1>
         </div>
 
-        <Section title="Players per team">
-          <div className="grid grid-cols-2 gap-2">
-            {[1, 2].map((n) => (
+        {/* 1v1 / 2v2 SELECTOR */}
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          {[1, 2].map((n) => {
+            const active = playersPerTeam === n;
+
+            return (
               <button
                 type="button"
                 key={n}
                 onClick={() => setPlayersPerTeam(n)}
-                className={`rounded-2xl border px-4 py-4 text-lg font-black ${
-                  playersPerTeam === n
-                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/15 bg-black/45 text-white"
-                }`}
+                className={cx(
+                  "relative overflow-hidden rounded-[24px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
+                  active
+                    ? "border-[#d1c79f]/80 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9b8d5c] text-black"
+                    : "border-white/12 bg-black/42 text-white"
+                )}
               >
-                {n} v {n}
+                <div className="text-[34px] font-black uppercase leading-none tracking-[-0.04em]">
+                  {n}v{n}
+                </div>
+
+                <div
+                  className={cx(
+                    "mt-1 text-[8px] font-black uppercase tracking-[0.2em]",
+                    active ? "text-black/55" : "text-white/35"
+                  )}
+                >
+                  Players
+                </div>
               </button>
-            ))}
-          </div>
-        </Section>
+            );
+          })}
+        </div>
 
-        <Section title="Teams">
-          <div className="grid grid-cols-2 gap-3">
-            <TextInput
-              label="Red team"
-              value={redName}
-              onChange={setRedName}
-            />
+        {/* TEAM / PLAYER PANELS */}
+        <div className="grid grid-cols-2 gap-3">
+          <TeamSetupColumn
+            tone="red"
+            teamName={redName}
+            setTeamName={setRedName}
+            players={redPlayers}
+            count={playersPerTeam}
+            updatePlayer={updatePlayer}
+          />
 
-            <TextInput
-              label="Blue team"
-              value={blueName}
-              onChange={setBlueName}
-            />
-          </div>
-        </Section>
-
-        <Section title="Players">
-          <div className="grid grid-cols-2 gap-3">
-            <PlayerColumn
-              title={redName}
-              team="red"
-              players={redPlayers}
-              count={playersPerTeam}
-              updatePlayer={updatePlayer}
-            />
-
-            <PlayerColumn
-              title={blueName}
-              team="blue"
-              players={bluePlayers}
-              count={playersPerTeam}
-              updatePlayer={updatePlayer}
-            />
-          </div>
-        </Section>
+          <TeamSetupColumn
+            tone="blue"
+            teamName={blueName}
+            setTeamName={setBlueName}
+            players={bluePlayers}
+            count={playersPerTeam}
+            updatePlayer={updatePlayer}
+          />
+        </div>
 
         <Section title="Format">
           <div className="grid gap-2">
@@ -201,11 +201,12 @@ export default function QuickGame({
                 type="button"
                 key={f}
                 onClick={() => setFormat(f)}
-                className={`rounded-2xl border px-4 py-3 text-left text-sm font-bold ${
+                className={cx(
+                  "rounded-2xl border px-4 py-3 text-left text-[12px] font-black uppercase tracking-[0.05em] transition-all",
                   format === f
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/15 bg-black/45 text-white"
-                }`}
+                    : "border-white/12 bg-black/42 text-white/85"
+                )}
               >
                 {f}
               </button>
@@ -220,11 +221,12 @@ export default function QuickGame({
                 type="button"
                 key={t}
                 onClick={() => setTee(t)}
-                className={`rounded-2xl border px-2 py-3 text-xs font-black uppercase ${
+                className={cx(
+                  "rounded-2xl border px-2 py-3 text-xs font-black uppercase tracking-[0.08em] transition-all",
                   tee === t
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/15 bg-black/45 text-white"
-                }`}
+                    : "border-white/12 bg-black/42 text-white"
+                )}
               >
                 {t}
               </button>
@@ -246,76 +248,105 @@ export default function QuickGame({
   );
 }
 
-function Section({ title, children }: any) {
-  return (
-    <div className={`${panel} mt-3 p-4`}>
-      <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/55">
-        {title}
-      </div>
-
-      {children}
-    </div>
-  );
-}
-
-function TextInput({ label, value, onChange }: any) {
-  return (
-    <label className="block">
-      <div className="mb-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/45">
-        {label}
-      </div>
-
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-2xl border border-white/10 bg-black/55 px-3 py-3 text-sm font-bold text-white outline-none focus:border-[#d1c79f]"
-      />
-    </label>
-  );
-}
-
-function PlayerColumn({
-  title,
-  team,
+function TeamSetupColumn({
+  tone,
+  teamName,
+  setTeamName,
   players,
   count,
   updatePlayer,
 }: any) {
+  const isRed = tone === "red";
+
   return (
-    <div>
-      <div
-        className={`mb-2 rounded-full px-3 py-1 text-center text-[10px] font-black uppercase tracking-[0.16em] ${
-          team === "red" ? "bg-[#661716]" : "bg-[#2a2e46]"
-        }`}
-      >
-        {title}
+    <div
+      className={cx(
+        "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+        isRed
+          ? "border-[#7a2424]/45 bg-[#250305]/54"
+          : "border-[#343957]/55 bg-[#060a16]/56"
+      )}
+    >
+      <div className="mb-3">
+        <div
+          className={cx(
+            "mb-1 text-[8px] font-black uppercase tracking-[0.24em]",
+            isRed ? "text-red-200/45" : "text-blue-100/45"
+          )}
+        >
+          Team
+        </div>
+
+        <input
+          value={teamName}
+          onChange={(e) => setTeamName(e.target.value)}
+          className={cx(
+            "w-full border-0 bg-transparent p-0 text-[18px] font-black uppercase leading-none text-white outline-none",
+            "placeholder:text-white/25"
+          )}
+        />
+
+        <div
+          className={cx(
+            "mt-2 h-[2px] w-full rounded-full",
+            isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
+          )}
+        />
       </div>
 
       <div className="space-y-3">
         {players.slice(0, count).map((p: any, i: number) => (
-          <div
-            key={i}
-            className="rounded-2xl border border-white/10 bg-black/40 p-2"
-          >
-            <input
-              value={p.name}
-              onChange={(e) =>
-                updatePlayer(team, i, "name", e.target.value)
-              }
-              className="mb-2 w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
-            />
+          <div key={i} className="rounded-[22px] border border-white/8 bg-black/34 p-3">
+            <div className="mb-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/32">
+              Player {i + 1}
+            </div>
 
             <input
-              type="number"
-              value={p.handicap}
-              onChange={(e) =>
-                updatePlayer(team, i, "handicap", e.target.value)
-              }
-              className="w-full rounded-xl bg-black/55 px-3 py-2 text-sm font-bold text-white outline-none"
+              value={p.name}
+              onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
+              className="w-full border-0 bg-transparent p-0 text-[18px] font-black text-white outline-none placeholder:text-white/25"
             />
+
+            <div className="mt-3 grid grid-cols-[1fr_54px] items-end gap-2">
+              <div>
+                <div className="mb-1 text-[8px] font-black uppercase tracking-[0.2em] text-white/32">
+                  Handicap
+                </div>
+
+                <input
+                  type="number"
+                  value={p.handicap}
+                  onChange={(e) =>
+                    updatePlayer(tone, i, "handicap", e.target.value)
+                  }
+                  className="w-full border-0 bg-transparent p-0 text-[24px] font-black leading-none text-white outline-none"
+                />
+              </div>
+
+              <div
+                className={cx(
+                  "rounded-full px-2 py-1 text-center text-[8px] font-black uppercase tracking-[0.12em]",
+                  isRed ? "bg-[#661716] text-red-100" : "bg-[#2a2e46] text-blue-100"
+                )}
+              >
+                HCP
+              </div>
+            </div>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function Section({ title, children }: any) {
+  return (
+    <div className="mt-4 rounded-[28px] border border-white/10 bg-black/46 p-4 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/45">
+        {title}
+      </div>
+
+      {children}
     </div>
   );
 }
