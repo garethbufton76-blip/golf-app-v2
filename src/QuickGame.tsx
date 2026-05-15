@@ -157,18 +157,14 @@ export default function QuickGame({
           />
         </div>
 
-        <div className={`${panel} p-4`}>
-          <div className="text-[11px] font-black uppercase tracking-[0.26em] text-[#d1c79f]">
+        <div className="mb-5 text-center">
+          <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
             Quick Game
           </div>
 
-          <h1 className="mt-2 text-[34px] font-black uppercase leading-none">
-            Set up & play
+          <h1 className="mt-2 text-[34px] font-black uppercase leading-none text-white">
+            Set Up
           </h1>
-
-          <p className="mt-2 text-sm text-white/65">
-            No days. No weekend admin. Just choose the match and go.
-          </p>
         </div>
 
         <Section title="Players per team">
