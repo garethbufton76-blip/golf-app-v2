@@ -231,7 +231,7 @@ export default function PlayerScorecard({
           </div>
         ) : null}
 
-        {matchScoreLabel ? (
+        {matchScoreLabel && !showingTeamCard ? (
           <MatchScoreWatermark
             label={matchScoreLabel}
             showingTeamCard={showingTeamCard}
@@ -302,7 +302,10 @@ export default function PlayerScorecard({
                   />
 
                   {matchScoreLabel ? (
-                    <div className="mb-1 text-[24px] font-black uppercase leading-none tracking-[0.03em] text-white/18">
+                    <div
+                      className="mb-1 text-[24px] font-black uppercase leading-none tracking-[0.03em] text-white"
+                      style={{ opacity: 0.3 }}
+                    >
                       {matchScoreLabel}
                     </div>
                   ) : null}
@@ -425,17 +428,18 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
       className={
         showingTeamCard
           ? "pointer-events-none absolute left-1/2 top-[222px] z-[14] w-[118px] -translate-x-1/2 text-center"
-          : "pointer-events-none absolute right-7 top-[292px] z-[14] w-[128px] text-right"
+          : "pointer-events-none absolute right-7 top-[238px] z-[14] w-[132px] text-right"
       }
     >
       <div
         className={
           showingTeamCard
-            ? "text-[34px] font-black uppercase leading-none tracking-[-0.03em] text-white/10"
-            : "text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white/10"
+            ? "text-[34px] font-black uppercase leading-none tracking-[-0.03em] text-white"
+            : "text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white"
         }
         style={{
           fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+          opacity: 0.3,
         }}
       >
         {label}
