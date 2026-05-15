@@ -173,7 +173,7 @@ export default function PlayerScorecard({
           />
 
           {/* LARGE TEAM WATERMARK */}
-          <div className="absolute left-[-130px] top-[-42px] opacity-[0.10]">
+          <div className="absolute left-[-130px] top-[-118px] opacity-[0.10]">
             <Logo
               team={team}
               size="h-[390px] w-[390px]"
@@ -182,7 +182,7 @@ export default function PlayerScorecard({
           </div>
 
           {/* SECONDARY TEAM WATERMARK */}
-          <div className="absolute right-[-46px] top-[196px] opacity-[0.15]">
+          <div className="absolute right-[-46px] top-[118px] opacity-[0.15]">
             <Logo
               team={team}
               size="h-[210px] w-[210px]"
