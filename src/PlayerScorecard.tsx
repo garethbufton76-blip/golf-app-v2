@@ -306,7 +306,7 @@ export default function PlayerScorecard({
 
                   {matchScoreLabel ? (
                     <div
-                      className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[18px] font-black uppercase leading-none tracking-[0.01em] text-white"
+                      className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white"
                       style={{ opacity: 0.3 }}
                     >
                       {matchScoreLabel}
@@ -455,7 +455,7 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
       className={
         showingTeamCard
           ? "pointer-events-none absolute left-1/2 top-[222px] z-[14] w-[132px] -translate-x-1/2 text-center"
-          : "pointer-events-none absolute right-7 top-[238px] z-[14] w-[150px] text-right"
+          : "pointer-events-none absolute right-7 top-[286px] z-[14] w-[150px] text-right"
       }
     >
       <div
