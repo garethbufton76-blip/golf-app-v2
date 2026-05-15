@@ -210,7 +210,7 @@ export default function PlayerScorecard({
           alt="DUEL"
           className={
             showingTeamCard
-              ? "absolute left-1/2 top-7 z-20 h-[54px] -translate-x-1/2 object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]"
+              ? "absolute left-1/2 top-7 z-20 h-[34px] -translate-x-1/2 object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]"
               : "absolute left-5 top-7 z-20 h-[34px] object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.65)]"
           }
         />
@@ -303,7 +303,7 @@ export default function PlayerScorecard({
 
                   {matchScoreLabel ? (
                     <div
-                      className="mb-1 text-[24px] font-black uppercase leading-none tracking-[0.03em] text-white"
+                      className="mb-1 whitespace-nowrap text-[20px] font-black uppercase leading-none tracking-[0.02em] text-white"
                       style={{ opacity: 0.3 }}
                     >
                       {matchScoreLabel}
@@ -442,7 +442,23 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
           opacity: 0.3,
         }}
       >
-        {label}
+        {showingTeamCard ? (
+          label
+        ) : (
+          <>
+            <div className="whitespace-nowrap">
+              {label
+                .replace(/\s?(\d+UP|ALL SQUARE|AS)$/i, "")
+                .trim()}
+            </div>
+
+            <div>
+              {(
+                label.match(/(\d+UP|ALL SQUARE|AS)$/i) || []
+              )[0] || ""}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -712,3 +728,4 @@ function Legend({
     </div>
   );
 }
+
