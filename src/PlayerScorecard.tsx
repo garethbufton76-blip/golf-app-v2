@@ -31,6 +31,9 @@ export default function PlayerScorecard({
       isBlue ? "Blue" : "Red"
     ] || "";
 
+  const showStableford =
+    /stableford|stb|points/i.test(day.format || "");
+
   const front = playerScorecardRows(
     p,
     team,
@@ -272,6 +275,7 @@ export default function PlayerScorecard({
               rows={front}
               accent={accent}
               scoreMode={scoreMode}
+              showStableford={showStableford}
             />
 
             <NineScoreTable
@@ -279,6 +283,7 @@ export default function PlayerScorecard({
               rows={back}
               accent={accent}
               scoreMode={scoreMode}
+              showStableford={showStableford}
             />
 
             {/* TOTALS */}
@@ -393,6 +398,7 @@ function NineScoreTable({
   rows,
   accent,
   scoreMode,
+  showStableford,
 }: any) {
 
   const parTotal = rows.reduce(
@@ -503,24 +509,26 @@ function NineScoreTable({
       </div>
 
       {/* STB */}
-      <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] bg-[#171717] px-1 py-1.5 text-center text-[10px] font-black text-[#d1a354]">
+      {showStableford && (
+        <div className="grid grid-cols-[42px_repeat(9,1fr)_36px] bg-[#171717] px-1 py-1.5 text-center text-[10px] font-black text-[#d1a354]">
 
-        <div className="text-left uppercase">
-          STB
-        </div>
-
-        {rows.map((h: any) => (
-          <div key={h.hole}>
-            {h.points == null
-              ? "-"
-              : h.points}
+          <div className="text-left uppercase">
+            STB
           </div>
-        ))}
 
-        <div>
-          {pointsTotal || "-"}
+          {rows.map((h: any) => (
+            <div key={h.hole}>
+              {h.points == null
+                ? "-"
+                : h.points}
+            </div>
+          ))}
+
+          <div>
+            {pointsTotal || "-"}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
