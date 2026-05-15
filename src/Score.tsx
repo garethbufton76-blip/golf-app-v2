@@ -426,6 +426,7 @@ export default function Score({
                 getTeeShotCount={getTeeShotCount}
                 setCardPlayer={setCardPlayer}
                 matchScore={displayMain}
+                matchLeader={result.leader}
               />
 
               <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
@@ -440,6 +441,7 @@ export default function Score({
                 getTeeShotCount={getTeeShotCount}
                 setCardPlayer={setCardPlayer}
                 matchScore={displayMain}
+                matchLeader={result.leader}
               />
             </div>
 
@@ -654,6 +656,7 @@ function TeamPlayers({
   getTeeShotCount,
   setCardPlayer,
   matchScore,
+  matchLeader,
 }: any) {
   const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
   const logoSize =
@@ -664,7 +667,7 @@ function TeamPlayers({
       {players.map((p: any, i: number) => (
         <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
           <button
-            onClick={() => setCardPlayer({ team, p, players, matchScore })}
+            onClick={() => setCardPlayer({ team, p, players, matchScore, matchLeader })}
             className="flex h-[64px] items-center justify-center"
           >
             <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
