@@ -98,7 +98,10 @@ export default function App() {
       ? TEAM.blue.bg
       : "from-[#092018] via-[#101010] to-black";
 
-  const bgImage = BACKGROUND_IMAGES[screen] || BACKGROUND_IMAGES.home;
+  const bgImage =
+    mode === "quick"
+      ? BACKGROUND_IMAGES.admin || BACKGROUND_IMAGES.home
+      : BACKGROUND_IMAGES[screen] || BACKGROUND_IMAGES.home;
 
   const openMatch = (i: number) => {
     setSelectedMatch(i);
@@ -138,24 +141,6 @@ export default function App() {
     );
   }
 
-  if (mode === "quick") {
-    return (
-      <QuickGame
-        setScreen={handleQuickScreen}
-        setPlayers={setPlayers}
-        setTeamNames={setTeamNames}
-        setRoster={setRoster}
-        setDayConfigs={setDayConfigs}
-        setActiveDay={setActiveDay}
-        setStartMatch={setSelectedMatch}
-        setStates={setStates}
-        setScorecards={setScorecards}
-        setEventStarted={setEventStarted}
-        setEventLocked={setEventLocked}
-      />
-    );
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
       <div
@@ -175,7 +160,23 @@ export default function App() {
         <div className="absolute inset-0 bg-black/15" />
 
         <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
-          {screen === "home" && eventStarted && (
+          {mode === "quick" && (
+            <QuickGame
+              setScreen={handleQuickScreen}
+              setPlayers={setPlayers}
+              setTeamNames={setTeamNames}
+              setRoster={setRoster}
+              setDayConfigs={setDayConfigs}
+              setActiveDay={setActiveDay}
+              setStartMatch={setSelectedMatch}
+              setStates={setStates}
+              setScorecards={setScorecards}
+              setEventStarted={setEventStarted}
+              setEventLocked={setEventLocked}
+            />
+          )}
+
+          {mode !== "quick" && screen === "home" && eventStarted && (
             <Home
               setScreen={setScreen}
               dayConfigs={dayConfigs}
@@ -190,7 +191,7 @@ export default function App() {
             />
           )}
 
-          {screen === "rosterP" && (
+          {mode !== "quick" && screen === "rosterP" && (
             <Roster
               team="Red"
               setScreen={setScreen}
@@ -209,7 +210,7 @@ export default function App() {
             />
           )}
 
-          {screen === "rosterB" && (
+          {mode !== "quick" && screen === "rosterB" && (
             <Roster
               team="Blue"
               setScreen={setScreen}
@@ -228,7 +229,7 @@ export default function App() {
             />
           )}
 
-          {screen === "score" && eventStarted && (
+          {mode !== "quick" && screen === "score" && eventStarted && (
             <Score
               setScreen={setScreen}
               dayConfigs={dayConfigs}
@@ -247,7 +248,7 @@ export default function App() {
             />
           )}
 
-          {(screen === "admin" || !eventStarted) && (
+          {mode !== "quick" && (screen === "admin" || !eventStarted) && (
             <Admin
               setScreen={setScreen}
               players={players}
@@ -277,7 +278,7 @@ export default function App() {
             />
           )}
 
-          {screen === "home" && eventStarted && (
+          {mode !== "quick" && screen === "home" && eventStarted && (
             <button
               onClick={() => setScreen("admin")}
               className="absolute left-4 top-4"
@@ -290,3 +291,4 @@ export default function App() {
     </div>
   );
 }
+
