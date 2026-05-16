@@ -14,7 +14,6 @@ import {
   TEAM,
   getResult,
 } from "./data";
-import PlayerScorecard from "./PlayerScorecard";
 
 export default function Score({
   setScreen,
@@ -425,7 +424,6 @@ export default function Score({
                 isAmbrose={isAmbrose}
                 getTeeShotCount={getTeeShotCount}
                 setCardPlayer={setCardPlayer}
-                matchScore={displayMain}
               />
 
               <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
@@ -439,7 +437,6 @@ export default function Score({
                 isAmbrose={isAmbrose}
                 getTeeShotCount={getTeeShotCount}
                 setCardPlayer={setCardPlayer}
-                matchScore={displayMain}
               />
             </div>
 
@@ -485,15 +482,15 @@ export default function Score({
       )}
 
       {selectedHole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-          <div className="w-full max-w-[380px] rounded-[26px] border border-[#d1c79f]/30 bg-black/95 p-4 shadow-2xl backdrop-blur-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/82 p-3">
+          <div className="w-full max-w-[95vw] rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[10px] tracking-[0.24em] text-white/50">
                   SCORE HOLE
                 </div>
 
-                <div className="mt-1 text-[16px] font-black tracking-[0.08em] text-white">
+                <div className="mt-1 text-[22px] font-black tracking-[0.04em] text-white">
                   Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
                   {selectedHole.si}
                 </div>
@@ -501,46 +498,44 @@ export default function Score({
 
               <button
                 onClick={saveHole}
-                className="rounded-full bg-[#d1c79f] px-4 py-2 text-[12px] font-black text-black"
+                className="rounded-full bg-[#d1c79f] px-6 py-3 text-[15px] font-black text-black"
               >
                 Save
               </button>
             </div>
 
             {isBetterBall ? (
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-3">
-                  {match.red.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`red-${i}`}
-                      team="red"
-                      players={[p]}
-                      score={draft[`red_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                    />
-                  ))}
-                </div>
+              <div className="grid grid-cols-2 gap-4">
+                {match.red.map((p: any, i: number) => (
+                  <ScoreBox
+                    key={`red-${i}`}
+                    team="red"
+                    players={[p]}
+                    score={draft[`red_${i}`]}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
+                    }
+                    par={selectedHole.par}
+                    compact={match.red.length + match.blue.length >= 4}
+                  />
+                ))}
 
-                <div className="space-y-3">
-                  {match.blue.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`blue-${i}`}
-                      team="blue"
-                      players={[p]}
-                      score={draft[`blue_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                    />
-                  ))}
-                </div>
+                {match.blue.map((p: any, i: number) => (
+                  <ScoreBox
+                    key={`blue-${i}`}
+                    team="blue"
+                    players={[p]}
+                    score={draft[`blue_${i}`]}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
+                    }
+                    par={selectedHole.par}
+                    compact={match.red.length + match.blue.length >= 4}
+                  />
+                ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <ScoreBox
                   team="red"
                   players={match.red}
@@ -653,7 +648,6 @@ function TeamPlayers({
   isAmbrose,
   getTeeShotCount,
   setCardPlayer,
-  matchScore,
 }: any) {
   const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
   const logoSize =
@@ -664,7 +658,7 @@ function TeamPlayers({
       {players.map((p: any, i: number) => (
         <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
           <button
-            onClick={() => setCardPlayer({ team, p, players, matchScore })}
+            onClick={() => setCardPlayer({ team, p })}
             className="flex h-[64px] items-center justify-center"
           >
             <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
@@ -698,53 +692,525 @@ function TeamPlayers({
 }
 
 
-function ScoreBox({ team, players, score, setScore, par }: any) {
-  const namesText =
-    players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
+function PlayerScorecard({
+  cardPlayer,
+  close,
+  day,
+  teamLogos,
+  playerScorecardRows,
+}: any) {
+  const { p, team } = cardPlayer;
+
+  const isBlue = team === "blue";
+
+  const accent = isBlue ? "#2f63d6" : "#c62828";
+  const darkAccent = isBlue ? "#071631" : "#2b0508";
+
+  const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
+
+  const teamLogo =
+    teamLogos?.[isBlue ? "Blue" : "Red"] || "";
+
+  const front = playerScorecardRows(
+    p,
+    team,
+    1,
+    9
+  );
+
+  const back = playerScorecardRows(
+    p,
+    team,
+    10,
+    18
+  );
+
+  const all = [...front, ...back];
+
+  const parTotal = all.reduce(
+    (sum, h) => sum + Number(h.par || 0),
+    0
+  );
+
+  const grossTotal = all.reduce(
+    (sum, h) =>
+      sum +
+      (h.gross == null ? 0 : Number(h.gross)),
+    0
+  );
+
+  const pointsTotal = all.reduce(
+    (sum, h) =>
+      sum +
+      (h.points == null
+        ? 0
+        : Number(h.points)),
+    0
+  );
+
+  const scoreVsPar = grossTotal
+    ? grossTotal - parTotal
+    : null;
+
+  const scoreLabel =
+    scoreVsPar == null
+      ? "-"
+      : scoreVsPar === 0
+      ? "E"
+      : scoreVsPar > 0
+      ? `+${scoreVsPar}`
+      : `${scoreVsPar}`;
 
   return (
-    <div className="h-[146px] overflow-hidden rounded-[20px] border border-[#d1c79f]/20 bg-black/55 backdrop-blur-xl">
-      <div
-        className={cx(
-          "border-b px-2 py-1.5 text-center text-[10px] font-semibold tracking-[0.14em]",
-          team === "red"
-            ? "bg-[#6f2a33] text-[#f1dada]"
-            : "bg-[#3f56a0] text-[#d6e1ff]"
-        )}
-      >
-        <span className="block truncate">{namesText}</span>
-      </div>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
+      <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[34px] border border-white/10 bg-black shadow-2xl">
+        <div className="absolute inset-0">
+          {p.photo ? (
+            <img
+              src={p.photo}
+              alt=""
+              className="h-full w-full object-cover object-top scale-[1.04] -translate-y-[10%]"
+            />
+          ) : (
+            <div
+              className="h-full w-full"
+              style={{
+                background: `
+                  radial-gradient(circle at 70% 10%, ${accent}55, transparent 30%),
+                  linear-gradient(180deg, ${darkAccent}, #020202 72%)
+                `,
+              }}
+            />
+          )}
 
-      <div className="relative h-[92px]">
-        <button
-          onClick={() => setScore(Math.max(0, score - 1))}
-          className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-xl text-white"
-        >
-          −
-        </button>
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/90" />
 
-        <div className="flex h-full items-center justify-center text-[58px] font-extrabold">
-          {score === par + 4 ? "P" : score}
+          <div className="absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-black via-black/96 to-transparent" />
+
+          <div
+            className="absolute bottom-0 left-0 right-0 h-[42%] opacity-[0.12]"
+            style={{
+              backgroundImage: `
+                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.18) 0px, rgba(255,255,255,0.04) 12px, transparent 13px),
+                radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.03) 10px, transparent 11px)
+              `,
+              backgroundSize: "80px 80px",
+            }}
+          />
+
+          <div className="absolute right-[-40px] top-[80px] opacity-[0.10]">
+            <Logo
+              team={team}
+              size="h-[220px] w-[220px]"
+              src={teamLogo}
+            />
+          </div>
         </div>
 
         <button
-          onClick={() => setScore(Math.min(par + 4, score + 1))}
-          className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/65 text-xl text-white"
+          onClick={close}
+          className="absolute left-4 top-4 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-black/50 text-[28px] text-white backdrop-blur-xl"
         >
-          +
+          ×
         </button>
-      </div>
 
-      <div
-        className={cx(
-          "px-2 py-1.5 text-center text-[10px] font-semibold tracking-[0.16em]",
-          team === "red"
-            ? "bg-[#6f2a33] text-[#f1dada]"
-            : "bg-[#3f56a0] text-[#d6e1ff]"
-        )}
-      >
-        {stableford(score, par, 0)} POINTS
+        <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-4">
+          <div className="mb-5">
+            <div className="mb-3">
+              <Logo
+                team={team}
+                size="h-24 w-24"
+                src={teamLogo}
+              />
+            </div>
+
+            <div
+              className="text-[46px] font-black uppercase leading-[0.84] tracking-[-0.06em] text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.85)]"
+              style={{
+                fontFamily:
+                  'Impact, "Arial Narrow", "Arial Black", sans-serif',
+              }}
+            >
+              {String(p.name || "")
+                .split(" ")
+                .slice(0, 2)
+                .map((part) => (
+                  <div key={part}>{part}</div>
+                ))}
+            </div>
+
+            <div
+              className="mt-4 h-[2px] w-[120px]"
+              style={{
+                backgroundColor: accent,
+              }}
+            />
+
+            <div className="mt-4 grid grid-cols-2 gap-y-2 text-[11px] font-black uppercase tracking-[0.16em] text-white">
+              <div>
+                {day.label.toUpperCase()}
+              </div>
+
+              <div>
+                {(day.course ||
+                  "ST MICHAELS").toUpperCase()}
+              </div>
+
+              <div>
+                {day.tee.toUpperCase()} TEE
+              </div>
+
+              <div>
+                HCP {p.handicap}
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-[24px] border border-white/10 bg-black/88 shadow-[0_30px_60px_rgba(0,0,0,0.75)] backdrop-blur-xl">
+            <NineScoreTable
+              title="FRONT"
+              rows={front}
+              accent={accent}
+            />
+
+            <NineScoreTable
+              title="BACK"
+              rows={back}
+              accent={accent}
+            />
+
+            <div
+              className="grid grid-cols-4 items-center px-3 py-3 text-center text-white"
+              style={{
+                backgroundColor: accent,
+              }}
+            >
+              <div>
+                <div className="text-[9px] font-black tracking-[0.18em] opacity-65">
+                  PAR
+                </div>
+
+                <div className="text-[28px] font-black leading-none">
+                  {parTotal}
+                </div>
+              </div>
+
+              <div className="border-l border-white/20">
+                <div className="text-[9px] font-black tracking-[0.18em] opacity-65">
+                  SCORE
+                </div>
+
+                <div className="text-[28px] font-black leading-none">
+                  {grossTotal || "-"}
+                </div>
+              </div>
+
+              <div className="border-l border-white/20">
+                <div className="text-[9px] font-black tracking-[0.18em] opacity-65">
+                  STB
+                </div>
+
+                <div className="text-[28px] font-black leading-none">
+                  {pointsTotal || "-"}
+                </div>
+              </div>
+
+              <div className="border-l border-white/20">
+                <div className="text-[9px] font-black tracking-[0.18em] opacity-65">
+                  TO PAR
+                </div>
+
+                <div className="text-[28px] font-black leading-none">
+                  {scoreLabel}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-2 bg-black px-3 py-3 text-[8px] font-bold uppercase tracking-[0.12em] text-white/70">
+              <Legend icon="◎" label="Eagle+" />
+              <Legend icon="○" label="Birdie" />
+              <Legend icon="□" label="Bogey" />
+              <Legend icon="▣" label="Double+" />
+            </div>
+          </div>
+
+          <div className="mt-3 text-center text-[12px] font-black uppercase tracking-[0.24em] text-white">
+            {teamName} • {day.format}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+function NineScoreTable({
+  title,
+  rows,
+  accent,
+}: any) {
+  const parTotal = rows.reduce(
+    (sum: number, h: any) =>
+      sum + Number(h.par || 0),
+    0
+  );
+
+  const grossTotal = rows.reduce(
+    (sum: number, h: any) =>
+      sum +
+      (h.gross == null ? 0 : Number(h.gross)),
+    0
+  );
+
+  const pointsTotal = rows.reduce(
+    (sum: number, h: any) =>
+      sum +
+      (h.points == null
+        ? 0
+        : Number(h.points)),
+    0
+  );
+
+  return (
+    <div>
+      <div
+        className="grid grid-cols-[58px_repeat(9,1fr)_44px] px-2 py-2 text-center text-[9px] font-black uppercase text-white"
+        style={{
+          backgroundColor: accent,
+        }}
+      >
+        <div>Hole</div>
+
+        {rows.map((h: any) => (
+          <div key={h.hole}>{h.hole}</div>
+        ))}
+
+        <div>{title}</div>
+      </div>
+
+      <div className="grid grid-cols-[58px_repeat(9,1fr)_44px] border-b border-white/5 bg-[#262626] px-2 py-3 text-center text-[13px] font-black text-white/55">
+        <div className="text-left uppercase">
+          Par
+        </div>
+
+        {rows.map((h: any) => (
+          <div key={h.hole}>{h.par}</div>
+        ))}
+
+        <div>{parTotal}</div>
+      </div>
+
+      <div className="grid grid-cols-[58px_repeat(9,1fr)_44px] border-b border-white/5 bg-[#1d1d1d] px-2 py-3 text-center text-[13px] font-black text-white">
+        <div className="text-left uppercase">
+          Score
+        </div>
+
+        {rows.map((h: any) => (
+          <div
+            key={h.hole}
+            className="flex items-center justify-center"
+          >
+            <ScoreMark
+              gross={h.gross}
+              par={h.par}
+            />
+          </div>
+        ))}
+
+        <div>{grossTotal || "-"}</div>
+      </div>
+
+      <div className="grid grid-cols-[58px_repeat(9,1fr)_44px] bg-[#171717] px-2 py-3 text-center text-[13px] font-black text-[#d1a354]">
+        <div className="text-left uppercase">
+          STB
+        </div>
+
+        {rows.map((h: any) => (
+          <div key={h.hole}>
+            {h.points == null
+              ? "-"
+              : h.points}
+          </div>
+        ))}
+
+        <div>{pointsTotal || "-"}</div>
+      </div>
+    </div>
+  );
+}
+
+function ScoreMark({
+  gross,
+  par,
+}: any) {
+  if (gross == null)
+    return <span>-</span>;
+
+  const diff =
+    Number(gross) - Number(par);
+
+  if (diff <= -2) {
+    return (
+      <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-red-500 text-[13px] font-black text-white shadow-[0_0_12px_rgba(239,68,68,0.45)]">
+        {gross}
+      </span>
+    );
+  }
+
+  if (diff === -1) {
+    return (
+      <span className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-red-500 text-[13px] font-black text-white">
+        {gross}
+      </span>
+    );
+  }
+
+  if (diff === 1) {
+    return (
+      <span className="flex h-7 w-7 items-center justify-center border-2 border-white/55 text-[13px] font-black text-white">
+        {gross}
+      </span>
+    );
+  }
+
+  if (diff >= 2) {
+    return (
+      <span className="flex h-7 w-7 items-center justify-center border-4 border-white/55 text-[13px] font-black text-white">
+        {gross}
+      </span>
+    );
+  }
+
+  return <span>{gross}</span>;
+}
+
+function Legend({
+  icon,
+  label,
+}: any) {
+  return (
+    <div className="flex items-center justify-center gap-1">
+      <span className="text-red-500">
+        {icon}
+      </span>
+
+      <span>{label}</span>
+    </div>
+  );
+}
+
+
+function ScoreBox({ team, players, score, setScore, par, compact = false }: any) {
+  const namesText =
+    players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
+
+  const points = stableford(score, par, 0);
+  const isRed = team === "red";
+
+  return (
+    <div
+      className={cx(
+        "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
+        compact
+          ? "min-h-[260px] rounded-[28px]"
+          : "min-h-[420px] rounded-[34px]",
+        isRed
+          ? "border-red-400/35 bg-gradient-to-br from-[#a90820] via-[#5c000c] to-[#170005]"
+          : "border-blue-400/35 bg-gradient-to-br from-[#2360d8] via-[#06296f] to-[#010816]"
+      )}
+    >
+      <div
+        className={cx(
+          "absolute right-[-48px] top-[-44px] h-[150%] w-[48%] rotate-[14deg] opacity-20",
+          isRed ? "bg-white" : "bg-[#9fc2ff]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "absolute inset-0 opacity-45",
+          isRed
+            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.20),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "relative z-10 flex h-full flex-col",
+          compact ? "p-3" : "p-4"
+        )}
+      >
+        <div className={cx("text-center", compact ? "mb-3" : "mb-4")}>
+          <div
+            className={cx(
+              "truncate font-black uppercase tracking-[0.08em] text-white",
+              compact ? "text-[16px]" : "text-[22px]"
+            )}
+          >
+            {namesText}
+          </div>
+        </div>
+
+        <div
+          className={cx(
+            "relative flex flex-1 items-center justify-center rounded-[28px] bg-black/34 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
+            compact ? "min-h-[170px]" : "min-h-[275px]"
+          )}
+        >
+          <button
+            type="button"
+            onClick={() => setScore(Math.max(0, score - 1))}
+            className={cx(
+              "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
+              compact
+                ? "left-3 bottom-6 h-[54px] w-[54px] text-[38px]"
+                : "left-4 bottom-8 h-[72px] w-[72px] text-[52px]",
+              isRed
+                ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
+                : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
+            )}
+          >
+            −
+          </button>
+
+          <div
+            className={cx(
+              "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
+              compact ? "text-[104px]" : "text-[160px]"
+            )}
+          >
+            {score === par + 4 ? "P" : score}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setScore(Math.min(par + 4, score + 1))}
+            className={cx(
+              "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
+              compact
+                ? "right-3 bottom-6 h-[54px] w-[54px] text-[38px]"
+                : "right-4 bottom-8 h-[72px] w-[72px] text-[52px]",
+              isRed
+                ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
+                : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
+            )}
+          >
+            +
+          </button>
+        </div>
+
+        <div className={cx("text-center", compact ? "pt-3" : "pt-5")}>
+          <div
+            className={cx(
+              "font-black uppercase tracking-[0.08em] text-white",
+              compact ? "text-[16px]" : "text-[26px]"
+            )}
+          >
+            {points} {points === 1 ? "POINT" : "POINTS"}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
