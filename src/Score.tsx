@@ -482,15 +482,15 @@ export default function Score({
       )}
 
       {selectedHole && (
-        <div className="absolute inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/82 p-3 pt-5">
+        <div className="absolute left-0 right-0 top-[252px] bottom-[118px] z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3">
           <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-2 flex items-start justify-between gap-3">
               <div>
-                <div className="text-[10px] tracking-[0.24em] text-white/50">
+                <div className="text-[9px] tracking-[0.24em] text-white/50">
                   SCORE HOLE
                 </div>
 
-                <div className="mt-1 text-[22px] font-black tracking-[0.04em] text-white">
+                <div className="mt-0.5 text-[20px] font-black tracking-[0.04em] text-white">
                   Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
                   {selectedHole.si}
                 </div>
@@ -498,7 +498,7 @@ export default function Score({
 
               <button
                 onClick={saveHole}
-                className="rounded-full bg-[#d1c79f] px-6 py-3 text-[15px] font-black text-black"
+                className="rounded-full bg-[#d1c79f] px-5 py-2.5 text-[14px] font-black text-black"
               >
                 Save
               </button>
@@ -1112,7 +1112,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
           ? "min-h-[225px] rounded-[24px]"
-          : "min-h-[300px] rounded-[28px]",
+          : "min-h-[245px] rounded-[28px]",
         isRed
           ? "border-red-400/35 bg-gradient-to-br from-[#a90820] via-[#5c000c] to-[#170005]"
           : "border-blue-400/35 bg-gradient-to-br from-[#2360d8] via-[#06296f] to-[#010816]"
@@ -1154,7 +1154,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         <div
           className={cx(
             "relative flex flex-1 items-center justify-center rounded-[28px] bg-black/34 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-            compact ? "min-h-[145px]" : "min-h-[205px]"
+            compact ? "min-h-[145px]" : "min-h-[160px]"
           )}
         >
           <button
@@ -1163,8 +1163,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
             className={cx(
               "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
               compact
-                ? "left-2 bottom-5 h-[42px] w-[42px] text-[30px]"
-                : "left-3 bottom-6 h-[50px] w-[50px] text-[38px]",
+                ? "left-2 bottom-5 h-[42px] w-[66px] text-[30px]"
+                : "left-3 bottom-6 h-[48px] w-[96px] text-[38px]",
               isRed
                 ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
                 : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
@@ -1176,7 +1176,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
           <div
             className={cx(
               "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[82px]" : "text-[112px]"
+              compact ? "text-[82px]" : "text-[104px]"
             )}
           >
             {score === par + 4 ? "P" : score}
@@ -1188,8 +1188,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
             className={cx(
               "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
               compact
-                ? "right-2 bottom-5 h-[42px] w-[42px] text-[30px]"
-                : "right-3 bottom-6 h-[50px] w-[50px] text-[38px]",
+                ? "right-2 bottom-5 h-[42px] w-[66px] text-[30px]"
+                : "right-3 bottom-6 h-[48px] w-[96px] text-[38px]",
               isRed
                 ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
                 : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
