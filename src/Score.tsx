@@ -503,10 +503,10 @@ export default function Score({
         <div
           className={cx(
             "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
-            isBetterBall ? "top-3 bottom-[118px]" : "top-[252px] bottom-[118px]"
+            isBetterBall ? "top-3 bottom-3" : "top-[252px] bottom-[118px]"
           )}
         >
-          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
+          <div className={cx("w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl", isBetterBall && "min-h-full")}>
             <div className="mb-2 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[9px] tracking-[0.24em] text-white/50">
@@ -528,7 +528,7 @@ export default function Score({
             </div>
 
             {isBetterBall ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 pb-1">
                 {scoringRedPlayers.map((p: any, i: number) => (
                   <ScoreBox
                     key={`red-${i}`}
@@ -1134,7 +1134,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
       className={cx(
         "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
-          ? "min-h-[215px] rounded-[24px]"
+          ? "min-h-[245px] rounded-[24px]"
           : "min-h-[245px] rounded-[28px]",
         isRed
           ? "border-red-400/35 bg-gradient-to-br from-[#b40b22] via-[#65000d] to-[#170005]"
@@ -1172,13 +1172,13 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         <div
           className={cx(
             "relative flex flex-1 flex-col items-center justify-center rounded-[24px] bg-black/28 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-            compact ? "min-h-[135px] px-2 py-2" : "min-h-[160px] px-3 py-2"
+            compact ? "min-h-[160px] px-2 py-2" : "min-h-[160px] px-3 py-2"
           )}
         >
           <div
             className={cx(
               "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[78px]" : "text-[98px]"
+              compact ? "text-[92px]" : "text-[98px]"
             )}
           >
             {score === par + 4 ? "P" : score}
