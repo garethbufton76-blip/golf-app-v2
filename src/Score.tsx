@@ -56,6 +56,24 @@ export default function Score({
   const stateKey = keyFor(activeDay, activeMatch);
   const holes = states[stateKey] || blankHoles();
   const match = playersForMatch(roster, players, day.format, activeMatch);
+
+  const rosterRed = roster?.Red || roster?.red || [];
+  const rosterBlue = roster?.Blue || roster?.blue || [];
+
+  const pairStart = activeMatch * 2;
+
+  const scoringRedPlayers =
+    isBetterBall && match.red.length < 2
+      ? rosterRed.slice(pairStart, pairStart + 2)
+      : match.red;
+
+  const scoringBluePlayers =
+    isBetterBall && match.blue.length < 2
+      ? rosterBlue.slice(pairStart, pairStart + 2)
+      : match.blue;
+
+  const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
+
   const result = getResult(holes);
 
   const nextHoleNumber =
@@ -134,7 +152,7 @@ export default function Score({
   }
 
   function holeShotDots(detail: any) {
-    const allPlayers = [...match.red, ...match.blue];
+    const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
 
     if (allPlayers.length < 2) return { red: false, blue: false };
 
@@ -174,13 +192,13 @@ export default function Score({
     const nextScorecards: any = { ...scorecards };
 
     if (isBetterBall) {
-      const allPlayers = [...match.red, ...match.blue];
+      const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
 
       const lowMarker = Math.min(
         ...allPlayers.map((p: any) => Number(p.handicap || 0))
       );
 
-      const redNets = match.red.map((p: any, i: number) => {
+      const redNets = scoringRedPlayers.map((p: any, i: number) => {
         const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
 
         const strokeCount = shots(
@@ -198,7 +216,7 @@ export default function Score({
         return gross - strokeCount;
       });
 
-      const blueNets = match.blue.map((p: any, i: number) => {
+      const blueNets = scoringBluePlayers.map((p: any, i: number) => {
         const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
 
         const strokeCount = shots(
@@ -482,7 +500,12 @@ export default function Score({
       )}
 
       {selectedHole && (
-        <div className="absolute left-0 right-0 top-[252px] bottom-[118px] z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3">
+        <div
+          className={cx(
+            "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
+            isBetterBall ? "top-3 bottom-[118px]" : "top-[252px] bottom-[118px]"
+          )}
+        >
           <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
             <div className="mb-2 flex items-start justify-between gap-3">
               <div>
@@ -506,7 +529,7 @@ export default function Score({
 
             {isBetterBall ? (
               <div className="grid grid-cols-2 gap-3">
-                {match.red.map((p: any, i: number) => (
+                {scoringRedPlayers.map((p: any, i: number) => (
                   <ScoreBox
                     key={`red-${i}`}
                     team="red"
@@ -516,11 +539,11 @@ export default function Score({
                       setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
                     }
                     par={selectedHole.par}
-                    compact={match.red.length + match.blue.length >= 4}
+                    compact={scoringPlayerCount >= 4}
                   />
                 ))}
 
-                {match.blue.map((p: any, i: number) => (
+                {scoringBluePlayers.map((p: any, i: number) => (
                   <ScoreBox
                     key={`blue-${i}`}
                     team="blue"
@@ -530,7 +553,7 @@ export default function Score({
                       setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
                     }
                     par={selectedHole.par}
-                    compact={match.red.length + match.blue.length >= 4}
+                    compact={scoringPlayerCount >= 4}
                   />
                 ))}
               </div>
@@ -1111,7 +1134,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
       className={cx(
         "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
-          ? "min-h-[225px] rounded-[24px]"
+          ? "min-h-[215px] rounded-[24px]"
           : "min-h-[245px] rounded-[28px]",
         isRed
           ? "border-red-400/35 bg-gradient-to-br from-[#b40b22] via-[#65000d] to-[#170005]"
@@ -1149,7 +1172,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         <div
           className={cx(
             "relative flex flex-1 flex-col items-center justify-center rounded-[24px] bg-black/28 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-            compact ? "min-h-[145px] px-2 py-2" : "min-h-[160px] px-3 py-2"
+            compact ? "min-h-[135px] px-2 py-2" : "min-h-[160px] px-3 py-2"
           )}
         >
           <div
