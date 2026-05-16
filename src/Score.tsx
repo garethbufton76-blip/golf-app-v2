@@ -503,10 +503,10 @@ export default function Score({
         <div
           className={cx(
             "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
-            isBetterBall ? "top-3 bottom-[52px]" : "top-[252px] bottom-[118px]"
+            isBetterBall ? "top-3 bottom-[22px]" : "top-[252px] bottom-[118px]"
           )}
         >
-          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/92 p-3 shadow-2xl backdrop-blur-xl">
+          <div className={cx("w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/92 p-3 shadow-2xl backdrop-blur-xl", isBetterBall && "min-h-full")}>
             <div className="mb-2 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[9px] tracking-[0.24em] text-white/50">
@@ -1138,7 +1138,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
       className={cx(
         "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
-          ? "min-h-[248px] rounded-[24px]"
+          ? "min-h-[258px] rounded-[24px]"
           : "min-h-[245px] rounded-[28px]",
         isRed
           ? "border-[#c94a4d]/35 bg-gradient-to-br from-[#9e2b32] via-[#5b1519] to-[#170607]"
@@ -1175,8 +1175,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
 
         <div
           className={cx(
-            "relative flex flex-1 flex-col items-center justify-center rounded-[24px] bg-black/72 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]",
-            compact ? "min-h-[166px] px-2 py-2" : "min-h-[160px] px-3 py-2"
+            "relative z-20 flex flex-1 flex-col items-center justify-center rounded-[24px] bg-[#020407]/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_10px_22px_rgba(0,0,0,0.35)]",
+            compact ? "min-h-[176px] px-2 py-2" : "min-h-[160px] px-3 py-2"
           )}
         >
           <div
@@ -1238,3 +1238,4 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
     </div>
   );
 }
+
