@@ -1114,8 +1114,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
           ? "min-h-[225px] rounded-[24px]"
           : "min-h-[245px] rounded-[28px]",
         isRed
-          ? "border-red-400/35 bg-gradient-to-br from-[#a90820] via-[#5c000c] to-[#170005]"
-          : "border-blue-400/35 bg-gradient-to-br from-[#2360d8] via-[#06296f] to-[#010816]"
+          ? "border-red-400/35 bg-gradient-to-br from-[#b40b22] via-[#65000d] to-[#170005]"
+          : "border-blue-400/35 bg-gradient-to-br from-[#2867e7] via-[#073080] to-[#010816]"
       )}
     >
       <div
@@ -1129,21 +1129,16 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         className={cx(
           "absolute inset-0 opacity-45",
           isRed
-            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.20),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
-            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
         )}
       />
 
-      <div
-        className={cx(
-          "relative z-10 flex h-full flex-col",
-          compact ? "p-2.5" : "p-3"
-        )}
-      >
-        <div className={cx("text-center", compact ? "mb-2" : "mb-3")}>
+      <div className={cx("relative z-10 flex h-full flex-col", compact ? "p-2.5" : "p-3")}>
+        <div className={cx("text-center", compact ? "mb-2" : "mb-2")}>
           <div
             className={cx(
-              "truncate font-black uppercase tracking-[0.08em] text-white",
+              "truncate font-black uppercase tracking-[0.12em] text-white",
               compact ? "text-[13px]" : "text-[16px]"
             )}
           >
@@ -1153,56 +1148,59 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
 
         <div
           className={cx(
-            "relative flex flex-1 items-center justify-center rounded-[28px] bg-black/34 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-            compact ? "min-h-[145px]" : "min-h-[160px]"
+            "relative flex flex-1 flex-col items-center justify-center rounded-[24px] bg-black/28 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
+            compact ? "min-h-[145px] px-2 py-2" : "min-h-[160px] px-3 py-2"
           )}
         >
-          <button
-            type="button"
-            onClick={() => setScore(Math.max(0, score - 1))}
-            className={cx(
-              "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
-              compact
-                ? "left-2 bottom-5 h-[42px] w-[66px] text-[30px]"
-                : "left-3 bottom-6 h-[48px] w-[96px] text-[38px]",
-              isRed
-                ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
-                : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
-            )}
-          >
-            −
-          </button>
-
           <div
             className={cx(
               "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[82px]" : "text-[104px]"
+              compact ? "text-[78px]" : "text-[98px]"
             )}
           >
             {score === par + 4 ? "P" : score}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setScore(Math.min(par + 4, score + 1))}
+          <div
             className={cx(
-              "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
-              compact
-                ? "right-2 bottom-5 h-[42px] w-[66px] text-[30px]"
-                : "right-3 bottom-6 h-[48px] w-[96px] text-[38px]",
-              isRed
-                ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
-                : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
+              "mt-1 grid w-full grid-cols-2",
+              compact ? "gap-2" : "gap-3"
             )}
           >
-            +
-          </button>
+            <button
+              type="button"
+              onClick={() => setScore(Math.max(0, score - 1))}
+              className={cx(
+                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
+                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
+                isRed
+                  ? "border-red-400 bg-[#730011]/62 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
+                  : "border-blue-400 bg-[#002c87]/62 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
+              )}
+            >
+              −
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setScore(Math.min(par + 4, score + 1))}
+              className={cx(
+                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
+                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
+                isRed
+                  ? "border-red-400 bg-[#730011]/62 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
+                  : "border-blue-400 bg-[#002c87]/62 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
+              )}
+            >
+              +
+            </button>
+          </div>
         </div>
 
         <div className={cx("text-center", compact ? "pt-2" : "pt-3")}>
           <div
             className={cx(
-              "font-black uppercase tracking-[0.08em] text-white",
+              "font-black uppercase tracking-[0.1em] text-white",
               compact ? "text-[12px]" : "text-[16px]"
             )}
           >
