@@ -503,10 +503,10 @@ export default function Score({
         <div
           className={cx(
             "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
-            isBetterBall ? "top-3 bottom-[54px]" : "top-[252px] bottom-[118px]"
+            isBetterBall ? "top-3 bottom-[64px]" : "top-[252px] bottom-[118px]"
           )}
         >
-          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/24 bg-[#07080a]/94 p-3 shadow-2xl backdrop-blur-xl">
+          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/92 p-3 shadow-2xl backdrop-blur-xl">
             <div className="mb-2 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[9px] tracking-[0.24em] text-white/50">
@@ -1136,39 +1136,36 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
   return (
     <div
       className={cx(
-        "relative overflow-hidden border shadow-[0_18px_42px_rgba(0,0,0,0.58)] backdrop-blur-xl",
+        "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
-          ? "min-h-[246px] rounded-[24px]"
+          ? "min-h-[248px] rounded-[24px]"
           : "min-h-[245px] rounded-[28px]",
         isRed
-          ? "border-[#b33d42]/42 bg-gradient-to-br from-[#8f242b] via-[#521419] to-[#160507]"
-          : "border-[#5e87b4]/42 bg-gradient-to-br from-[#315980] via-[#172f49] to-[#06111f]"
+          ? "border-[#c94a4d]/35 bg-gradient-to-br from-[#9e2b32] via-[#5b1519] to-[#170607]"
+          : "border-[#6f96c4]/35 bg-gradient-to-br from-[#35618d] via-[#17324e] to-[#06111f]"
       )}
     >
-      {/* subtle background contour lines only — no bright white border/glare */}
       <div
         className={cx(
-          "pointer-events-none absolute inset-0 opacity-[0.16]",
+          "absolute right-[-48px] top-[-44px] h-[150%] w-[48%] rotate-[14deg] opacity-20",
+          isRed ? "bg-white" : "bg-[#9fc2ff]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "absolute inset-0 opacity-45",
           isRed
-            ? "bg-[repeating-radial-gradient(ellipse_at_28%_22%,rgba(255,100,100,0.28)_0px,rgba(255,100,100,0.28)_1px,transparent_2px,transparent_22px)]"
-            : "bg-[repeating-radial-gradient(ellipse_at_28%_22%,rgba(120,172,225,0.28)_0px,rgba(120,172,225,0.28)_1px,transparent_2px,transparent_22px)]"
+            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
         )}
       />
-
-      <div
-        className={cx(
-          "pointer-events-none absolute right-[-54px] top-[-38px] h-[150%] w-[46%] rotate-[14deg] opacity-[0.13]",
-          isRed ? "bg-[#ffb0b0]" : "bg-[#9fc8ff]"
-        )}
-      />
-
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.055),transparent_46%,rgba(0,0,0,0.28))]" />
 
       <div className={cx("relative z-10 flex h-full flex-col", compact ? "p-2.5" : "p-3")}>
-        <div className="mb-2 text-center">
+        <div className={cx("text-center", compact ? "mb-2" : "mb-2")}>
           <div
             className={cx(
-              "truncate font-black uppercase tracking-[0.14em] text-white",
+              "truncate font-black uppercase tracking-[0.12em] text-white",
               compact ? "text-[13px]" : "text-[16px]"
             )}
           >
@@ -1178,32 +1175,34 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
 
         <div
           className={cx(
-            "relative flex flex-1 flex-col items-center justify-center overflow-hidden rounded-[22px] border border-[#d1c79f]/18 bg-[#07080a]/96 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_10px_22px_rgba(0,0,0,0.42)]",
-            compact ? "min-h-[164px] px-2 py-2" : "min-h-[160px] px-3 py-2"
+            "relative z-20 flex flex-1 flex-col items-center justify-center rounded-[24px] bg-[#020407]/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_10px_22px_rgba(0,0,0,0.35)]",
+            compact ? "min-h-[166px] px-2 py-2" : "min-h-[160px] px-3 py-2"
           )}
         >
-          <div className="pointer-events-none absolute inset-0 opacity-[0.10] bg-[repeating-radial-gradient(ellipse_at_30%_25%,rgba(255,255,255,0.24)_0px,rgba(255,255,255,0.24)_1px,transparent_2px,transparent_20px)]" />
-          <div className="pointer-events-none absolute top-4 h-[1px] w-[46px] bg-[#d1c79f]/45" />
-
           <div
             className={cx(
-              "relative font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[86px]" : "text-[98px]"
+              "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
+              compact ? "text-[88px]" : "text-[98px]"
             )}
           >
             {score === par + 4 ? "P" : score}
           </div>
 
-          <div className={cx("relative mt-1 grid w-full grid-cols-2", compact ? "gap-2" : "gap-3")}>
+          <div
+            className={cx(
+              "mt-1 grid w-full grid-cols-2",
+              compact ? "gap-2" : "gap-3"
+            )}
+          >
             <button
               type="button"
               onClick={() => setScore(Math.max(0, score - 1))}
               className={cx(
-                "flex items-center justify-center rounded-full border bg-black/35 font-black text-white transition-all active:scale-95",
+                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
                 compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
                 isRed
-                  ? "border-[#ef5d64] shadow-[0_0_16px_rgba(190,55,60,0.24)]"
-                  : "border-[#7fb3ef] shadow-[0_0_16px_rgba(78,130,187,0.24)]"
+                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
+                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
               )}
             >
               −
@@ -1213,18 +1212,16 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
               type="button"
               onClick={() => setScore(Math.min(par + 4, score + 1))}
               className={cx(
-                "flex items-center justify-center rounded-full border bg-black/35 font-black text-white transition-all active:scale-95",
+                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
                 compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
                 isRed
-                  ? "border-[#ef5d64] shadow-[0_0_16px_rgba(190,55,60,0.24)]"
-                  : "border-[#7fb3ef] shadow-[0_0_16px_rgba(78,130,187,0.24)]"
+                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
+                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
               )}
             >
               +
             </button>
           </div>
-
-          <div className="pointer-events-none absolute bottom-4 h-[1px] w-[46px] bg-[#d1c79f]/45" />
         </div>
 
         <div className={cx("text-center", compact ? "pt-2" : "pt-3")}>
