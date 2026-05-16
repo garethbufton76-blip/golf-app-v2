@@ -482,8 +482,8 @@ export default function Score({
       )}
 
       {selectedHole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/82 p-3">
-          <div className="w-full max-w-[95vw] rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
+        <div className="absolute inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/82 p-3 pt-5">
+          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/96 p-3 shadow-2xl backdrop-blur-xl">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[10px] tracking-[0.24em] text-white/50">
@@ -505,7 +505,7 @@ export default function Score({
             </div>
 
             {isBetterBall ? (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {match.red.map((p: any, i: number) => (
                   <ScoreBox
                     key={`red-${i}`}
@@ -535,7 +535,7 @@ export default function Score({
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <ScoreBox
                   team="red"
                   players={match.red}
@@ -1111,8 +1111,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
       className={cx(
         "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
         compact
-          ? "min-h-[260px] rounded-[28px]"
-          : "min-h-[420px] rounded-[34px]",
+          ? "min-h-[225px] rounded-[24px]"
+          : "min-h-[300px] rounded-[28px]",
         isRed
           ? "border-red-400/35 bg-gradient-to-br from-[#a90820] via-[#5c000c] to-[#170005]"
           : "border-blue-400/35 bg-gradient-to-br from-[#2360d8] via-[#06296f] to-[#010816]"
@@ -1137,14 +1137,14 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
       <div
         className={cx(
           "relative z-10 flex h-full flex-col",
-          compact ? "p-3" : "p-4"
+          compact ? "p-2.5" : "p-3"
         )}
       >
-        <div className={cx("text-center", compact ? "mb-3" : "mb-4")}>
+        <div className={cx("text-center", compact ? "mb-2" : "mb-3")}>
           <div
             className={cx(
               "truncate font-black uppercase tracking-[0.08em] text-white",
-              compact ? "text-[16px]" : "text-[22px]"
+              compact ? "text-[13px]" : "text-[16px]"
             )}
           >
             {namesText}
@@ -1154,7 +1154,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
         <div
           className={cx(
             "relative flex flex-1 items-center justify-center rounded-[28px] bg-black/34 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]",
-            compact ? "min-h-[170px]" : "min-h-[275px]"
+            compact ? "min-h-[145px]" : "min-h-[205px]"
           )}
         >
           <button
@@ -1163,8 +1163,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
             className={cx(
               "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
               compact
-                ? "left-3 bottom-6 h-[54px] w-[54px] text-[38px]"
-                : "left-4 bottom-8 h-[72px] w-[72px] text-[52px]",
+                ? "left-2 bottom-5 h-[42px] w-[42px] text-[30px]"
+                : "left-3 bottom-6 h-[50px] w-[50px] text-[38px]",
               isRed
                 ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
                 : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
@@ -1176,7 +1176,7 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
           <div
             className={cx(
               "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[104px]" : "text-[160px]"
+              compact ? "text-[82px]" : "text-[112px]"
             )}
           >
             {score === par + 4 ? "P" : score}
@@ -1188,8 +1188,8 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
             className={cx(
               "absolute flex items-center justify-center rounded-full border font-light text-white transition-all active:scale-95",
               compact
-                ? "right-3 bottom-6 h-[54px] w-[54px] text-[38px]"
-                : "right-4 bottom-8 h-[72px] w-[72px] text-[52px]",
+                ? "right-2 bottom-5 h-[42px] w-[42px] text-[30px]"
+                : "right-3 bottom-6 h-[50px] w-[50px] text-[38px]",
               isRed
                 ? "border-red-500 bg-[#730011]/60 shadow-[0_0_18px_rgba(190,0,30,0.35)]"
                 : "border-blue-500 bg-[#002c87]/60 shadow-[0_0_18px_rgba(42,104,255,0.35)]"
@@ -1199,11 +1199,11 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
           </button>
         </div>
 
-        <div className={cx("text-center", compact ? "pt-3" : "pt-5")}>
+        <div className={cx("text-center", compact ? "pt-2" : "pt-3")}>
           <div
             className={cx(
               "font-black uppercase tracking-[0.08em] text-white",
-              compact ? "text-[16px]" : "text-[26px]"
+              compact ? "text-[12px]" : "text-[16px]"
             )}
           >
             {points} {points === 1 ? "POINT" : "POINTS"}
@@ -1213,4 +1213,3 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
     </div>
   );
 }
-
