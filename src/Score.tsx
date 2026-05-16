@@ -503,7 +503,7 @@ export default function Score({
         <div
           className={cx(
             "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
-            isBetterBall ? "top-3 bottom-[100px]" : "top-[252px] bottom-[118px]"
+            isBetterBall ? "top-3 bottom-[78px]" : "top-[252px] bottom-[118px]"
           )}
         >
           <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/90 p-3 shadow-2xl backdrop-blur-xl">
@@ -529,33 +529,37 @@ export default function Score({
 
             {isBetterBall ? (
               <div className="grid grid-cols-2 gap-3 pb-1">
-                {scoringRedPlayers.map((p: any, i: number) => (
-                  <ScoreBox
-                    key={`red-${i}`}
-                    team="red"
-                    players={[p]}
-                    score={draft[`red_${i}`]}
-                    setScore={(v: number) =>
-                      setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
-                    }
-                    par={selectedHole.par}
-                    compact={scoringPlayerCount >= 4}
-                  />
-                ))}
+                <div className="space-y-3">
+                  {scoringRedPlayers.map((p: any, i: number) => (
+                    <ScoreBox
+                      key={`red-${i}`}
+                      team="red"
+                      players={[p]}
+                      score={draft[`red_${i}`]}
+                      setScore={(v: number) =>
+                        setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
+                      }
+                      par={selectedHole.par}
+                      compact={scoringPlayerCount >= 4}
+                    />
+                  ))}
+                </div>
 
-                {scoringBluePlayers.map((p: any, i: number) => (
-                  <ScoreBox
-                    key={`blue-${i}`}
-                    team="blue"
-                    players={[p]}
-                    score={draft[`blue_${i}`]}
-                    setScore={(v: number) =>
-                      setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
-                    }
-                    par={selectedHole.par}
-                    compact={scoringPlayerCount >= 4}
-                  />
-                ))}
+                <div className="space-y-3">
+                  {scoringBluePlayers.map((p: any, i: number) => (
+                    <ScoreBox
+                      key={`blue-${i}`}
+                      team="blue"
+                      players={[p]}
+                      score={draft[`blue_${i}`]}
+                      setScore={(v: number) =>
+                        setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
+                      }
+                      par={selectedHole.par}
+                      compact={scoringPlayerCount >= 4}
+                    />
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3">
@@ -1234,3 +1238,4 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
     </div>
   );
 }
+
