@@ -1,8 +1,7 @@
 import {
   Logo,
-  MatchButtons,
-  panel,
   Button,
+  cx,
   matchCount,
 } from "./data";
 
@@ -18,7 +17,7 @@ function DayButtons({
 
   return (
     <div
-      className="grid gap-2"
+      className="mb-3 grid gap-2"
       style={{
         gridTemplateColumns: `repeat(${shown.length}, minmax(0, 1fr))`,
       }}
@@ -28,6 +27,7 @@ function DayButtons({
           key={d.label}
           active={i === active}
           onClick={() => setActive(i)}
+          className="py-2 text-[10px]"
         >
           {d.label}
         </Button>
@@ -51,12 +51,21 @@ export default function Home({
   totals,
   openMatch,
   teamLogos,
+  teamNames,
 }: any) {
-  const count = matchCount(players, dayConfigs[activeDay].format);
+  const day = dayConfigs[activeDay];
+  const count = matchCount(players, day.format);
+
+  const matchCards = Array.from({ length: count }, (_, i) => ({
+    label: `Match ${i + 1}`,
+    status: i === 0 ? "Live now" : "Ready",
+    detail: day.format,
+    progress: i === 0 ? "14 to play" : "18 to play",
+  }));
 
   return (
-    <>
-      <div className="flex justify-center mt-2">
+    <div className="relative flex-1 overflow-y-auto pb-[96px]">
+      <div className="flex justify-center pt-2">
         <img
           src="/launch-logo.png"
           alt="DUEL"
@@ -64,53 +73,85 @@ export default function Home({
         />
       </div>
 
-      <div className="mt-[92px] grid grid-cols-2 text-center">
-        {["red", "blue"].map((team: any) => (
+      <div className="mt-4 rounded-[28px] border border-white/12 bg-black/48 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.24em] text-white/50">
+          {day.label} • {day.course || "St Michaels"} • {day.tee} Tee
+        </div>
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <button
-            key={team}
-            onClick={() =>
-              setScreen(team === "red" ? "rosterP" : "rosterB")
-            }
+            type="button"
+            onClick={() => setScreen("rosterP")}
+            className="text-center"
           >
-            <div className="mx-auto w-fit drop-shadow-[0_30px_60px_rgba(0,0,0,0.95)]">
-              <Logo
-                team={team}
-                size="mx-auto h-28 w-28"
-                src={teamLogos[team === "red" ? "Red" : "Blue"]}
-              />
+            <Logo
+              team="red"
+              size="mx-auto h-20 w-20"
+              src={teamLogos?.Red}
+            />
+
+            <div className="mt-2 text-[11px] font-black uppercase tracking-[0.12em] text-white/60">
+              {teamNames?.Red || "Team Red"}
             </div>
 
             <div
-              className="mt-8 text-[104px] font-black leading-[0.82] tracking-[-0.12em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.85)]"
+              className="mt-2 text-[76px] font-black leading-none tracking-[-0.1em] text-white"
               style={{
-                fontFamily:
-                  'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                transform: "scaleY(1.2) scaleX(0.82)",
-                transformOrigin: "center",
-                WebkitTextStroke: "1px rgba(255,255,255,0.08)",
+                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                transform: "scaleY(1.12) scaleX(0.86)",
               }}
             >
-              {formatScore(totals.official[team])}
+              {formatScore(totals.official.red)}
             </div>
           </button>
-        ))}
-      </div>
 
-      <div className="mt-[34px] flex justify-center">
-        <div className="inline-flex items-center gap-4 rounded-full border border-[#d1c79f]/20 bg-black/60 px-5 py-2.5 backdrop-blur-xl shadow-[0_10px_35px_rgba(0,0,0,0.65)]">
-          <b className="text-[22px]">{formatScore(totals.live.red)}</b>
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+              LIVE
+            </div>
 
-          <span className="text-[11px] tracking-[0.24em] text-[#d1c79f]">
-            LIVE
-          </span>
+            <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/55 px-4 py-2 text-center">
+              <span className="text-lg font-black">
+                {formatScore(totals.live.red)}
+              </span>
 
-          <b className="text-[22px]">{formatScore(totals.live.blue)}</b>
+              <span className="mx-2 text-white/35">-</span>
+
+              <span className="text-lg font-black">
+                {formatScore(totals.live.blue)}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setScreen("rosterB")}
+            className="text-center"
+          >
+            <Logo
+              team="blue"
+              size="mx-auto h-20 w-20"
+              src={teamLogos?.Blue}
+            />
+
+            <div className="mt-2 text-[11px] font-black uppercase tracking-[0.12em] text-white/60">
+              {teamNames?.Blue || "Team Blue"}
+            </div>
+
+            <div
+              className="mt-2 text-[76px] font-black leading-none tracking-[-0.1em] text-white"
+              style={{
+                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                transform: "scaleY(1.12) scaleX(0.86)",
+              }}
+            >
+              {formatScore(totals.official.blue)}
+            </div>
+          </button>
         </div>
       </div>
 
-      <div
-        className={`${panel} absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3`}
-      >
+      <div className="mt-4 rounded-[26px] border border-white/10 bg-black/42 p-4 backdrop-blur-xl">
         <DayButtons
           dayConfigs={dayConfigs}
           days={days}
@@ -118,14 +159,47 @@ export default function Home({
           setActive={setActiveDay}
         />
 
-        <div className="mt-2 text-[9px] tracking-[0.22em] text-white/60">
-          MATCHES
+        <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/55">
+          Live Matches
         </div>
 
-        <div className="mt-1.5">
-          <MatchButtons count={count} setActive={openMatch} />
+        <div className="space-y-3">
+          {matchCards.map((match, i) => (
+            <button
+              key={match.label}
+              type="button"
+              onClick={() => openMatch(i)}
+              className={cx(
+                "w-full overflow-hidden rounded-[22px] border p-4 text-left shadow-[0_14px_32px_rgba(0,0,0,0.35)]",
+                i % 2 === 0
+                  ? "border-red-300/15 bg-gradient-to-r from-[#5b1218]/88 via-[#1a1214]/92 to-[#0c1018]/92"
+                  : "border-blue-300/15 bg-gradient-to-r from-[#101522]/92 via-[#14213a]/90 to-[#07101c]/92"
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/45">
+                    {match.label}
+                  </div>
+
+                  <div className="mt-1 text-[18px] font-black uppercase tracking-[0.08em] text-white">
+                    All Square
+                  </div>
+                </div>
+
+                <div className="rounded-full border border-[#d1c79f]/20 bg-black/35 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#d1c79f]">
+                  {match.status}
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.13em] text-white/55">
+                <span>{match.detail}</span>
+                <span>{match.progress}</span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
-    </>
+    </div>
   );
 }
