@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Button,
   Logo,
@@ -7,10 +7,11 @@ import {
   dayOptions,
   playerOptions,
   rosterMeta,
-  tees,
   times,
   validFormats,
 } from "./data";
+import { searchCourses } from "./lib/golfCourseApi";
+import { COURSES, getDefaultTee } from "./courses";
 
 export default function Admin({
   setScreen,
@@ -41,6 +42,177 @@ export default function Admin({
 }: any) {
   const [adminMode, setAdminMode] = useState("event");
   const [editingTeam, setEditingTeam] = useState("Red");
+
+  const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
+    try {
+      const stored = localStorage.getItem("duel_saved_api_courses");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [coursePickerMode, setCoursePickerMode] = useState<
+    Record<number, "saved" | "search">
+  >({});
+
+  const [courseSearch, setCourseSearch] = useState<Record<number, string>>({});
+  const [courseSearchResults, setCourseSearchResults] = useState<
+    Record<number, any[]>
+  >({});
+  const [courseSearchStatus, setCourseSearchStatus] = useState<
+    Record<number, string>
+  >({});
+
+  const savedCourses = useMemo(
+    () => [...COURSES, ...savedApiCourses],
+    [savedApiCourses]
+  );
+
+  function getCourseTeesForAdmin(courseId: string) {
+    const course = COURSES.find((c) => c.id === courseId);
+
+    return course?.tees?.map((tee: any) => tee.id) || [
+      "Blue",
+      "White",
+      "Gold",
+      "Red",
+    ];
+  }
+
+  function getApiCourseName(course: any) {
+    return (
+      course?.course_name ||
+      course?.name ||
+      course?.club_name ||
+      course?.facility_name ||
+      "Unknown Course"
+    );
+  }
+
+  function getApiCourseLocation(course: any) {
+    return [course?.city, course?.state, course?.province, course?.country]
+      .filter(Boolean)
+      .join(", ");
+  }
+
+  function getApiCourseId(course: any) {
+    return (
+      course?.id ||
+      course?.course_id ||
+      course?.global_course_id ||
+      course?.club_id ||
+      getApiCourseName(course).toLowerCase().replace(/[^a-z0-9]+/g, "-")
+    );
+  }
+
+  async function handleCourseSearch(dayIndex: number) {
+    const query = String(courseSearch[dayIndex] || "").trim();
+
+    if (!query) {
+      setCourseSearchStatus((current) => ({
+        ...current,
+        [dayIndex]: "Enter a course name first",
+      }));
+      return;
+    }
+
+    setCourseSearchStatus((current) => ({
+      ...current,
+      [dayIndex]: "Searching...",
+    }));
+
+    try {
+      const result = await searchCourses(query);
+      const courses = Array.isArray(result?.courses)
+        ? result.courses
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      console.log("Weekend GolfCourseAPI search result:", result);
+
+      setCourseSearchResults((current) => ({
+        ...current,
+        [dayIndex]: courses,
+      }));
+
+      setCourseSearchStatus((current) => ({
+        ...current,
+        [dayIndex]: courses.length
+          ? `${courses.length} result${courses.length === 1 ? "" : "s"} found`
+          : "No courses found",
+      }));
+    } catch (error) {
+      console.error("Weekend GolfCourseAPI search error:", error);
+
+      setCourseSearchStatus((current) => ({
+        ...current,
+        [dayIndex]: "Search failed — check console",
+      }));
+    }
+  }
+
+  function importApiCourse(apiCourse: any, dayIndex: number) {
+    const apiId = getApiCourseId(apiCourse);
+
+    const importedCourse = {
+      id: `api-${apiId}`,
+      name: getApiCourseName(apiCourse),
+      shortName: getApiCourseName(apiCourse),
+      region: getApiCourseLocation(apiCourse),
+      country: apiCourse?.country || "",
+      source: "GolfCourseAPI",
+      raw: apiCourse,
+    };
+
+    setSavedApiCourses((current: any[]) => {
+      const withoutDuplicate = current.filter(
+        (course) => course.id !== importedCourse.id
+      );
+
+      const next = [...withoutDuplicate, importedCourse];
+
+      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
+
+      return next;
+    });
+
+    setDay(dayIndex, "courseId", importedCourse.id);
+    setDay(dayIndex, "course", importedCourse.shortName);
+    setDay(dayIndex, "tee", getDefaultTee("st-michaels"));
+
+    setCoursePickerMode((current) => ({
+      ...current,
+      [dayIndex]: "saved",
+    }));
+
+    setCourseSearchStatus((current) => ({
+      ...current,
+      [dayIndex]: `Saved ${importedCourse.name}`,
+    }));
+  }
+
+  function selectSavedCourseForDay(dayIndex: number, course: any) {
+    setDay(dayIndex, "courseId", course.id);
+    setDay(dayIndex, "course", course.shortName || course.name);
+
+    if (COURSES.some((c) => c.id === course.id)) {
+      setDay(dayIndex, "tee", getDefaultTee(course.id));
+    } else {
+      setDay(dayIndex, "tee", getDefaultTee("st-michaels"));
+    }
+  }
+
+  function removeSavedApiCourse(courseIdToRemove: string) {
+    setSavedApiCourses((current: any[]) => {
+      const next = current.filter((course) => course.id !== courseIdToRemove);
+
+      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
+
+      return next;
+    });
+  }
 
   const readImageFile = (
     file: File | undefined,
@@ -310,26 +482,45 @@ export default function Admin({
                       />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="col-span-2">
-                        <Label>COURSE</Label>
+                    <WeekendCoursePicker
+                      dayIndex={i}
+                      day={day}
+                      courseMode={coursePickerMode[i] || "saved"}
+                      setCourseMode={(mode: "saved" | "search") =>
+                        setCoursePickerMode((current) => ({
+                          ...current,
+                          [i]: mode,
+                        }))
+                      }
+                      savedCourses={savedCourses}
+                      selectSavedCourse={(course: any) =>
+                        selectSavedCourseForDay(i, course)
+                      }
+                      removeSavedApiCourse={removeSavedApiCourse}
+                      courseSearch={courseSearch[i] || ""}
+                      setCourseSearch={(value: string) =>
+                        setCourseSearch((current) => ({
+                          ...current,
+                          [i]: value,
+                        }))
+                      }
+                      handleCourseSearch={() => handleCourseSearch(i)}
+                      courseSearchStatus={courseSearchStatus[i] || ""}
+                      courseSearchResults={courseSearchResults[i] || []}
+                      importApiCourse={(course: any) => importApiCourse(course, i)}
+                      getApiCourseName={getApiCourseName}
+                      getApiCourseLocation={getApiCourseLocation}
+                      getApiCourseId={getApiCourseId}
+                    />
 
-                        <Select
-                          value={day.course}
-                          onChange={(v: any) => setDay(i, "course", v)}
-                          options={["St Michaels"]}
-                        />
-                      </div>
+                    <div className="mt-3">
+                      <Label>TEE</Label>
 
-                      <div>
-                        <Label>TEE</Label>
-
-                        <Select
-                          value={day.tee}
-                          onChange={(v: any) => setDay(i, "tee", v)}
-                          options={tees}
-                        />
-                      </div>
+                      <Select
+                        value={day.tee}
+                        onChange={(v: any) => setDay(i, "tee", v)}
+                        options={getCourseTeesForAdmin(day.courseId || "st-michaels")}
+                      />
                     </div>
 
                     <div className="mt-3">
@@ -653,6 +844,162 @@ export default function Admin({
   );
 }
 
+function WeekendCoursePicker({
+  dayIndex,
+  day,
+  courseMode,
+  setCourseMode,
+  savedCourses,
+  selectSavedCourse,
+  removeSavedApiCourse,
+  courseSearch,
+  setCourseSearch,
+  handleCourseSearch,
+  courseSearchStatus,
+  courseSearchResults,
+  importApiCourse,
+  getApiCourseName,
+  getApiCourseLocation,
+  getApiCourseId,
+}: any) {
+  return (
+    <div>
+      <Label>COURSE</Label>
+
+      <div className="mb-2 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => setCourseMode("saved")}
+          className={cx(
+            "rounded-full border px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em]",
+            courseMode === "saved"
+              ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+              : "border-white/12 bg-black/40 text-white/65"
+          )}
+        >
+          Saved
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setCourseMode("search")}
+          className={cx(
+            "rounded-full border px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em]",
+            courseMode === "search"
+              ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+              : "border-white/12 bg-black/40 text-white/65"
+          )}
+        >
+          Search API
+        </button>
+      </div>
+
+      {courseMode === "saved" ? (
+        <div className="space-y-2">
+          {savedCourses.map((course: any) => {
+            const active =
+              day.courseId === course.id ||
+              day.course === course.shortName ||
+              day.course === course.name;
+
+            const isApiCourse = course.source === "GolfCourseAPI";
+
+            return (
+              <div
+                key={`${dayIndex}-${course.id}`}
+                className={cx(
+                  "rounded-[16px] border p-3",
+                  active
+                    ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
+                    : "border-white/10 bg-black/35"
+                )}
+              >
+                <button
+                  type="button"
+                  onClick={() => selectSavedCourse(course)}
+                  className="w-full text-left"
+                >
+                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                    {course.name}
+                  </div>
+
+                  <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                    {isApiCourse
+                      ? "Saved from GolfCourseAPI"
+                      : `${course.region || ""}${
+                          course.country ? ` • ${course.country}` : ""
+                        }` || "Saved Course"}
+                  </div>
+                </button>
+
+                {isApiCourse ? (
+                  <button
+                    type="button"
+                    onClick={() => removeSavedApiCourse(course.id)}
+                    className="mt-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/45"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div>
+          <div className="grid grid-cols-[1fr_auto] gap-2">
+            <input
+              value={courseSearch}
+              onChange={(e) => setCourseSearch(e.target.value)}
+              placeholder="Search course"
+              className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white outline-none placeholder:text-white/25"
+            />
+
+            <button
+              type="button"
+              onClick={handleCourseSearch}
+              className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-black"
+            >
+              Search
+            </button>
+          </div>
+
+          {courseSearchStatus ? (
+            <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
+              {courseSearchStatus}
+            </div>
+          ) : null}
+
+          <div className="mt-3 max-h-[240px] space-y-2 overflow-y-auto pr-1">
+            {courseSearchResults.map((course: any, index: number) => (
+              <div
+                key={`${getApiCourseId(course)}-${index}`}
+                className="rounded-[16px] border border-white/10 bg-black/35 p-3"
+              >
+                <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                  {getApiCourseName(course)}
+                </div>
+
+                <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                  {getApiCourseLocation(course) || "GolfCourseAPI result"}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => importApiCourse(course)}
+                  className="mt-3 w-full rounded-full bg-[#d1c79f] py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
+                >
+                  Import & Save
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StatusPanel({ eventLocked, eventStarted }: any) {
   return (
     <div className="mt-3 rounded-[20px] border border-[#d1c79f]/20 bg-black/40 p-3">
@@ -801,3 +1148,4 @@ function Label({ children }: any) {
     </div>
   );
 }
+
