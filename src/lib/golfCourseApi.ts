@@ -1,36 +1,25 @@
-const API_KEY = "YOUR_API_KEY";
+const API_KEY = "SXUKS5HIJ7M23LY246DWQ44XWQ";
 
-const BASE_URL = "https://api.golfcourseapi.com/v1";
+const API_HOST = "golf-course-api.p.rapidapi.com";
 
 export async function searchCourses(query: string) {
   const response = await fetch(
-    `${BASE_URL}/search?search_query=${encodeURIComponent(query)}`,
+    `https://${API_HOST}/search?query=${encodeURIComponent(query)}`,
     {
+      method: "GET",
       headers: {
-        Authorization: `Key ${API_KEY}`,
+        "X-RapidAPI-Key": API_KEY,
+        "X-RapidAPI-Host": API_HOST,
       },
     }
   );
 
   if (!response.ok) {
-    throw new Error("Failed to search courses");
-  }
+    const text = await response.text();
 
-  return response.json();
-}
+    console.error("GolfCourseAPI Error:", text);
 
-export async function getCourse(courseId: number) {
-  const response = await fetch(
-    `${BASE_URL}/courses/${courseId}`,
-    {
-      headers: {
-        Authorization: `Key ${API_KEY}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch course");
+    throw new Error(text);
   }
 
   return response.json();
