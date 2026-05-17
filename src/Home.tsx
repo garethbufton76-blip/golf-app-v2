@@ -1,335 +1,205 @@
-import { useMemo, useState } from "react";
 import {
-  BACKGROUND_IMAGES,
-  TEAM,
-  AdminIcon,
+  Logo,
+  Button,
   cx,
-  homeTotals,
-  makeRoster,
+  matchCount,
 } from "./data";
 
-import Launch from "./Launch";
-import Home from "./Home";
-import Roster from "./Roster";
-import Score from "./Score";
-import Admin from "./Admin";
-import QuickGame from "./QuickGame";
-import BottomNav from "./BottomNav";
+function DayButtons({
+  dayConfigs,
+  days,
+  active,
+  setActive,
+}: any) {
+  const shown = dayConfigs.slice(0, days);
 
-type AppMode = "launch" | "weekend" | "quick";
-type GameTab = "live" | "score" | "team";
-
-export default function App() {
-  const [mode, setMode] = useState<AppMode>("launch");
-
-  const [screen, setScreen] = useState("home");
-  const [players, setPlayers] = useState(2);
-  const [days, setDays] = useState(1);
-
-  const [activeTab, setActiveTab] = useState<GameTab>("score");
-
-  const [eventLocked, setEventLocked] = useState(false);
-  const [eventStarted, setEventStarted] = useState(false);
-  const [pairingLocks, setPairingLocks] = useState({});
-
-  const [eventDetails, setEventDetails] = useState({
-    name: "Dual in the Dunes",
-    location: "St Michaels Golf Club",
-    startDate: "",
-    endDate: "",
-    notes: "",
-  });
-
-  const [savedPlayers, setSavedPlayers] = useState([
-    {
-      id: "gareth",
-      name: "Gareth Bufton",
-      nickname: "Gareth",
-      handicap: "4.0",
-      homeClub: "",
-      preferredTee: "Blue",
-      photo: "",
-      regular: true,
-    },
-    {
-      id: "mark",
-      name: "Mark McLeod",
-      nickname: "Mark",
-      handicap: "7.0",
-      homeClub: "",
-      preferredTee: "Blue",
-      photo: "",
-      regular: true,
-    },
-  ]);
-
-  const [dayConfigs, setDayConfigs] = useState(
-    Array.from({ length: 4 }, (_, i) => ({
-      label: `Day ${i + 1}`,
-      teeTime: i < 2 ? "8:00" : "8:30",
-      course: "St Michaels",
-      tee: "Blue",
-      format: "Singles Match Play",
-    }))
-  );
-
-  const [roster, setRoster] = useState(makeRoster);
-  const [activeDay, setActiveDay] = useState(0);
-  const [selectedMatch, setSelectedMatch] = useState(0);
-  const [states, setStates] = useState({});
-  const [scorecards, setScorecards] = useState({});
-  const [dayLocks, setDayLocks] = useState({});
-
-  const [teamLogos, setTeamLogos] = useState({
-    Red: "",
-    Blue: "",
-  });
-
-  const [teamNames, setTeamNames] = useState({
-    Red: "Team Red",
-    Blue: "Team Blue",
-  });
-
-  const totals = useMemo(
-    () => homeTotals(dayConfigs, days, players, states),
-    [dayConfigs, days, players, states]
-  );
-
-  const bg =
-    screen === "rosterP"
-      ? TEAM.red.bg
-      : screen === "rosterB"
-      ? TEAM.blue.bg
-      : "from-[#092018] via-[#101010] to-black";
-
-  const bgImage =
-    mode === "quick"
-      ? BACKGROUND_IMAGES.admin || BACKGROUND_IMAGES.home
-      : BACKGROUND_IMAGES[screen] || BACKGROUND_IMAGES.home;
-
-  const openMatch = (i: number) => {
-    setSelectedMatch(i);
-    setScreen("score");
-    setActiveTab("score");
-  };
-
-  function handleQuickScreen(nextScreen: string) {
-    if (nextScreen === "score") {
-      setEventStarted(true);
-      setEventLocked(true);
-      setMode("weekend");
-      setScreen("score");
-      setActiveTab("score");
-      return;
-    }
-
-    if (nextScreen === "home") {
-      setMode("launch");
-      setScreen("home");
-      setActiveTab("score");
-      return;
-    }
-
-    setScreen(nextScreen);
-  }
-
-  function handleBottomNav(tab: GameTab) {
-    setActiveTab(tab);
-
-    if (tab === "live") {
-      setScreen("home");
-      return;
-    }
-
-    if (tab === "score") {
-      setScreen("score");
-      return;
-    }
-
-    if (tab === "team") {
-      setScreen("rosterP");
-    }
-  }
-
-  if (mode === "launch") {
-    return (
-      <Launch
-        onWeekend={() => {
-          setMode("weekend");
-          setScreen("admin");
-          setActiveTab("score");
-        }}
-        onQuick={() => {
-          setMode("quick");
-          setScreen("quick");
-          setActiveTab("score");
-        }}
-      />
-    );
-  }
-
-  const showBottomNav =
-    eventStarted &&
-    screen !== "admin" &&
-    screen !== "quick";
+  if (shown.length <= 1) return null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black text-white">
-      <div
-        className={cx(
-          "relative h-[780px] w-[390px] overflow-hidden rounded-3xl bg-gradient-to-b",
-          bg
-        )}
-      >
-        {bgImage && (
-          <img
-            src={bgImage}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-        )}
+    <div
+      className="mb-3 grid gap-2"
+      style={{
+        gridTemplateColumns: `repeat(${shown.length}, minmax(0, 1fr))`,
+      }}
+    >
+      {shown.map((d: any, i: number) => (
+        <Button
+          key={d.label}
+          active={i === active}
+          onClick={() => setActive(i)}
+          className="py-2 text-[10px]"
+        >
+          {d.label}
+        </Button>
+      ))}
+    </div>
+  );
+}
 
-        <div className="absolute inset-0 bg-black/15" />
+function formatScore(value: any) {
+  const n = Number(value || 0);
+  return Number.isInteger(n) ? String(n) : n.toFixed(1);
+}
 
-        <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
-          {mode === "quick" && (
-            <QuickGame
-              setScreen={handleQuickScreen}
-              setPlayers={setPlayers}
-              setTeamNames={setTeamNames}
-              setRoster={setRoster}
-              setDayConfigs={setDayConfigs}
-              setActiveDay={setActiveDay}
-              setStartMatch={setSelectedMatch}
-              setStates={setStates}
-              setScorecards={setScorecards}
-              setEventStarted={setEventStarted}
-              setEventLocked={setEventLocked}
+export default function Home({
+  setScreen,
+  dayConfigs,
+  days,
+  players,
+  activeDay,
+  setActiveDay,
+  totals,
+  openMatch,
+  teamLogos,
+  teamNames,
+}: any) {
+  const day = dayConfigs[activeDay];
+  const count = matchCount(players, day.format);
+
+  const matchCards = Array.from({ length: count }, (_, i) => ({
+    label: `Match ${i + 1}`,
+    status: i === 0 ? "Live now" : "Ready",
+    detail: day.format,
+    progress: i === 0 ? "14 to play" : "18 to play",
+  }));
+
+  return (
+    <div className="relative flex-1 overflow-y-auto pb-[96px]">
+      <div className="flex justify-center pt-2">
+        <img
+          src="/launch-logo.png"
+          alt="DUEL"
+          className="h-[34px] w-auto object-contain opacity-95 drop-shadow-[0_10px_24px_rgba(0,0,0,0.75)]"
+        />
+      </div>
+
+      <div className="mt-4 rounded-[28px] border border-white/12 bg-black/48 p-4 shadow-[0_24px_60px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+        <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.24em] text-white/50">
+          {day.label} • {day.course || "St Michaels"} • {day.tee} Tee
+        </div>
+
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setScreen("rosterP")}
+            className="text-center"
+          >
+            <Logo
+              team="red"
+              size="mx-auto h-20 w-20"
+              src={teamLogos?.Red}
             />
-          )}
 
-          {mode !== "quick" && screen === "home" && eventStarted && (
-            <Home
-              setScreen={setScreen}
-              dayConfigs={dayConfigs}
-              days={days}
-              players={players}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              totals={totals}
-              openMatch={openMatch}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              roster={roster}
-              states={states}
-            />
-          )}
+            <div className="mt-2 text-[11px] font-black uppercase tracking-[0.12em] text-white/60">
+              {teamNames?.Red || "Team Red"}
+            </div>
 
-          {mode !== "quick" && screen === "rosterP" && (
-            <Roster
-              team="Red"
-              setScreen={setScreen}
-              roster={roster}
-              setRoster={setRoster}
-              players={players}
-              dayConfigs={dayConfigs}
-              days={days}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && screen === "rosterB" && (
-            <Roster
-              team="Blue"
-              setScreen={setScreen}
-              roster={roster}
-              setRoster={setRoster}
-              players={players}
-              dayConfigs={dayConfigs}
-              days={days}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && screen === "score" && eventStarted && (
-            <Score
-              setScreen={setScreen}
-              dayConfigs={dayConfigs}
-              players={players}
-              activeDay={activeDay}
-              roster={roster}
-              states={states}
-              setStates={setStates}
-              scorecards={scorecards}
-              setScorecards={setScorecards}
-              startMatch={selectedMatch}
-              teamLogos={teamLogos}
-              teamNames={teamNames}
-              eventLocked={eventLocked}
-              pairingLocks={pairingLocks}
-            />
-          )}
-
-          {mode !== "quick" && (screen === "admin" || !eventStarted) && (
-            <Admin
-              setScreen={setScreen}
-              players={players}
-              setPlayers={setPlayers}
-              days={days}
-              setDays={setDays}
-              dayConfigs={dayConfigs}
-              setDayConfigs={setDayConfigs}
-              roster={roster}
-              setRoster={setRoster}
-              dayLocks={dayLocks}
-              setDayLocks={setDayLocks}
-              teamLogos={teamLogos}
-              setTeamLogos={setTeamLogos}
-              teamNames={teamNames}
-              setTeamNames={setTeamNames}
-              eventLocked={eventLocked}
-              setEventLocked={setEventLocked}
-              eventStarted={eventStarted}
-              setEventStarted={setEventStarted}
-              pairingLocks={pairingLocks}
-              setPairingLocks={setPairingLocks}
-              eventDetails={eventDetails}
-              setEventDetails={setEventDetails}
-              savedPlayers={savedPlayers}
-              setSavedPlayers={setSavedPlayers}
-            />
-          )}
-
-          {mode !== "quick" && screen === "home" && eventStarted && (
-            <button
-              onClick={() => setScreen("admin")}
-              className="absolute left-4 top-4 z-40"
+            <div
+              className="mt-2 text-[76px] font-black leading-none tracking-[-0.1em] text-white"
+              style={{
+                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                transform: "scaleY(1.12) scaleX(0.86)",
+              }}
             >
-              <AdminIcon />
-            </button>
-          )}
+              {formatScore(totals.official.red)}
+            </div>
+          </button>
 
-          {showBottomNav && (
-            <BottomNav
-              activeTab={activeTab}
-              setActiveTab={handleBottomNav}
+          <div className="flex flex-col items-center justify-center">
+            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+              LIVE
+            </div>
+
+            <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/55 px-4 py-2 text-center">
+              <span className="text-lg font-black">
+                {formatScore(totals.live.red)}
+              </span>
+
+              <span className="mx-2 text-white/35">-</span>
+
+              <span className="text-lg font-black">
+                {formatScore(totals.live.blue)}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setScreen("rosterB")}
+            className="text-center"
+          >
+            <Logo
+              team="blue"
+              size="mx-auto h-20 w-20"
+              src={teamLogos?.Blue}
             />
-          )}
+
+            <div className="mt-2 text-[11px] font-black uppercase tracking-[0.12em] text-white/60">
+              {teamNames?.Blue || "Team Blue"}
+            </div>
+
+            <div
+              className="mt-2 text-[76px] font-black leading-none tracking-[-0.1em] text-white"
+              style={{
+                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                transform: "scaleY(1.12) scaleX(0.86)",
+              }}
+            >
+              {formatScore(totals.official.blue)}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-[26px] border border-white/10 bg-black/42 p-4 backdrop-blur-xl">
+        <DayButtons
+          dayConfigs={dayConfigs}
+          days={days}
+          active={activeDay}
+          setActive={setActiveDay}
+        />
+
+        <div className="mb-3 text-[10px] font-black uppercase tracking-[0.24em] text-white/55">
+          Live Matches
+        </div>
+
+        <div className="space-y-3">
+          {matchCards.map((match, i) => (
+            <button
+              key={match.label}
+              type="button"
+              onClick={() => openMatch(i)}
+              className={cx(
+                "w-full overflow-hidden rounded-[22px] border p-4 text-left shadow-[0_14px_32px_rgba(0,0,0,0.35)]",
+                i % 2 === 0
+                  ? "border-red-300/15 bg-gradient-to-r from-[#5b1218]/88 via-[#1a1214]/92 to-[#0c1018]/92"
+                  : "border-blue-300/15 bg-gradient-to-r from-[#101522]/92 via-[#14213a]/90 to-[#07101c]/92"
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/45">
+                    {match.label}
+                  </div>
+
+                  <div className="mt-1 text-[18px] font-black uppercase tracking-[0.08em] text-white">
+                    All Square
+                  </div>
+                </div>
+
+                <div className="rounded-full border border-[#d1c79f]/20 bg-black/35 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-[#d1c79f]">
+                  {match.status}
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.13em] text-white/55">
+                <span>{match.detail}</span>
+                <span>{match.progress}</span>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
   );
 }
-
