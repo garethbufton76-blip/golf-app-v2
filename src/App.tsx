@@ -126,6 +126,7 @@ export default function App() {
     if (nextScreen === "home") {
       setMode("launch");
       setScreen("home");
+      setActiveTab("score");
       return;
     }
 
@@ -156,10 +157,12 @@ export default function App() {
         onWeekend={() => {
           setMode("weekend");
           setScreen("admin");
+          setActiveTab("score");
         }}
         onQuick={() => {
           setMode("quick");
           setScreen("quick");
+          setActiveTab("score");
         }}
       />
     );
@@ -217,6 +220,8 @@ export default function App() {
               openMatch={openMatch}
               teamLogos={teamLogos}
               teamNames={teamNames}
+              roster={roster}
+              states={states}
             />
           )}
 
@@ -327,3 +332,4 @@ export default function App() {
     </div>
   );
 }
+
