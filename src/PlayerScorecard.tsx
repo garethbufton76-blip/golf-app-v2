@@ -30,14 +30,14 @@ export default function PlayerScorecard({
   const showingTeamCard = isDoubleFormat && !individualPlayer;
   const activePlayer = individualPlayer || p;
 
-  const accent = isBlue ? "#2a2e46" : "#661716";
-  const accentBright = isBlue ? "#343957" : "#7a1b1b";
-  const accentDeep = isBlue ? "#111729" : "#260707";
+  const accent = isBlue ? "#173f94" : "#8f070d";
+  const accentBright = isBlue ? "#2557c8" : "#c50812";
+  const accentDeep = isBlue ? "#061733" : "#250304";
 
   const bgImage = isBlue ? "/roster-blue-bg.jpg" : "/roster-red-bg.jpg";
   const teamName = isBlue ? "BLUE TEAM" : "RED TEAM";
   const teamLogo = teamLogos?.[isBlue ? "Blue" : "Red"] || "";
-  const showStableford = /stableford|stb|points/i.test(day.format || "");
+  const showStableford = /stableford|stb|points/i.test(day.format || "") && !/match play/i.test(day.format || "");
 
   const matchScoreLabel = relativeMatchScore(
     cardPlayer.matchScore || cardPlayer.matchStatus || cardPlayer.result || "",
@@ -172,20 +172,10 @@ export default function PlayerScorecard({
             }}
           />
 
-          {/* LARGE TEAM WATERMARK */}
-          <div className="absolute left-[-130px] top-[-118px] opacity-[0.10]">
+          <div className="absolute right-[-54px] top-[128px] opacity-[0.10]">
             <Logo
               team={team}
-              size="h-[390px] w-[390px]"
-              src={teamLogo}
-            />
-          </div>
-
-          {/* SECONDARY TEAM WATERMARK */}
-          <div className="absolute right-[-46px] top-[118px] opacity-[0.15]">
-            <Logo
-              team={team}
-              size="h-[210px] w-[210px]"
+              size="h-[220px] w-[220px]"
               src={teamLogo}
             />
           </div>
@@ -194,7 +184,7 @@ export default function PlayerScorecard({
             <img
               src={activePlayer.photo}
               alt=""
-              className="absolute right-[-18px] top-[-8px] h-[50%] w-[66%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
+              className="absolute right-[-10px] top-[-6px] h-[48%] w-[58%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
               style={{
                 WebkitMaskImage:
                   "linear-gradient(to bottom, black 0%, black 80%, rgba(0,0,0,0.65) 91%, transparent 100%)",
@@ -256,11 +246,11 @@ export default function PlayerScorecard({
           className={
             showingTeamCard
               ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[258px]"
-              : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[102px]"
+              : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[86px]"
           }
         >
           {!showingTeamCard ? (
-            <div className="flex min-h-[220px] flex-col justify-end px-3 pb-2">
+            <div className="flex min-h-[238px] flex-col justify-end px-3 pb-2">
               <div className="mb-3">
                 <Logo
                   team={team}
@@ -270,7 +260,7 @@ export default function PlayerScorecard({
               </div>
 
               <div
-                className="text-[34px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
+                className="max-w-[158px] text-[31px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
                 style={{
                   fontFamily:
                     'Impact, "Arial Narrow", "Arial Black", sans-serif',
@@ -309,6 +299,11 @@ export default function PlayerScorecard({
                 </button>
 
                 <div className="pb-1 text-center">
+                  <div
+                    className="mx-auto mb-2 h-[2px] w-[54px]"
+                    style={{ backgroundColor: accentBright }}
+                  />
+
                   {matchScoreLabel ? (
                     <div
                       className="mb-1 flex w-full items-center justify-center whitespace-nowrap text-center text-[42px] font-black uppercase leading-none tracking-[-0.04em] text-white"
@@ -346,7 +341,7 @@ export default function PlayerScorecard({
           )}
 
           {/* SCORECARD */}
-          <div className="mt-5 overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
+          <div className="mt-2 overflow-hidden rounded-[18px] border border-white/18 bg-black/90 shadow-[0_24px_55px_rgba(0,0,0,0.78)] backdrop-blur-xl">
             <NineScoreTable
               title="FRONT"
               rows={front}
@@ -524,6 +519,8 @@ function DoublesHeroBackground({
 
   return (
     <>
+      <div className="absolute left-1/2 top-0 z-[9] h-[48%] w-[3px] -translate-x-1/2 bg-black/80" />
+
       {left?.photo ? (
         <button
           onClick={() => onPlayerClick(left)}
