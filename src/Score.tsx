@@ -2,13 +2,11 @@ import { useState } from "react";
 import PlayerScorecard from "./PlayerScorecard";
 import {
   Logo,
-  MatchButtons,
   blankHoles,
   cx,
   first,
   holesByTee,
   keyFor,
-  panel,
   playersForMatch,
   shots,
   stableford,
@@ -73,7 +71,8 @@ export default function Score({
       ? rosterBlue.slice(pairStart, pairStart + 2)
       : match.blue;
 
-  const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
+  const scoringPlayerCount =
+    scoringRedPlayers.length + scoringBluePlayers.length;
 
   const result = getResult(holes);
 
@@ -295,36 +294,10 @@ export default function Score({
     setSelectedHole(null);
   }
 
-  function grossFor(team: string, p: any, hole: number) {
-    return scorecards[playerKey(team, p)]?.[hole] ?? null;
-  }
-
-  function playerScorecardRows(p: any, team: string, from: number, to: number) {
-    return Array.from({ length: to - from + 1 }, (_, i) => {
-      const holeNo = from + i;
-      const h = holesByTee[holeNo][day.tee];
-      const gross = grossFor(team, p, h.hole);
-      const shotCount = shots(Number(p.handicap || 0), h.si);
-      const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
-      const points = gross == null ? null : stableford(gross, h.par, shotCount);
-
-      return {
-        ...h,
-        gross,
-        net,
-        points,
-      };
-    });
-  }
-
   const Hole = ({ h }: any) => {
     const detail = holesByTee[h.hole][day.tee];
     const status = h.status;
     const active = h.hole === nextHoleNumber;
-
-    const shotDot = holeShotDots(detail);
-    const both = shotDot.red && shotDot.blue;
-    const single = shotDot.red || shotDot.blue;
 
     const tone =
       status === "red"
@@ -354,35 +327,7 @@ export default function Score({
             : undefined
         }
       >
-        <div className="absolute left-0 right-0 top-1 flex justify-center">
-          {both ? (
-            <div className="flex gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#ff6d6d] shadow-[0_0_7px_rgba(255,109,109,0.9)]" />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#67a6ff] shadow-[0_0_7px_rgba(103,166,255,0.9)]" />
-            </div>
-          ) : single ? (
-            <span
-              className={cx(
-                "h-1.5 w-1.5 rounded-full shadow-[0_0_7px_rgba(255,255,255,0.6)]",
-                shotDot.red ? "bg-[#ff6d6d]" : "bg-[#67a6ff]"
-              )}
-            />
-          ) : null}
-        </div>
-
-        <div className="flex h-5 items-center justify-center">
-          {status === "red" || status === "blue" ? (
-            <Logo
-              team={status}
-              size="h-5 w-5"
-              src={teamLogos[status === "red" ? "Red" : "Blue"]}
-            />
-          ) : status === "as" ? (
-            <span className="text-[9px]">AS</span>
-          ) : null}
-        </div>
-
-        <div className="mt-0.5 text-[13px] font-medium">{h.hole}</div>
+        <div className="mt-4 text-[13px] font-medium">{h.hole}</div>
 
         <div className="mt-1 text-[9px] text-white/50">SI {detail.si}</div>
       </button>
@@ -391,7 +336,7 @@ export default function Score({
 
   return (
     <>
-      <div className="relative flex-1 overflow-y-auto pb-[220px]">
+      <div className="relative flex-1 overflow-y-auto pb-[96px]">
         <div
           className={cx(
             "relative mt-6 overflow-hidden rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
@@ -402,19 +347,6 @@ export default function Score({
               : "bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
           )}
         >
-          <div
-            className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
-            style={{
-              backgroundImage: `
-                radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
-                radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
-              `,
-              backgroundSize: "80px 80px",
-            }}
-          />
-
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]" />
-
           <div className="relative z-10">
             <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
               <div>
@@ -471,7 +403,7 @@ export default function Score({
           </div>
         </div>
 
-        <div className="relative mt-4 rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+        <div className="relative mt-4 min-h-[calc(100vh-360px)] rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
           <div className="mb-4">
             <div className="text-[10px] tracking-[0.22em] text-white/60">
               HOLE TRACKER
@@ -490,21 +422,11 @@ export default function Score({
         </div>
       </div>
 
-      {cardPlayer && (
-        <PlayerScorecard
-          cardPlayer={cardPlayer}
-          close={() => setCardPlayer(null)}
-          day={day}
-          teamLogos={teamLogos}
-          playerScorecardRows={playerScorecardRows}
-        />
-      )}
-
       {selectedHole && (
         <div
           className={cx(
             "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
-            isBetterBall ? "top-3 bottom-[64px]" : "top-[252px] bottom-[118px]"
+            isBetterBall ? "top-3 bottom-[78px]" : "top-[252px] bottom-[78px]"
           )}
         >
           <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/92 p-3 shadow-2xl backdrop-blur-xl">
@@ -527,310 +449,9 @@ export default function Score({
                 Save
               </button>
             </div>
-
-            {isBetterBall ? (
-              <div className="grid grid-cols-2 gap-3 pb-1">
-                <div className="space-y-3">
-                  {scoringRedPlayers.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`red-${i}`}
-                      team="red"
-                      players={[p]}
-                      score={draft[`red_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                      compact={scoringPlayerCount >= 4}
-                    />
-                  ))}
-                </div>
-
-                <div className="space-y-3">
-                  {scoringBluePlayers.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`blue-${i}`}
-                      team="blue"
-                      players={[p]}
-                      score={draft[`blue_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                      compact={scoringPlayerCount >= 4}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-3">
-                <ScoreBox
-                  team="red"
-                  players={match.red}
-                  score={draft.red}
-                  setScore={(v: number) =>
-                    setDraft((d: any) => ({ ...d, red: v }))
-                  }
-                  par={selectedHole.par}
-                />
-
-                <ScoreBox
-                  team="blue"
-                  players={match.blue}
-                  score={draft.blue}
-                  setScore={(v: number) =>
-                    setDraft((d: any) => ({ ...d, blue: v }))
-                  }
-                  par={selectedHole.par}
-                />
-              </div>
-            )}
-
-            {isAmbrose && (
-              <div className="mt-4 rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
-                <div className="mb-2 text-center text-[9px] font-bold tracking-[0.22em] text-white/45">
-                  TEE SHOT USED
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    {match.red.map((p: any) => {
-                      const selected =
-                        getSelectedTeePlayer(selectedHole.hole, "red") ===
-                        playerKey("red", p);
-
-                      return (
-                        <button
-                          key={`red-${p.name}`}
-                          onClick={() =>
-                            selectTeeShot(selectedHole.hole, "red", p)
-                          }
-                          className={cx(
-                            "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
-                            selected
-                              ? "border-red-300 bg-red-800 text-white shadow-[0_0_12px_rgba(255,109,109,0.45)]"
-                              : "border-red-400/25 bg-red-950/35 text-red-100"
-                          )}
-                        >
-                          {first(p.name)} • {getTeeShotCount("red", p)}/6
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="space-y-2">
-                    {match.blue.map((p: any) => {
-                      const selected =
-                        getSelectedTeePlayer(selectedHole.hole, "blue") ===
-                        playerKey("blue", p);
-
-                      return (
-                        <button
-                          key={`blue-${p.name}`}
-                          onClick={() =>
-                            selectTeeShot(selectedHole.hole, "blue", p)
-                          }
-                          className={cx(
-                            "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
-                            selected
-                              ? "border-blue-300 bg-blue-800 text-white shadow-[0_0_12px_rgba(103,166,255,0.45)]"
-                              : "border-blue-400/25 bg-blue-950/35 text-blue-100"
-                          )}
-                        >
-                          {first(p.name)} • {getTeeShotCount("blue", p)}/6
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
-
-      <div
-        className={cx(
-          "absolute bottom-[max(16px,env(safe-area-inset-bottom))] left-4 right-4 z-30 p-3",
-          panel
-        )}
-      >
-        <div className="mb-2 text-[9px] tracking-[0.22em] text-white/60">
-          MATCHES
-        </div>
-
-        <MatchButtons
-          count={count}
-          active={activeMatch}
-          setActive={setActiveMatch}
-        />
-      </div>
     </>
   );
 }
-
-function TeamPlayers({
-  team,
-  players,
-  teamLogos,
-  isAmbrose,
-  getTeeShotCount,
-  setCardPlayer,
-}: any) {
-  const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
-  const logoSize =
-    players.length > 1 ? "h-[50px] w-[50px]" : "h-[64px] w-[64px]";
-
-  return (
-    <div className="flex items-start justify-center gap-2 text-center">
-      {players.map((p: any, i: number) => (
-        <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
-          <button
-            onClick={() => setCardPlayer({ team, p })}
-            className="flex h-[64px] items-center justify-center"
-          >
-            <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
-          </button>
-
-          <div className="mt-1 w-full truncate text-[11px] leading-tight text-white">
-            {first(p.name)}
-          </div>
-
-          {isAmbrose && (
-            <div className="mt-1 flex justify-center gap-[2px]">
-              {Array.from({ length: 6 }, (_, dot) => (
-                <span
-                  key={dot}
-                  className={cx(
-                    "h-1.5 w-1.5 rounded-full border border-white/25",
-                    dot < getTeeShotCount(team, p)
-                      ? team === "red"
-                        ? "bg-[#ff6d6d]"
-                        : "bg-[#67a6ff]"
-                      : "bg-black/45"
-                  )}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-
-
-function ScoreBox({ team, players, score, setScore, par, compact = false }: any) {
-  const namesText =
-    players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
-
-  const points = stableford(score, par, 0);
-  const isRed = team === "red";
-
-  return (
-    <div
-      className={cx(
-        "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
-        compact
-          ? "min-h-[248px] rounded-[24px]"
-          : "min-h-[245px] rounded-[28px]",
-        isRed
-          ? "border-[#c94a4d]/35 bg-gradient-to-br from-[#9e2b32] via-[#5b1519] to-[#170607]"
-          : "border-[#6f96c4]/35 bg-gradient-to-br from-[#35618d] via-[#17324e] to-[#06111f]"
-      )}
-    >
-      <div
-        className={cx(
-          "absolute right-[-48px] top-[-44px] h-[150%] w-[48%] rotate-[14deg] opacity-20",
-          isRed ? "bg-white" : "bg-[#9fc2ff]"
-        )}
-      />
-
-      <div
-        className={cx(
-          "absolute inset-0 opacity-45",
-          isRed
-            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
-            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
-        )}
-      />
-
-      <div className={cx("relative z-10 flex h-full flex-col", compact ? "p-2.5" : "p-3")}>
-        <div className={cx("text-center", compact ? "mb-2" : "mb-2")}>
-          <div
-            className={cx(
-              "truncate font-black uppercase tracking-[0.12em] text-white",
-              compact ? "text-[13px]" : "text-[16px]"
-            )}
-          >
-            {namesText}
-          </div>
-        </div>
-
-        <div
-          className={cx(
-            "relative z-20 flex flex-1 flex-col items-center justify-center rounded-[24px] bg-[#020407]/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_10px_22px_rgba(0,0,0,0.35)]",
-            compact ? "min-h-[166px] px-2 py-2" : "min-h-[160px] px-3 py-2"
-          )}
-        >
-          <div
-            className={cx(
-              "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[88px]" : "text-[98px]"
-            )}
-          >
-            {score === par + 4 ? "P" : score}
-          </div>
-
-          <div
-            className={cx(
-              "mt-1 grid w-full grid-cols-2",
-              compact ? "gap-2" : "gap-3"
-            )}
-          >
-            <button
-              type="button"
-              onClick={() => setScore(Math.max(0, score - 1))}
-              className={cx(
-                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
-                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
-                isRed
-                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
-                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
-              )}
-            >
-              −
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScore(Math.min(par + 4, score + 1))}
-              className={cx(
-                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
-                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
-                isRed
-                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
-                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
-              )}
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        <div className={cx("text-center", compact ? "pt-2" : "pt-3")}>
-          <div
-            className={cx(
-              "font-black uppercase tracking-[0.1em] text-white",
-              compact ? "text-[12px]" : "text-[16px]"
-            )}
-          >
-            {points} {points === 1 ? "POINT" : "POINTS"}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
