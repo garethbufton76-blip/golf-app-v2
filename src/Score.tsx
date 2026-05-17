@@ -458,27 +458,6 @@ export default function Score({
             </div>
 
             <div className="mt-1 text-center">
-              <img
-                src="/launch-logo.png"
-                alt="DUEL"
-                className={cx(
-                  "mx-auto mb-2 h-5 object-contain transition-all duration-500",
-                  result.leader === "red"
-                    ? "opacity-100 drop-shadow-[0_0_10px_rgba(220,38,38,0.9)]"
-                    : result.leader === "blue"
-                    ? "opacity-100 drop-shadow-[0_0_10px_rgba(59,130,246,0.9)]"
-                    : "opacity-90"
-                )}
-                style={{
-                  filter:
-                    result.leader === "red"
-                      ? "brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(2307%) hue-rotate(349deg) brightness(98%) contrast(97%)"
-                      : result.leader === "blue"
-                      ? "brightness(0) saturate(100%) invert(43%) sepia(89%) saturate(1328%) hue-rotate(201deg) brightness(100%) contrast(94%)"
-                      : "brightness(0) invert(1)",
-                }}
-              />
-
               <div className="text-[20px] font-extrabold tracking-[0.08em]">
                 {displayMain}
               </div>
@@ -491,6 +470,27 @@ export default function Score({
         </div>
 
         <div className="relative mt-4 min-h-[calc(100vh-320px)] rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+          <img
+            src="/launch-logo.png"
+            alt="DUEL"
+            className={cx(
+              "pointer-events-none absolute right-5 top-5 h-7 object-contain transition-all duration-500",
+              result.leader === "red"
+                ? "opacity-95 drop-shadow-[0_0_10px_rgba(220,38,38,0.9)]"
+                : result.leader === "blue"
+                ? "opacity-95 drop-shadow-[0_0_10px_rgba(59,130,246,0.9)]"
+                : "opacity-80"
+            )}
+            style={{
+              filter:
+                result.leader === "red"
+                  ? "brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(2307%) hue-rotate(349deg) brightness(98%) contrast(97%)"
+                  : result.leader === "blue"
+                  ? "brightness(0) saturate(100%) invert(43%) sepia(89%) saturate(1328%) hue-rotate(201deg) brightness(100%) contrast(94%)"
+                  : "brightness(0) invert(1)",
+            }}
+          />
+
           <div className="mb-4">
             <div className="text-[10px] tracking-[0.22em] text-white/60">
               HOLE TRACKER
