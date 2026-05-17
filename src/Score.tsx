@@ -414,19 +414,10 @@ export default function Score({
           <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]" />
 
           <div className="relative z-10">
-            <div className="mb-1 flex items-center justify-between text-[11px] font-semibold tracking-[0.22em] text-white/60">
-              <div>
-                {day.label.toUpperCase()} •{" "}
-                {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
-                {day.tee.toUpperCase()}
-              </div>
-
-              <button
-                onClick={() => setScreen("home")}
-                className="text-sm font-semibold tracking-normal text-white/85"
-              >
-                Back
-              </button>
+            <div className="mb-1 text-center text-[11px] font-semibold tracking-[0.22em] text-white/60">
+              {day.label.toUpperCase()} •{" "}
+              {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
+              {day.tee.toUpperCase()}
             </div>
 
             <div className="mb-2 text-center text-[11px] font-extrabold tracking-[0.32em] text-white/80">
@@ -473,21 +464,9 @@ export default function Score({
           <img
             src="/launch-logo.png"
             alt="DUEL"
-            className={cx(
-              "pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain transition-all duration-500",
-              result.leader === "red"
-                ? "opacity-95 drop-shadow-[0_0_10px_rgba(220,38,38,0.9)]"
-                : result.leader === "blue"
-                ? "opacity-95 drop-shadow-[0_0_10px_rgba(59,130,246,0.9)]"
-                : "opacity-80"
-            )}
+            className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
             style={{
-              filter:
-                result.leader === "red"
-                  ? "brightness(0) saturate(100%) invert(19%) sepia(94%) saturate(2307%) hue-rotate(349deg) brightness(98%) contrast(97%)"
-                  : result.leader === "blue"
-                  ? "brightness(0) saturate(100%) invert(43%) sepia(89%) saturate(1328%) hue-rotate(201deg) brightness(100%) contrast(94%)"
-                  : "brightness(0) invert(1)",
+              filter: "brightness(0) invert(1)",
             }}
           />
 
@@ -836,3 +815,4 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
     </div>
   );
 }
+
