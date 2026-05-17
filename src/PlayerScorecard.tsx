@@ -184,7 +184,7 @@ export default function PlayerScorecard({
             <img
               src={activePlayer.photo}
               alt=""
-              className="absolute right-[-10px] top-[-6px] h-[48%] w-[58%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
+              className="absolute right-[-10px] top-[-2px] h-[47%] w-[58%] object-cover object-top opacity-95 drop-shadow-[0_30px_50px_rgba(0,0,0,0.78)]"
               style={{
                 WebkitMaskImage:
                   "linear-gradient(to bottom, black 0%, black 80%, rgba(0,0,0,0.65) 91%, transparent 100%)",
@@ -204,7 +204,7 @@ export default function PlayerScorecard({
           ) : null}
 
           <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/8 to-black/88" />
-          <div className="absolute inset-x-0 bottom-0 h-[40%] bg-gradient-to-t from-black via-black/92 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-black via-black/94 to-transparent" />
         </div>
 
         {/* DUEL LOGO */}
@@ -246,12 +246,12 @@ export default function PlayerScorecard({
           className={
             showingTeamCard
               ? "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[258px]"
-              : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[86px]"
+              : "relative z-10 flex h-full flex-col px-3 pb-[72px] pt-[88px]"
           }
         >
           {!showingTeamCard ? (
-            <div className="flex min-h-[238px] flex-col justify-end px-3 pb-2">
-              <div className="mb-3">
+            <div className="flex min-h-[245px] flex-col justify-end px-3 pb-1">
+              <div className="mb-2">
                 <Logo
                   team={team}
                   size="h-[72px] w-[72px]"
@@ -260,7 +260,7 @@ export default function PlayerScorecard({
               </div>
 
               <div
-                className="max-w-[158px] text-[31px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
+                className="max-w-[150px] text-[31px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
                 style={{
                   fontFamily:
                     'Impact, "Arial Narrow", "Arial Black", sans-serif',
@@ -280,7 +280,7 @@ export default function PlayerScorecard({
                 style={{ backgroundColor: accentBright }}
               />
 
-              <div className="mt-3 space-y-1.5 text-[8px] font-black uppercase tracking-[0.16em] text-white">
+              <div className="mt-3 space-y-1.5 text-[7.5px] font-black uppercase tracking-[0.16em] text-white">
                 <MetaLines day={day} handicap={activePlayer.handicap} />
               </div>
             </div>
@@ -390,7 +390,7 @@ export default function PlayerScorecard({
           </div>
 
           {/* FOOTER */}
-          <div className="mt-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/55">
+          <div className="mt-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
             {teamName} • {day.format}
           </div>
         </div>
