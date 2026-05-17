@@ -14,8 +14,10 @@ import Roster from "./Roster";
 import Score from "./Score";
 import Admin from "./Admin";
 import QuickGame from "./QuickGame";
+import BottomNav from "./BottomNav";
 
 type AppMode = "launch" | "weekend" | "quick";
+type GameTab = "live" | "score" | "team";
 
 export default function App() {
   const [mode, setMode] = useState<AppMode>("launch");
@@ -23,6 +25,8 @@ export default function App() {
   const [screen, setScreen] = useState("home");
   const [players, setPlayers] = useState(2);
   const [days, setDays] = useState(1);
+
+  const [activeTab, setActiveTab] = useState<GameTab>("score");
 
   const [eventLocked, setEventLocked] = useState(false);
   const [eventStarted, setEventStarted] = useState(false);
@@ -106,6 +110,7 @@ export default function App() {
   const openMatch = (i: number) => {
     setSelectedMatch(i);
     setScreen("score");
+    setActiveTab("score");
   };
 
   function handleQuickScreen(nextScreen: string) {
@@ -114,6 +119,7 @@ export default function App() {
       setEventLocked(true);
       setMode("weekend");
       setScreen("score");
+      setActiveTab("score");
       return;
     }
 
@@ -124,6 +130,24 @@ export default function App() {
     }
 
     setScreen(nextScreen);
+  }
+
+  function handleBottomNav(tab: GameTab) {
+    setActiveTab(tab);
+
+    if (tab === "live") {
+      setScreen("home");
+      return;
+    }
+
+    if (tab === "score") {
+      setScreen("score");
+      return;
+    }
+
+    if (tab === "team") {
+      setScreen("rosterP");
+    }
   }
 
   if (mode === "launch") {
@@ -140,6 +164,11 @@ export default function App() {
       />
     );
   }
+
+  const showBottomNav =
+    eventStarted &&
+    screen !== "admin" &&
+    screen !== "quick";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
@@ -281,14 +310,20 @@ export default function App() {
           {mode !== "quick" && screen === "home" && eventStarted && (
             <button
               onClick={() => setScreen("admin")}
-              className="absolute left-4 top-4"
+              className="absolute left-4 top-4 z-40"
             >
               <AdminIcon />
             </button>
+          )}
+
+          {showBottomNav && (
+            <BottomNav
+              activeTab={activeTab}
+              setActiveTab={handleBottomNav}
+            />
           )}
         </div>
       </div>
     </div>
   );
 }
-
