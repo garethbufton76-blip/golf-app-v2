@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { cx } from "./data";
+import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
 
 const QUICK_FORMATS = [
@@ -31,6 +32,7 @@ export default function QuickGame({
   const [playersPerTeam, setPlayersPerTeam] = useState(1);
   const [format, setFormat] = useState("Singles Match Play");
   const [tee, setTee] = useState(getDefaultTee(courseId));
+  const [apiTestStatus, setApiTestStatus] = useState("");
 
   const [redName, setRedName] = useState("Team Red");
   const [blueName, setBlueName] = useState("Team Blue");
@@ -65,6 +67,34 @@ export default function QuickGame({
           : p
       )
     );
+  }
+
+  async function testCourseApi() {
+    setApiTestStatus("Testing GolfCourseAPI...");
+
+    try {
+      const result = await searchCourses("St Michaels");
+
+      console.log("GolfCourseAPI test result:", result);
+
+      const courseCount = Array.isArray(result?.courses)
+        ? result.courses.length
+        : Array.isArray(result)
+        ? result.length
+        : 0;
+
+      setApiTestStatus(
+        courseCount
+          ? `API connected • ${courseCount} course result${courseCount === 1 ? "" : "s"}`
+          : "API connected • check console for response"
+      );
+
+      alert("GolfCourseAPI worked — check the browser console for the full result.");
+    } catch (error) {
+      console.error("GolfCourseAPI test error:", error);
+      setApiTestStatus("API failed • check console");
+      alert("GolfCourseAPI failed — check the browser console.");
+    }
   }
 
   function startQuickGame() {
@@ -154,6 +184,22 @@ export default function QuickGame({
             </div>
           </div>
         </Section>
+
+        <div className="mt-3 rounded-[18px] border border-[#d1c79f]/20 bg-black/38 p-3 shadow-[0_12px_28px_rgba(0,0,0,0.34)] backdrop-blur-xl">
+          <button
+            type="button"
+            onClick={testCourseApi}
+            className="w-full rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.16em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)]"
+          >
+            Test Course API
+          </button>
+
+          {apiTestStatus ? (
+            <div className="mt-2 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white/60">
+              {apiTestStatus}
+            </div>
+          ) : null}
+        </div>
 
         <div className="mb-3 mt-3 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
