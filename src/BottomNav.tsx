@@ -1,4 +1,3 @@
-import { BarChart3, Users, Plus } from "lucide-react";
 import { cx } from "./data";
 
 type GameTab = "live" | "score" | "team";
@@ -15,7 +14,7 @@ export default function BottomNav({
       <div className="relative grid grid-cols-3 items-center rounded-[28px] border border-[#d1c79f]/22 bg-black/78 px-3 py-3 shadow-[0_18px_45px_rgba(0,0,0,0.75)] backdrop-blur-xl">
         <NavButton
           label="Live"
-          icon={<BarChart3 size={22} />}
+          icon="▦"
           active={activeTab === "live"}
           onClick={() => setActiveTab("live")}
         />
@@ -30,13 +29,13 @@ export default function BottomNav({
               : "border-[#d1c79f]/35 bg-gradient-to-b from-[#245438] via-[#163d2b] to-[#071b13] text-[#efe6bf]"
           )}
         >
-          <Plus size={28} strokeWidth={3} />
+          <span className="text-[28px] leading-none">＋</span>
           <span className="mt-0.5 text-[9px] tracking-[0.14em]">Score</span>
         </button>
 
         <NavButton
           label="Team"
-          icon={<Users size={22} />}
+          icon="◉"
           active={activeTab === "team"}
           onClick={() => setActiveTab("team")}
         />
@@ -52,7 +51,7 @@ function NavButton({
   onClick,
 }: {
   label: string;
-  icon: React.ReactNode;
+  icon: string;
   active: boolean;
   onClick: () => void;
 }) {
@@ -67,7 +66,7 @@ function NavButton({
           : "text-white/55 hover:text-white"
       )}
     >
-      <div>{icon}</div>
+      <div className="text-[22px] leading-none">{icon}</div>
       <div>{label}</div>
     </button>
   );
