@@ -1,3 +1,4 @@
+```tsx
 import { useState } from "react";
 import {
   Logo,
@@ -144,8 +145,8 @@ export default function Home({
 
         <div
           className={cx(
-            "grid grid-cols-[1fr_auto_1fr] items-center gap-3 transition-all duration-500",
-            liveExpanded ? "min-h-[405px]" : ""
+            "mx-auto grid w-full max-w-[720px] grid-cols-[1fr_auto_1fr] items-center transition-all duration-500",
+            liveExpanded ? "gap-6 min-h-[405px]" : "gap-3"
           )}
         >
           <button
@@ -155,7 +156,7 @@ export default function Home({
           >
             <Logo
               team="red"
-              size={liveExpanded ? "mx-auto h-32 w-32" : "mx-auto h-20 w-20"}
+              size={liveExpanded ? "mx-auto h-28 w-28" : "mx-auto h-20 w-20"}
               src={teamLogos?.Red}
             />
 
@@ -228,7 +229,7 @@ export default function Home({
           >
             <Logo
               team="blue"
-              size={liveExpanded ? "mx-auto h-32 w-32" : "mx-auto h-20 w-20"}
+              size={liveExpanded ? "mx-auto h-28 w-28" : "mx-auto h-20 w-20"}
               src={teamLogos?.Blue}
             />
 
@@ -330,3 +331,4 @@ export default function Home({
     </div>
   );
 }
+```
