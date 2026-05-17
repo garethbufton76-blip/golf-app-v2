@@ -11,53 +11,31 @@ export default function BottomNav({
 }) {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-50">
-      <div className="relative h-[96px] border-t border-black/10 bg-white">
-        {/* CENTER SCORE BUTTON */}
-        <button
-          type="button"
+      <div className="grid h-[72px] grid-cols-3 overflow-hidden rounded-t-[22px] border-t border-white/15 shadow-[0_-12px_32px_rgba(0,0,0,0.45)]">
+        <NavButton
+          label="Live"
+          icon="☷"
+          active={activeTab === "live"}
+          onClick={() => setActiveTab("live")}
+          className="bg-[#111d3a] text-white"
+        />
+
+        <NavButton
+          label="Score"
+          icon="+"
+          active={activeTab === "score"}
           onClick={() => setActiveTab("score")}
-          className="absolute left-1/2 top-0 z-20 flex h-[92px] w-[92px] -translate-x-1/2 -translate-y-8 items-center justify-center rounded-full shadow-[0_18px_40px_rgba(0,0,0,0.28)] transition-all active:scale-95"
-        >
-          <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-[#23452f] bg-gradient-to-br from-[#1f5f3d] via-[#0f3d27] to-[#061811]">
-            {/* soft glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.16),transparent_45%)]" />
+          className="bg-white text-black"
+          center
+        />
 
-            {/* logo text */}
-            <div className="relative flex flex-col items-center justify-center">
-              <div
-                className="text-[32px] font-black italic leading-none text-white"
-                style={{
-                  fontFamily: "cursive",
-                }}
-              >
-                Duel
-              </div>
-
-              <div className="mt-1 text-[9px] font-black uppercase tracking-[0.22em] text-white/80">
-                Score
-              </div>
-            </div>
-          </div>
-        </button>
-
-        {/* NAV ITEMS */}
-        <div className="flex h-full items-center justify-between px-10 pt-2">
-          <NavButton
-            label="Live"
-            icon="▦"
-            active={activeTab === "live"}
-            onClick={() => setActiveTab("live")}
-          />
-
-          <div className="w-[90px]" />
-
-          <NavButton
-            label="Team"
-            icon="◉"
-            active={activeTab === "team"}
-            onClick={() => setActiveTab("team")}
-          />
-        </div>
+        <NavButton
+          label="Team"
+          icon="◉"
+          active={activeTab === "team"}
+          onClick={() => setActiveTab("team")}
+          className="bg-[#b91f2d] text-white"
+        />
       </div>
     </div>
   );
@@ -68,26 +46,49 @@ function NavButton({
   icon,
   active,
   onClick,
+  className,
+  center = false,
 }: {
   label: string;
   icon: string;
   active: boolean;
   onClick: () => void;
+  className: string;
+  center?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cx(
-        "flex w-[90px] flex-col items-center justify-center gap-1 transition-all active:scale-95",
-        active ? "text-black" : "text-black/45"
+        "relative flex flex-col items-center justify-center gap-1 font-black uppercase transition-all active:scale-[0.98]",
+        className,
+        active && "brightness-110"
       )}
     >
-      <div className="text-[24px] leading-none">{icon}</div>
+      <div
+        className={cx(
+          "flex items-center justify-center rounded-full font-black leading-none",
+          center
+            ? "h-[30px] w-[30px] bg-[#23395d] text-[24px] text-white"
+            : "text-[24px]"
+        )}
+      >
+        {icon}
+      </div>
 
-      <div className="text-[11px] font-black uppercase tracking-[0.18em]">
+      <div className="text-[11px] tracking-[0.08em]">
         {label}
       </div>
+
+      {active && (
+        <div
+          className={cx(
+            "absolute top-0 h-[3px] w-full",
+            center ? "bg-[#23395d]" : "bg-white/75"
+          )}
+        />
+      )}
     </button>
   );
 }
