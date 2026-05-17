@@ -16,7 +16,7 @@ function DayButtons({
   active,
   setActive,
 }: any) {
-  const shown = dayConfigs.slice(0, days);
+  const shown = (dayConfigs || []).slice(0, days || 1);
 
   if (shown.length <= 1) return null;
 
@@ -29,12 +29,12 @@ function DayButtons({
     >
       {shown.map((d: any, i: number) => (
         <Button
-          key={d.label}
+          key={d?.label || i}
           active={i === active}
           onClick={() => setActive(i)}
           className="py-2 text-[10px]"
         >
-          {d.label}
+          {d?.label || `Day ${i + 1}`}
         </Button>
       ))}
     </div>
@@ -49,11 +49,11 @@ function formatScore(value: any) {
 function namesFor(players: any[]) {
   if (!players?.length) return "TBC";
 
-  return players.map((p: any) => first(p.name)).join(" / ");
+  return players.map((p: any) => first(p?.name || "Player")).join(" / ");
 }
 
 function latestHoleText(holes: any[], teamNames: any) {
-  const latest = [...holes]
+  const latest = [...(holes || [])]
     .reverse()
     .find((h: any) => h.status && h.status !== "pending");
 
@@ -62,32 +62,64 @@ function latestHoleText(holes: any[], teamNames: any) {
   if (latest.status === "as") return `Hole ${latest.hole} halved`;
 
   if (latest.status === "red") {
-    return `${teamNames?.Red || "Red"} won Hole ${latest.hole}`;
+    return `${teamNames?.Red || "Team Red"} won Hole ${latest.hole}`;
   }
 
   if (latest.status === "blue") {
-    return `${teamNames?.Blue || "Blue"} won Hole ${latest.hole}`;
+    return `${teamNames?.Blue || "Team Blue"} won Hole ${latest.hole}`;
   }
 
   return `Hole ${latest.hole} updated`;
 }
 
 function displayMatchMain(result: any, teamNames: any) {
-  if (!result.leader) return result.main;
+  if (!result?.leader) return result?.main || "All Square";
 
   const label =
     teamNames?.[result.leader === "red" ? "Red" : "Blue"] ||
     result.leader.toUpperCase();
 
-  return result.main.replace(result.leader.toUpperCase(), label.toUpperCase());
+  return String(result.main || "").replace(
+    result.leader.toUpperCase(),
+    label.toUpperCase()
+  );
+}
+
+function safeMatchCount(players: number, format: string) {
+  try {
+    return matchCount(players || 1, format || "Singles Match Play");
+  } catch {
+    return 1;
+  }
+}
+
+function safePlayersForMatch(
+  roster: any,
+  players: number,
+  format: string,
+  index: number
+) {
+  try {
+    return playersForMatch(
+      roster || { Red: [], Blue: [] },
+      players || 1,
+      format || "Singles Match Play",
+      index
+    );
+  } catch {
+    return {
+      red: [],
+      blue: [],
+    };
+  }
 }
 
 export default function Home({
   setScreen,
-  dayConfigs,
-  days,
-  players,
-  activeDay,
+  dayConfigs = [],
+  days = 1,
+  players = 1,
+  activeDay = 0,
   setActiveDay,
   totals,
   openMatch,
@@ -96,14 +128,26 @@ export default function Home({
   roster,
   states,
 }: any) {
-  const day = dayConfigs[activeDay];
-  const count = matchCount(players, day.format);
+  const day =
+    dayConfigs?.[activeDay] || {
+      label: "Day 1",
+      course: "St Michaels",
+      tee: "Blue",
+      format: "Singles Match Play",
+    };
+
+  const safeTotals = totals || {
+    official: { red: 0, blue: 0 },
+    live: { red: 0, blue: 0 },
+  };
+
+  const count = safeMatchCount(players, day.format);
 
   const matchCards = Array.from({ length: count }, (_, i) => {
     const stateKey = keyFor(activeDay, i);
     const holes = states?.[stateKey] || blankHoles();
     const result = getResult(holes);
-    const match = playersForMatch(roster, players, day.format, i);
+    const match = safePlayersForMatch(roster, players, day.format, i);
     const holesPlayed = holes.filter(
       (h: any) => h.status !== "pending"
     ).length;
@@ -120,7 +164,7 @@ export default function Home({
       redNames: namesFor(match.red),
       blueNames: namesFor(match.blue),
       main: displayMatchMain(result, teamNames),
-      sub: result.sub,
+      sub: result?.sub || "0-0-0 • 18 to play",
       latest: latestHoleText(holes, teamNames),
     };
   });
@@ -137,7 +181,7 @@ export default function Home({
 
       <div className="mt-5 px-2">
         <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.24em] text-white/52">
-          {day.label} • {day.course || "St Michaels"} • {day.tee} Tee
+          {day.label} • {day.course || "St Michaels"} • {day.tee || "Blue"} Tee
         </div>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
@@ -164,7 +208,7 @@ export default function Home({
                 transform: "scaleY(1.12) scaleX(0.86)",
               }}
             >
-              {formatScore(totals.official.red)}
+              {formatScore(safeTotals.official?.red)}
             </div>
           </button>
 
@@ -175,13 +219,13 @@ export default function Home({
 
             <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 px-4 py-2 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl">
               <span className="text-lg font-black">
-                {formatScore(totals.live.red)}
+                {formatScore(safeTotals.live?.red)}
               </span>
 
               <span className="mx-2 text-white/35">-</span>
 
               <span className="text-lg font-black">
-                {formatScore(totals.live.blue)}
+                {formatScore(safeTotals.live?.blue)}
               </span>
             </div>
           </div>
@@ -209,7 +253,7 @@ export default function Home({
                 transform: "scaleY(1.12) scaleX(0.86)",
               }}
             >
-              {formatScore(totals.official.blue)}
+              {formatScore(safeTotals.official?.blue)}
             </div>
           </button>
         </div>
@@ -229,17 +273,17 @@ export default function Home({
           Live Matches
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {matchCards.map((matchCard) => (
             <button
               key={matchCard.label}
               type="button"
               onClick={() => openMatch(matchCard.index)}
               className={cx(
-                "w-full overflow-hidden rounded-[22px] border px-5 py-3 text-left shadow-[0_14px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all",
-                matchCard.result.leader === "red"
+                "w-full overflow-hidden rounded-[20px] border px-5 py-3 text-left shadow-[0_14px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all",
+                matchCard.result?.leader === "red"
                   ? "border-red-300/18 bg-gradient-to-r from-[#68171d]/92 via-[#241316]/94 to-[#0b1018]/94"
-                  : matchCard.result.leader === "blue"
+                  : matchCard.result?.leader === "blue"
                   ? "border-blue-300/18 bg-gradient-to-r from-[#0b1018]/94 via-[#13233f]/94 to-[#173f73]/86"
                   : "border-white/10 bg-gradient-to-r from-[#1d1d22]/88 via-[#101318]/94 to-[#111827]/90"
               )}
@@ -262,13 +306,7 @@ export default function Home({
                 </div>
 
                 <div className="shrink-0 text-right">
-                  <div
-                    className="text-[15px] font-black uppercase leading-none tracking-[-0.02em] text-white"
-                    style={{
-                      fontFamily:
-                        'Inter, SF Pro Display, system-ui, sans-serif',
-                    }}
-                  >
+                  <div className="text-[15px] font-black uppercase leading-none tracking-[-0.02em] text-white">
                     {matchCard.main}
                   </div>
 
@@ -279,7 +317,7 @@ export default function Home({
                 </div>
               </div>
 
-              <div className="mt-3 flex items-center justify-between border-t border-white/8 pt-2">
+              <div className="mt-3 flex items-center justify-between border-t border-white/10 pt-2">
                 <span className="truncate text-[10px] font-bold uppercase tracking-[0.12em] text-white/62">
                   {matchCard.latest}
                 </span>
