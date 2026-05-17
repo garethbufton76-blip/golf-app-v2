@@ -474,7 +474,7 @@ export default function Score({
             src="/launch-logo.png"
             alt="DUEL"
             className={cx(
-              "pointer-events-none absolute right-5 top-5 h-7 object-contain transition-all duration-500",
+              "pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain transition-all duration-500",
               result.leader === "red"
                 ? "opacity-95 drop-shadow-[0_0_10px_rgba(220,38,38,0.9)]"
                 : result.leader === "blue"
