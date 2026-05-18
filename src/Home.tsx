@@ -375,7 +375,7 @@ export default function Home({
                     className={cx(
                       "pointer-events-none absolute inset-0",
                       isRedLeader
-                        ? "bg-[linear-gradient(90deg,rgba(255,255,255,0.035),transparent_44%,rgba(0,0,0,0.26))]"
+                        ? "bg-[linear-gradient(90deg,rgba(0,0,0,0.06),transparent_36%,rgba(255,255,255,0.08)_68%,rgba(255,255,255,0.14)_100%)]"
                         : isBlueLeader
                         ? "bg-[linear-gradient(90deg,rgba(0,0,0,0.2),transparent_38%,rgba(255,255,255,0.035))]"
                         : "bg-[linear-gradient(90deg,rgba(255,255,255,0.025),transparent_42%,rgba(255,255,255,0.015))]"
