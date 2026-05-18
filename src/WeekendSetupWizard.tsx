@@ -7,6 +7,66 @@ function firstName(name: string) {
   return String(name || "").split(" ")[0] || "Player";
 }
 
+function normalisePlayer(player: any, index: number) {
+  return {
+    id: player?.id || "player-" + (index + 1),
+    name: player?.name || "",
+    nickname: player?.nickname || "",
+    handicap: player?.handicap ?? player?.rawHandicap ?? "",
+    homeClub: player?.homeClub || "",
+    preferredTee: player?.preferredTee || "Blue",
+    photo: player?.photo || "",
+    team: player?.team || "",
+    regular: player?.regular ?? true,
+  };
+}
+
+function balanceTeamsByHandicap(players: any[]) {
+  const sorted = [...players]
+    .map((player, index) => normalisePlayer(player, index))
+    .sort((a, b) => Number(a.handicap || 0) - Number(b.handicap || 0));
+
+  const red: any[] = [];
+  const blue: any[] = [];
+  let redTotal = 0;
+  let blueTotal = 0;
+
+  sorted.forEach((player) => {
+    const hcp = Number(player.handicap || 0);
+
+    if (red.length <= blue.length && redTotal <= blueTotal) {
+      red.push({ ...player, team: "Red" });
+      redTotal += hcp;
+    } else if (blue.length < red.length || blueTotal <= redTotal) {
+      blue.push({ ...player, team: "Blue" });
+      blueTotal += hcp;
+    } else {
+      red.push({ ...player, team: "Red" });
+      redTotal += hcp;
+    }
+  });
+
+  return { red, blue };
+}
+
+function splitTeamsByOrder(players: any[]) {
+  const half = Math.ceil(players.length / 2);
+
+  return {
+    red: players.slice(0, half).map((player) => ({ ...player, team: "Red" })),
+    blue: players.slice(half).map((player) => ({ ...player, team: "Blue" })),
+  };
+}
+
+function shuffleTeams(players: any[]) {
+  const shuffled = [...players]
+    .map((player) => ({ player, sort: Math.random() }))
+    .sort((a, b) => a.sort - b.sort)
+    .map(({ player }) => player);
+
+  return splitTeamsByOrder(shuffled);
+}
+
 export default function WeekendSetupWizard({
   activeEvent,
   saveActiveEvent,
@@ -32,15 +92,38 @@ export default function WeekendSetupWizard({
   setActiveTab,
 }: any) {
   const [step, setStep] = useState(0);
+  const [teamMethod, setTeamMethod] = useState<"manual" | "random" | "handicap">(
+    "handicap"
+  );
 
   const eventCode = activeEvent?.eventCode || "DUEL";
   const adminPin = activeEvent?.adminPin || "0000";
 
-  const redPlayers = roster?.Red || roster?.red || [];
-  const bluePlayers = roster?.Blue || roster?.blue || [];
-
   const totalPlayers = players * 2;
-  const progress = ((step + 1) / 5) * 100;
+  const progress = ((step + 1) / 6) * 100;
+
+  const playerList = useMemo(() => {
+    const fromSaved = Array.isArray(savedPlayers) ? savedPlayers : [];
+    const merged = [...fromSaved];
+
+    while (merged.length < totalPlayers) {
+      merged.push({
+        id: "player-" + (merged.length + 1),
+        name: "",
+        nickname: "",
+        handicap: "",
+        homeClub: "",
+        preferredTee: "Blue",
+        photo: "",
+        regular: true,
+      });
+    }
+
+    return merged.slice(0, totalPlayers).map(normalisePlayer);
+  }, [savedPlayers, totalPlayers]);
+
+  const redPlayers = roster?.Red || [];
+  const bluePlayers = roster?.Blue || [];
 
   const eventSummary = useMemo(
     () => ({
@@ -79,6 +162,7 @@ export default function WeekendSetupWizard({
         dayConfigs,
         roster,
         savedPlayers,
+        teamMethod,
         ...extra,
       };
 
@@ -90,8 +174,12 @@ export default function WeekendSetupWizard({
   }
 
   function goNext() {
+    if (step === 2) {
+      applyTeamMethod(teamMethod);
+    }
+
     persistEvent();
-    setStep((value) => Math.min(4, value + 1));
+    setStep((value) => Math.min(5, value + 1));
   }
 
   function goBack() {
@@ -111,39 +199,88 @@ export default function WeekendSetupWizard({
     reader.readAsDataURL(file);
   }
 
-  function updateRosterPlayer(
-    team: "Red" | "Blue",
-    index: number,
-    field: string,
-    value: any
-  ) {
-    setRoster((current: any) => {
-      const nextTeam = [...(current?.[team] || [])];
+  function updateSavedPlayer(index: number, field: string, value: any) {
+    setSavedPlayers((current: any[]) => {
+      const next = Array.isArray(current) ? [...current] : [];
 
-      while (nextTeam.length < players) {
-        nextTeam.push({
-          id: team.toLowerCase() + "-" + (nextTeam.length + 1),
-          slot: team + " " + (nextTeam.length + 1),
+      while (next.length < totalPlayers) {
+        next.push({
+          id: "player-" + (next.length + 1),
           name: "",
-          handicap: "0",
-          photo: "",
+          nickname: "",
+          handicap: "",
           homeClub: "",
           preferredTee: "Blue",
+          photo: "",
+          regular: true,
         });
       }
 
-      nextTeam[index] = {
-        ...nextTeam[index],
-        id: nextTeam[index]?.id || team.toLowerCase() + "-" + (index + 1),
-        teamId: team.toLowerCase(),
+      next[index] = {
+        ...normalisePlayer(next[index], index),
         [field]: value,
       };
 
-      return {
-        ...current,
-        [team]: nextTeam,
-      };
+      return next;
     });
+  }
+
+  function applyTeams(red: any[], blue: any[]) {
+    setRoster((current: any) => ({
+      ...current,
+      Red: red.map((player, index) => ({
+        ...player,
+        id: player.id || "red-" + (index + 1),
+        teamId: "red",
+        name: player.name || "Red " + (index + 1),
+        handicap: String(player.handicap || "0"),
+      })),
+      Blue: blue.map((player, index) => ({
+        ...player,
+        id: player.id || "blue-" + (index + 1),
+        teamId: "blue",
+        name: player.name || "Blue " + (index + 1),
+        handicap: String(player.handicap || "0"),
+      })),
+    }));
+  }
+
+  function applyTeamMethod(method: "manual" | "random" | "handicap") {
+    const list = playerList.map(normalisePlayer);
+
+    if (method === "random") {
+      const result = shuffleTeams(list);
+      applyTeams(result.red, result.blue);
+      return;
+    }
+
+    if (method === "handicap") {
+      const result = balanceTeamsByHandicap(list);
+      applyTeams(result.red, result.blue);
+      return;
+    }
+
+    const manualRed = list.filter((player) => player.team === "Red");
+    const manualBlue = list.filter((player) => player.team === "Blue");
+    const unassigned = list.filter((player) => !player.team);
+
+    const red = [...manualRed];
+    const blue = [...manualBlue];
+
+    unassigned.forEach((player) => {
+      if (red.length <= blue.length) {
+        red.push({ ...player, team: "Red" });
+      } else {
+        blue.push({ ...player, team: "Blue" });
+      }
+    });
+
+    applyTeams(red, blue);
+  }
+
+  function updateManualTeam(index: number, team: "Red" | "Blue" | "") {
+    updateSavedPlayer(index, "team", team);
+    setTeamMethod("manual");
   }
 
   function updateDay(index: number, field: string, value: any) {
@@ -376,29 +513,184 @@ export default function WeekendSetupWizard({
         )}
 
         {step === 2 && (
-          <Panel title="3. Players" subtitle="Add names, photos and handicaps.">
-            <div className="grid grid-cols-2 gap-3">
-              <PlayerColumn
-                team="Red"
-                players={redPlayers}
-                count={players}
-                updateRosterPlayer={updateRosterPlayer}
-                readImageFile={readImageFile}
-              />
+          <Panel
+            title="3. Players"
+            subtitle="Add every player once. Teams are selected in the next step."
+          >
+            <div className="space-y-3">
+              {playerList.map((player, index) => (
+                <div
+                  key={player.id || index}
+                  className="rounded-[22px] border border-white/10 bg-black/42 p-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <label className="flex h-14 w-14 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/55">
+                      {player.photo ? (
+                        <img
+                          src={player.photo}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-[24px]">＋</span>
+                      )}
 
-              <PlayerColumn
-                team="Blue"
-                players={bluePlayers}
-                count={players}
-                updateRosterPlayer={updateRosterPlayer}
-                readImageFile={readImageFile}
-              />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          readImageFile(e.target.files?.[0], (value: string) =>
+                            updateSavedPlayer(index, "photo", value)
+                          )
+                        }
+                      />
+                    </label>
+
+                    <div className="min-w-0 flex-1">
+                      <Label>Player {index + 1}</Label>
+
+                      <input
+                        value={player.name || ""}
+                        onChange={(e) =>
+                          updateSavedPlayer(index, "name", e.target.value)
+                        }
+                        placeholder={"Player " + (index + 1)}
+                        className="w-full bg-transparent text-[18px] font-black text-white outline-none placeholder:text-white/25"
+                      />
+                    </div>
+
+                    <div className="w-[70px]">
+                      <Label>HCP</Label>
+
+                      <input
+                        value={player.handicap || ""}
+                        onChange={(e) =>
+                          updateSavedPlayer(index, "handicap", e.target.value)
+                        }
+                        placeholder="0"
+                        inputMode="decimal"
+                        className="w-full rounded-[14px] border border-white/10 bg-black/45 px-3 py-2 text-center text-[14px] font-black text-white outline-none placeholder:text-white/25"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-[1fr_92px] gap-2">
+                    <input
+                      value={player.homeClub || ""}
+                      onChange={(e) =>
+                        updateSavedPlayer(index, "homeClub", e.target.value)
+                      }
+                      placeholder="Home club"
+                      className="rounded-[14px] border border-white/10 bg-black/45 px-3 py-2 text-[12px] font-bold text-white outline-none placeholder:text-white/25"
+                    />
+
+                    <select
+                      value={player.preferredTee || "Blue"}
+                      onChange={(e) =>
+                        updateSavedPlayer(index, "preferredTee", e.target.value)
+                      }
+                      className="rounded-[14px] border border-white/10 bg-black/45 px-2 py-2 text-[11px] font-black uppercase text-white outline-none"
+                    >
+                      <option>Blue</option>
+                      <option>White</option>
+                      <option>Gold</option>
+                      <option>Red</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
             </div>
           </Panel>
         )}
 
         {step === 3 && (
-          <Panel title="4. Rounds" subtitle="Set each day before you press DUEL.">
+          <Panel
+            title="4. Teams"
+            subtitle="Choose the teams yourself, randomise, or balance by handicap."
+          >
+            <div className="grid grid-cols-3 gap-2">
+              <TeamMethodButton
+                active={teamMethod === "manual"}
+                title="Choose"
+                subtitle="Pick sides"
+                onClick={() => setTeamMethod("manual")}
+              />
+
+              <TeamMethodButton
+                active={teamMethod === "random"}
+                title="Random"
+                subtitle="Shuffle"
+                onClick={() => {
+                  setTeamMethod("random");
+                  applyTeamMethod("random");
+                }}
+              />
+
+              <TeamMethodButton
+                active={teamMethod === "handicap"}
+                title="Balance"
+                subtitle="By HCP"
+                onClick={() => {
+                  setTeamMethod("handicap");
+                  applyTeamMethod("handicap");
+                }}
+              />
+            </div>
+
+            {teamMethod === "manual" ? (
+              <div className="space-y-2">
+                {playerList.map((player, index) => (
+                  <div
+                    key={player.id || index}
+                    className="grid grid-cols-[1fr_88px_88px] items-center gap-2 rounded-[18px] border border-white/10 bg-black/42 p-3"
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-black text-white">
+                        {player.name || "Player " + (index + 1)}
+                      </div>
+
+                      <div className="mt-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white/35">
+                        HCP {player.handicap || "0"}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => updateManualTeam(index, "Red")}
+                      className={cx(
+                        "rounded-full border py-2 text-[10px] font-black uppercase tracking-[0.12em]",
+                        player.team === "Red"
+                          ? "border-red-200 bg-[#320611] text-white"
+                          : "border-white/10 bg-black/30 text-white/35"
+                      )}
+                    >
+                      Red
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => updateManualTeam(index, "Blue")}
+                      className={cx(
+                        "rounded-full border py-2 text-[10px] font-black uppercase tracking-[0.12em]",
+                        player.team === "Blue"
+                          ? "border-blue-200 bg-[#0a142b] text-white"
+                          : "border-white/10 bg-black/30 text-white/35"
+                      )}
+                    >
+                      Blue
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <TeamPreview redPlayers={redPlayers} bluePlayers={bluePlayers} />
+            )}
+          </Panel>
+        )}
+
+        {step === 4 && (
+          <Panel title="5. Rounds" subtitle="Set each day before you press DUEL.">
             <div className="space-y-3">
               {dayConfigs.slice(0, days).map((day: any, index: number) => (
                 <div
@@ -454,8 +746,8 @@ export default function WeekendSetupWizard({
           </Panel>
         )}
 
-        {step === 4 && (
-          <Panel title="5. DUEL Launch" subtitle="Review and start the live round.">
+        {step === 5 && (
+          <Panel title="6. DUEL Launch" subtitle="Review and start the live round.">
             <div className="rounded-[26px] border border-[#d1c79f]/20 bg-black/45 p-5 text-center">
               <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d1c79f]">
                 Ready to Start
@@ -499,10 +791,10 @@ export default function WeekendSetupWizard({
 
         <button
           type="button"
-          onClick={step === 4 ? persistEvent : goNext}
+          onClick={step === 5 ? persistEvent : goNext}
           className="rounded-[18px] bg-white py-4 text-[11px] font-black uppercase tracking-[0.16em] text-black"
         >
-          {step === 4 ? "Save" : "Next"}
+          {step === 5 ? "Save" : "Next"}
         </button>
       </div>
     </div>
@@ -550,88 +842,82 @@ function Field({ label, value, onChange, type = "text" }: any) {
   );
 }
 
-function PlayerColumn({
-  team,
-  players,
-  count,
-  updateRosterPlayer,
-  readImageFile,
-}: any) {
-  const tone =
-    team === "Red"
-      ? "border-red-300/15 bg-[#320611]/55"
-      : "border-blue-300/15 bg-[#0a142b]/55";
-
+function TeamMethodButton({ active, title, subtitle, onClick }: any) {
   return (
-    <div className="space-y-2">
-      <div className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-white/55">
-        {team}
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx(
+        "rounded-[18px] border px-2 py-4 text-center",
+        active
+          ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+          : "border-white/10 bg-black/35 text-white/55"
+      )}
+    >
+      <div className="text-[11px] font-black uppercase tracking-[0.12em]">
+        {title}
       </div>
 
-      {Array.from({ length: count }, (_, index) => {
-        const player = players[index] || {};
+      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] opacity-55">
+        {subtitle}
+      </div>
+    </button>
+  );
+}
 
-        return (
+function TeamPreview({ redPlayers, bluePlayers }: any) {
+  const redTotal = redPlayers.reduce(
+    (sum: number, player: any) => sum + Number(player.handicap || 0),
+    0
+  );
+
+  const blueTotal = bluePlayers.reduce(
+    (sum: number, player: any) => sum + Number(player.handicap || 0),
+    0
+  );
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <PreviewColumn team="Red" players={redPlayers} total={redTotal} />
+      <PreviewColumn team="Blue" players={bluePlayers} total={blueTotal} />
+    </div>
+  );
+}
+
+function PreviewColumn({ team, players, total }: any) {
+  const tone =
+    team === "Red"
+      ? "border-red-300/15 bg-[#320611]/65"
+      : "border-blue-300/15 bg-[#0a142b]/65";
+
+  return (
+    <div className={cx("rounded-[22px] border p-3", tone)}>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="text-[11px] font-black uppercase tracking-[0.16em] text-white">
+          {team}
+        </div>
+
+        <div className="rounded-full bg-black/35 px-2 py-1 text-[9px] font-black text-white/60">
+          {total.toFixed(1)}
+        </div>
+      </div>
+
+      <div className="space-y-1.5">
+        {players.map((player: any, index: number) => (
           <div
-            key={team + index}
-            className={cx("rounded-[18px] border p-2.5", tone)}
+            key={player.id || index}
+            className="rounded-xl border border-white/10 bg-black/28 px-2 py-2"
           >
-            <div className="mb-2 flex items-center gap-2">
-              <label className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/10 bg-black/45">
-                {player.photo ? (
-                  <img
-                    src={player.photo}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-[15px]">＋</span>
-                )}
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) =>
-                    readImageFile(e.target.files?.[0], (value: string) =>
-                      updateRosterPlayer(team, index, "photo", value)
-                    )
-                  }
-                />
-              </label>
-
-              <input
-                value={player.name || ""}
-                onChange={(e) =>
-                  updateRosterPlayer(team, index, "name", e.target.value)
-                }
-                placeholder={team + " " + (index + 1)}
-                className="min-w-0 flex-1 bg-transparent text-[12px] font-black text-white outline-none placeholder:text-white/25"
-              />
+            <div className="truncate text-[11px] font-black text-white">
+              {firstName(player.name || "Player " + (index + 1))}
             </div>
 
-            <div className="grid grid-cols-[1fr_60px] gap-2">
-              <input
-                value={player.homeClub || ""}
-                onChange={(e) =>
-                  updateRosterPlayer(team, index, "homeClub", e.target.value)
-                }
-                placeholder="Home club"
-                className="rounded-xl border border-white/10 bg-black/35 px-2 py-2 text-[10px] font-bold text-white outline-none placeholder:text-white/25"
-              />
-
-              <input
-                value={player.handicap || ""}
-                onChange={(e) =>
-                  updateRosterPlayer(team, index, "handicap", e.target.value)
-                }
-                placeholder="HCP"
-                className="rounded-xl border border-white/10 bg-black/35 px-2 py-2 text-center text-[10px] font-black text-white outline-none placeholder:text-white/25"
-              />
+            <div className="mt-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/35">
+              HCP {player.handicap || "0"}
             </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
@@ -647,4 +933,3 @@ function ReviewStat({ label, value }: any) {
     </div>
   );
 }
-
