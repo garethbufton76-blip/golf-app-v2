@@ -246,7 +246,7 @@ export default function Home({
           </div>
         ) : (
           <>
-            <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 items-start gap-8 transition-all duration-500">
+            <div className="mx-auto grid w-full max-w-[520px] grid-cols-[1fr_auto_1fr] items-end gap-3 transition-all duration-500">
               <button
                 type="button"
                 onClick={() => setScreen("rosterP")}
@@ -254,25 +254,54 @@ export default function Home({
               >
                 <Logo
                   team="red"
-                  size="mx-auto h-20 w-20"
+                  size="mx-auto h-16 w-16"
                   src={teamLogos?.Red}
                 />
 
-                <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
+                <div className="mt-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/55">
                   {teamNames?.Red || "Team Red"}
                 </div>
 
                 <div
-                  className="mt-1 text-[74px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  className="mt-0.5 text-[54px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
                   style={{
                     fontFamily:
                       'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                    transform: "scaleY(1.12) scaleX(0.86)",
+                    transform: "scaleY(1.1) scaleX(0.86)",
                   }}
                 >
                   {formatScore(totals.official.red)}
                 </div>
               </button>
+
+              <div className="mb-3 flex flex-col items-center justify-center">
+                <div className="text-[8px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+                  LIVE
+                </div>
+
+                <div className="mt-1.5 rounded-full border border-[#d1c79f]/20 bg-black/50 px-3 py-1.5 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                  <span className="text-[14px] font-black">
+                    {formatScore(totals.live.red)}
+                  </span>
+
+                  <span className="mx-2 text-white/35">-</span>
+
+                  <span className="text-[14px] font-black">
+                    {formatScore(totals.live.blue)}
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setLiveExpanded((value) => !value)}
+                  className="mt-2 flex h-7 w-7 rotate-180 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95"
+                  aria-label="Show headline score"
+                >
+                  <span className="translate-y-[-1px] text-[18px] leading-none">
+                    ⌄
+                  </span>
+                </button>
+              </div>
 
               <button
                 type="button"
@@ -281,20 +310,20 @@ export default function Home({
               >
                 <Logo
                   team="blue"
-                  size="mx-auto h-20 w-20"
+                  size="mx-auto h-16 w-16"
                   src={teamLogos?.Blue}
                 />
 
-                <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
+                <div className="mt-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/55">
                   {teamNames?.Blue || "Team Blue"}
                 </div>
 
                 <div
-                  className="mt-1 text-[74px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  className="mt-0.5 text-[54px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
                   style={{
                     fontFamily:
                       'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                    transform: "scaleY(1.12) scaleX(0.86)",
+                    transform: "scaleY(1.1) scaleX(0.86)",
                   }}
                 >
                   {formatScore(totals.official.blue)}
@@ -302,42 +331,14 @@ export default function Home({
               </button>
             </div>
 
-            <div className="mt-2 flex flex-col items-center justify-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
-                LIVE
-              </div>
+            <div className="mt-2 h-px w-full bg-gradient-to-r from-transparent via-[#d1c79f]/45 to-transparent" />
 
-              <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 px-4 py-2 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl">
-                <span className="text-lg font-black">
-                  {formatScore(totals.live.red)}
-                </span>
-
-                <span className="mx-3 text-white/35">-</span>
-
-                <span className="text-lg font-black">
-                  {formatScore(totals.live.blue)}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setLiveExpanded((value) => !value)}
-                className="mt-3 flex h-8 w-8 rotate-180 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95"
-                aria-label="Show headline score"
-              >
-                <span className="translate-y-[-1px] text-[20px] leading-none">
-                  ⌄
-                </span>
-              </button>
-            </div>
-
-            <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-[#d1c79f]/45 to-transparent" />
           </>
         )}
       </div>
 
       {!liveExpanded && (
-        <div className="mt-4 px-1">
+        <div className="mt-2 px-1">
           <DayButtons
             dayConfigs={dayConfigs}
             days={days}
