@@ -365,9 +365,9 @@ export default function Home({
                   className={cx(
                     "relative w-full overflow-hidden rounded-[20px] border px-4 py-3 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#123b24]/96 via-[#1a1315]/97 to-[#0a0a0a]/99"
+                      ? "border-white/68 bg-gradient-to-r from-[#3a0810]/98 via-[#15080b]/98 to-[#060606]/99"
                       : isBlueLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#0d1726]/98 via-[#101319]/97 to-[#163768]/96"
+                      ? "border-white/68 bg-gradient-to-r from-[#061224]/99 via-[#07101d]/98 to-[#0b2548]/98"
                       : "border-white/48 bg-gradient-to-r from-[#12281d]/90 via-[#111311]/97 to-[#090909]/99"
                   )}
                 >
@@ -379,7 +379,7 @@ export default function Home({
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
@@ -388,7 +388,7 @@ export default function Home({
                       <div className="min-w-0 text-left">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[18px] font-semibold uppercase leading-[1.02] tracking-[0.01em]",
+                            "whitespace-pre-line text-[14px] font-semibold uppercase leading-[1.05] tracking-[0.01em]",
                             isRedLeader ? "text-[#ff3a46]" : "text-red-100/92"
                           )}
                         >
@@ -399,7 +399,7 @@ export default function Home({
                       <div className="min-w-0 text-center">
                         <div
                           className={cx(
-                            "font-black uppercase leading-[0.76] tracking-[0.04em]",
+                            "font-black uppercase leading-[0.76] tracking-[0.02em]",
                             isRedLeader
                               ? "text-[#ff3a46]"
                               : isBlueLeader
@@ -410,7 +410,7 @@ export default function Home({
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
                             fontSize: isAllSquare ? "32px" : "54px",
-                            letterSpacing: isAllSquare ? "0.06em" : "0.04em",
+                            letterSpacing: isAllSquare ? "0.03em" : "0.02em",
                           }}
                         >
                           {heroScore}
@@ -420,7 +420,7 @@ export default function Home({
                       <div className="min-w-0 text-right">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[18px] font-semibold uppercase leading-[1.02] tracking-[0.01em]",
+                            "whitespace-pre-line text-[14px] font-semibold uppercase leading-[1.05] tracking-[0.01em]",
                             isBlueLeader ? "text-[#5f95ff]" : "text-blue-100/92"
                           )}
                         >
@@ -429,7 +429,7 @@ export default function Home({
                       </div>
                     </div>
 
-                    <div className="mt-3 truncate text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                    <div className="mt-3 text-center text-[8px] font-black uppercase tracking-[0.18em] text-white/85">
                       {matchCard.latest}
                     </div>
                   </div>
