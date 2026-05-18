@@ -107,6 +107,10 @@ export default function WeekendSetupWizard({
   const [teamMethod, setTeamMethod] = useState<"manual" | "random" | "handicap">(
     "handicap"
   );
+  const [courseSearch, setCourseSearch] = useState<Record<string, string>>({});
+  const [courseResults, setCourseResults] = useState<Record<string, any[]>>({});
+  const [courseLoading, setCourseLoading] = useState<Record<string, boolean>>({});
+  const [courseError, setCourseError] = useState<Record<string, string>>({});
 
   const eventCode = activeEvent?.eventCode || "DUEL";
   const adminPin = activeEvent?.adminPin || "0000";
@@ -211,6 +215,94 @@ export default function WeekendSetupWizard({
     };
 
     reader.readAsDataURL(file);
+  }
+
+  async function searchCourses(searchKey: string) {
+    const query = (courseSearch[searchKey] || "").trim();
+
+    if (query.length < 3) {
+      setCourseError((current) => ({
+        ...current,
+        [searchKey]: "Type at least 3 letters to search.",
+      }));
+      return;
+    }
+
+    setCourseLoading((current) => ({
+      ...current,
+      [searchKey]: true,
+    }));
+
+    setCourseError((current) => ({
+      ...current,
+      [searchKey]: "",
+    }));
+
+    try {
+      const params = new URLSearchParams({
+        search: query,
+        q: query,
+        query,
+      });
+
+      const response = await fetch("/api/golf-search?" + params.toString());
+
+      if (!response.ok) {
+        throw new Error("Course search failed");
+      }
+
+      const data = await response.json();
+
+      const courses = Array.isArray(data)
+        ? data
+        : data.courses || data.results || data.data || [];
+
+      setCourseResults((current) => ({
+        ...current,
+        [searchKey]: courses,
+      }));
+
+      if (!courses.length) {
+        setCourseError((current) => ({
+          ...current,
+          [searchKey]: "No courses found. Try another search.",
+        }));
+      }
+    } catch (error) {
+      console.error("GolfCourseAPI search failed:", error);
+
+      setCourseError((current) => ({
+        ...current,
+        [searchKey]:
+          "Course search failed. Check the API route or try again.",
+      }));
+    } finally {
+      setCourseLoading((current) => ({
+        ...current,
+        [searchKey]: false,
+      }));
+    }
+  }
+
+  function courseName(course: any) {
+    return (
+      course?.club_name ||
+      course?.course_name ||
+      course?.name ||
+      course?.facility_name ||
+      "Unnamed Course"
+    );
+  }
+
+  function courseLocation(course: any) {
+    return [
+      course?.city,
+      course?.state,
+      course?.region,
+      course?.country,
+    ]
+      .filter(Boolean)
+      .join(", ");
   }
 
   function updateSavedPlayer(index: number, field: string, value: any) {
@@ -806,53 +898,43 @@ export default function WeekendSetupWizard({
                             Round {roundIndex + 1}
                           </div>
 
-                          <Label>Course</Label>
-
-                          <select
-                            value={
-                              COURSE_OPTIONS.includes(round.course)
-                                ? round.course
-                                : "Custom Course"
-                            }
-                            onChange={(e) => {
-                              const nextCourse =
-                                e.target.value === "Custom Course"
-                                  ? ""
-                                  : e.target.value;
-
+                          <CourseSearchPicker
+                            searchKey={dayIndex + "-" + roundIndex}
+                            value={round.course}
+                            courseSearch={courseSearch}
+                            setCourseSearch={setCourseSearch}
+                            courseResults={courseResults}
+                            courseLoading={courseLoading}
+                            courseError={courseError}
+                            searchCourses={searchCourses}
+                            courseName={courseName}
+                            courseLocation={courseLocation}
+                            onSelect={(course: any) => {
                               updateRoundConfig(
                                 dayIndex,
                                 roundIndex,
                                 "course",
-                                nextCourse
+                                courseName(course)
+                              );
+
+                              updateRoundConfig(
+                                dayIndex,
+                                roundIndex,
+                                "courseApiId",
+                                course?.id || course?.course_id || course?.club_id || ""
+                              );
+
+                              updateRoundConfig(
+                                dayIndex,
+                                roundIndex,
+                                "courseApiData",
+                                course
                               );
                             }}
-                            className="w-full rounded-[16px] border border-white/10 bg-black/45 px-4 py-3 text-[12px] font-black uppercase tracking-[0.08em] text-white outline-none"
-                          >
-                            {COURSE_OPTIONS.map((course) => (
-                              <option key={course} value={course}>
-                                {course}
-                              </option>
-                            ))}
-                          </select>
-
-                          {!COURSE_OPTIONS.includes(round.course) ||
-                          round.course === "" ? (
-                            <div className="mt-2">
-                              <Field
-                                label="Custom Course"
-                                value={round.course}
-                                onChange={(value: string) =>
-                                  updateRoundConfig(
-                                    dayIndex,
-                                    roundIndex,
-                                    "course",
-                                    value
-                                  )
-                                }
-                              />
-                            </div>
-                          ) : null}
+                            onManual={(value: string) =>
+                              updateRoundConfig(dayIndex, roundIndex, "course", value)
+                            }
+                          />
 
                           <div className="mt-3 grid grid-cols-2 gap-3">
                             <Field
@@ -1090,6 +1172,108 @@ function PreviewColumn({ team, players, total }: any) {
             </div>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function CourseSearchPicker({
+  searchKey,
+  value,
+  courseSearch,
+  setCourseSearch,
+  courseResults,
+  courseLoading,
+  courseError,
+  searchCourses,
+  courseName,
+  courseLocation,
+  onSelect,
+  onManual,
+}: any) {
+  const query = courseSearch[searchKey] || "";
+  const results = courseResults[searchKey] || [];
+  const loading = courseLoading[searchKey];
+  const error = courseError[searchKey];
+
+  return (
+    <div>
+      <Label>Course Search</Label>
+
+      <div className="rounded-[18px] border border-white/10 bg-black/35 p-3">
+        <div className="grid grid-cols-[1fr_94px] gap-2">
+          <input
+            value={query}
+            onChange={(e) =>
+              setCourseSearch((current: any) => ({
+                ...current,
+                [searchKey]: e.target.value,
+              }))
+            }
+            placeholder="Search GolfCourseAPI"
+            className="rounded-[14px] border border-white/10 bg-black/50 px-3 py-3 text-[12px] font-bold text-white outline-none placeholder:text-white/25"
+          />
+
+          <button
+            type="button"
+            onClick={() => searchCourses(searchKey)}
+            className="rounded-[14px] bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9f925f] px-3 py-3 text-[10px] font-black uppercase tracking-[0.14em] text-black"
+          >
+            {loading ? "..." : "Search"}
+          </button>
+        </div>
+
+        {value ? (
+          <div className="mt-3 rounded-[14px] border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-3 py-2">
+            <div className="text-[8px] font-black uppercase tracking-[0.18em] text-[#d1c79f]">
+              Selected Course
+            </div>
+
+            <div className="mt-1 text-[13px] font-black text-white">
+              {value}
+            </div>
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="mt-3 rounded-[14px] border border-red-300/15 bg-red-950/25 px-3 py-2 text-[10px] font-bold text-red-100">
+            {error}
+          </div>
+        ) : null}
+
+        {results.length ? (
+          <div className="mt-3 space-y-2">
+            {results.slice(0, 6).map((course: any, index: number) => (
+              <button
+                key={(course?.id || course?.course_id || course?.club_id || index) + searchKey}
+                type="button"
+                onClick={() => onSelect(course)}
+                className="w-full rounded-[16px] border border-white/10 bg-black/45 px-3 py-3 text-left"
+              >
+                <div className="text-[12px] font-black text-white">
+                  {courseName(course)}
+                </div>
+
+                {courseLocation(course) ? (
+                  <div className="mt-1 text-[10px] font-bold text-white/42">
+                    {courseLocation(course)}
+                  </div>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-3">
+          <Label>Manual Course Name</Label>
+
+          <input
+            value={value || ""}
+            onChange={(e) => onManual(e.target.value)}
+            placeholder="Enter course manually"
+            className="w-full rounded-[14px] border border-white/10 bg-black/45 px-3 py-3 text-[12px] font-bold text-white outline-none placeholder:text-white/25"
+          />
+        </div>
       </div>
     </div>
   );
