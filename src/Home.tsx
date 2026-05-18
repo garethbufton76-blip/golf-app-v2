@@ -153,31 +153,56 @@ export default function Home({
         )}
 
         {liveExpanded ? (
-          <div className="mx-auto grid w-full max-w-[720px] grid-cols-[1fr_auto_1fr] items-center gap-6 min-h-[405px] transition-all duration-500">
-            <button
-              type="button"
-              onClick={() => setScreen("rosterP")}
-              className="text-center"
-            >
-              <Logo
-                team="red"
-                size="mx-auto h-28 w-28"
-                src={teamLogos?.Red}
-              />
-
-              <div
-                className="mt-14 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
-                style={{
-                  fontFamily:
-                    'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                  transform: "scaleY(1.22) scaleX(0.84)",
-                }}
+          <div className="mx-auto min-h-[525px] w-full max-w-[350px] transition-all duration-500">
+            <div className="grid grid-cols-2 items-start gap-7">
+              <button
+                type="button"
+                onClick={() => setScreen("rosterP")}
+                className="text-center"
               >
-                {formatScore(totals.official.red)}
-              </div>
-            </button>
+                <Logo
+                  team="red"
+                  size="mx-auto h-28 w-28"
+                  src={teamLogos?.Red}
+                />
 
-            <div className="flex flex-col items-center justify-center self-end pb-8 transition-all duration-500">
+                <div
+                  className="mt-16 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  style={{
+                    fontFamily:
+                      'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                    transform: "scaleY(1.22) scaleX(0.84)",
+                  }}
+                >
+                  {formatScore(totals.official.red)}
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setScreen("rosterB")}
+                className="text-center"
+              >
+                <Logo
+                  team="blue"
+                  size="mx-auto h-28 w-28"
+                  src={teamLogos?.Blue}
+                />
+
+                <div
+                  className="mt-16 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  style={{
+                    fontFamily:
+                      'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                    transform: "scaleY(1.22) scaleX(0.84)",
+                  }}
+                >
+                  {formatScore(totals.official.blue)}
+                </div>
+              </button>
+            </div>
+
+            <div className="mt-2 flex flex-col items-center justify-center transition-all duration-500">
               <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
                 LIVE
               </div>
@@ -205,29 +230,6 @@ export default function Home({
                 </span>
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setScreen("rosterB")}
-              className="text-center"
-            >
-              <Logo
-                team="blue"
-                size="mx-auto h-28 w-28"
-                src={teamLogos?.Blue}
-              />
-
-              <div
-                className="mt-14 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
-                style={{
-                  fontFamily:
-                    'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                  transform: "scaleY(1.22) scaleX(0.84)",
-                }}
-              >
-                {formatScore(totals.official.blue)}
-              </div>
-            </button>
           </div>
         ) : (
           <>
