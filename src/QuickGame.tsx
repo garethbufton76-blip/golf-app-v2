@@ -1,601 +1,802 @@
-/ src/QuickGame.tsx
+import { useState } from "react";
+import {
+  Button,
+  Logo,
+  Select,
+  cx,
+  dayOptions,
+  playerOptions,
+  rosterMeta,
+  tees,
+  times,
+  validFormats,
+} from "./data";
 
-import { useMemo, useState } from "react";
-import { cx } from "./data";
-import { searchCourses } from "./lib/golfCourseApi";
-import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
-
-const QUICK_FORMATS = [
-  "Singles Match Play",
-  "2-Ball Better Ball",
-  "2-Ball Ambrose",
-  "Stableford",
-  "2-Ball Better Ball Stableford",
-];
-
-export default function QuickGame({
+export default function Admin({
   setScreen,
+  players,
   setPlayers,
-  setTeamNames,
-  setRoster,
+  days,
+  setDays,
+  dayConfigs,
   setDayConfigs,
-  setActiveDay,
-  setStartMatch,
-  setStates,
-  setScorecards,
-  setEventStarted,
+  roster,
+  setRoster,
+  dayLocks,
+  setDayLocks,
+  teamLogos,
+  setTeamLogos,
+  teamNames,
+  setTeamNames,
+  eventLocked,
   setEventLocked,
+  eventStarted,
+  setEventStarted,
+  pairingLocks,
+  setPairingLocks,
+  eventDetails,
+  setEventDetails,
+  savedPlayers,
+  setSavedPlayers,
 }: any) {
-  const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem("duel_saved_api_courses");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [adminMode, setAdminMode] = useState("event");
+  const [editingTeam, setEditingTeam] = useState("Red");
 
-  const [courseMode, setCourseMode] = useState<"saved" | "search">("saved");
-  const [courseId, setCourseId] = useState("st-michaels");
-  const [courseSearch, setCourseSearch] = useState("");
-  const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
-  const [courseSearchStatus, setCourseSearchStatus] = useState("");
+  const readImageFile = (
+    file: File | undefined,
+    callback: (value: string) => void
+  ) => {
+    if (!file) return;
 
-  const savedCourses = useMemo(
-    () => [...COURSES, ...savedApiCourses],
-    [savedApiCourses]
-  );
+    const reader = new FileReader();
 
-  const selectedSavedCourse = useMemo(
-    () => savedCourses.find((course: any) => course.id === courseId) || COURSES[0],
-    [savedCourses, courseId]
-  );
-
-  const tees = useMemo(() => {
-    const localCourse = COURSES.find((course) => course.id === courseId);
-
-    return localCourse ? getCourseTees(courseId) : getCourseTees("st-michaels");
-  }, [courseId]);
-
-  const [playersPerTeam, setPlayersPerTeam] = useState(1);
-  const [format, setFormat] = useState("Singles Match Play");
-  const [tee, setTee] = useState(getDefaultTee(courseId));
-
-  const [redName, setRedName] = useState("Team Red");
-  const [blueName, setBlueName] = useState("Team Blue");
-
-  const [redPlayers, setRedPlayers] = useState([
-    { name: "Red 1", handicap: 18 },
-    { name: "Red 2", handicap: 18 },
-  ]);
-
-  const [bluePlayers, setBluePlayers] = useState([
-    { name: "Blue 1", handicap: 18 },
-    { name: "Blue 2", handicap: 18 },
-  ]);
-
-  function changeCourse(nextCourseId: string) {
-    setCourseId(nextCourseId);
-
-    const localCourse = COURSES.find((course) => course.id === nextCourseId);
-
-    setTee(localCourse ? getDefaultTee(nextCourseId) : getDefaultTee("st-michaels"));
-  }
-
-  function getApiCourseName(course: any) {
-    return (
-      course?.course_name ||
-      course?.name ||
-      course?.club_name ||
-      course?.facility_name ||
-      "Unknown Course"
-    );
-  }
-
-  function getApiCourseLocation(course: any) {
-    return [
-      course?.city,
-      course?.state,
-      course?.province,
-      course?.country,
-    ]
-      .filter(Boolean)
-      .join(", ");
-  }
-
-  function getApiCourseId(course: any) {
-    return (
-      course?.id ||
-      course?.course_id ||
-      course?.global_course_id ||
-      course?.club_id ||
-      getApiCourseName(course).toLowerCase().replace(/[^a-z0-9]+/g, "-")
-    );
-  }
-
-  async function handleCourseSearch() {
-    const query = courseSearch.trim();
-
-    if (!query) {
-      setCourseSearchStatus("Enter a course name first");
-      return;
-    }
-
-    setCourseSearchStatus("Searching...");
-
-    try {
-      const result = await searchCourses(query);
-      const courses = Array.isArray(result?.courses)
-        ? result.courses
-        : Array.isArray(result)
-        ? result
-        : [];
-
-      console.log("GolfCourseAPI search result:", result);
-
-      setCourseSearchResults(courses);
-      setCourseSearchStatus(
-        courses.length
-          ? `${courses.length} result${courses.length === 1 ? "" : "s"} found`
-          : "No courses found"
-      );
-    } catch (error) {
-      console.error("GolfCourseAPI search error:", error);
-      setCourseSearchStatus("Search failed — check console");
-    }
-  }
-
-  function importApiCourse(apiCourse: any) {
-    const apiId = getApiCourseId(apiCourse);
-    const importedCourse = {
-      id: `api-${apiId}`,
-      name: getApiCourseName(apiCourse),
-      shortName: getApiCourseName(apiCourse),
-      region: getApiCourseLocation(apiCourse),
-      country: apiCourse?.country || "",
-      source: "GolfCourseAPI",
-      raw: apiCourse,
+    reader.onload = () => {
+      callback(String(reader.result || ""));
     };
 
-    setSavedApiCourses((current: any[]) => {
-      const withoutDuplicate = current.filter(
-        (course) => course.id !== importedCourse.id
-      );
-      const next = [...withoutDuplicate, importedCourse];
+    reader.readAsDataURL(file);
+  };
 
-      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
+  const setDay = (i: number, field: string, value: any) => {
+    if (eventLocked || dayLocks[i]) return;
 
-      return next;
-    });
-
-    setCourseId(importedCourse.id);
-    setTee(getDefaultTee("st-michaels"));
-    setCourseMode("saved");
-    setCourseSearchStatus(`Saved ${importedCourse.name}`);
-  }
-
-  function removeSavedApiCourse(courseIdToRemove: string) {
-    setSavedApiCourses((current: any[]) => {
-      const next = current.filter((course) => course.id !== courseIdToRemove);
-
-      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
-
-      return next;
-    });
-
-    if (courseId === courseIdToRemove) {
-      changeCourse("st-michaels");
-    }
-  }
-
-  function updatePlayer(
-    team: "red" | "blue",
-    index: number,
-    key: string,
-    value: any
-  ) {
-    const setter = team === "red" ? setRedPlayers : setBluePlayers;
-
-    setter((current: any[]) =>
-      current.map((p, i) =>
-        i === index
-          ? { ...p, [key]: key === "handicap" ? Number(value) : value }
-          : p
+    setDayConfigs((ds: any[]) =>
+      ds.map((d, idx) =>
+        idx === i
+          ? {
+              ...d,
+              [field]: value,
+            }
+          : d
       )
     );
-  }
+  };
 
-  function startQuickGame() {
-    const selectedCourse = selectedSavedCourse || getCourseById("st-michaels");
+  const changePlayers = (count: number) => {
+    if (eventLocked) return;
 
-    const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
-      id: `quick-red-${i}`,
-      name: p.name || `Red ${i + 1}`,
-      nickname: p.name || `Red ${i + 1}`,
-      handicap: Number(p.handicap || 0),
-      rawHandicap: Number(p.handicap || 0),
-      team: "red",
-      teamId: "red",
-      rosterIndex: i,
-      photo: "",
-      homeClub: "",
-      preferredTee: tee,
-      regular: false,
+    setPlayers(count);
+
+    setDayConfigs((ds: any[]) =>
+      ds.map((d) =>
+        validFormats(count).includes(d.format)
+          ? d
+          : {
+              ...d,
+              format: validFormats(count)[0],
+            }
+      )
+    );
+  };
+
+  const changeDays = (count: number) => {
+    if (eventLocked) return;
+    setDays(count);
+  };
+
+  const updatePlayer = (
+    team: string,
+    index: number,
+    field: string,
+    value: any
+  ) => {
+    setRoster((current: any) => ({
+      ...current,
+      [team]: rosterMeta(
+        current[team].map((p: any, i: number) =>
+          i === index
+            ? {
+                ...p,
+                [field]: value,
+              }
+            : p
+        )
+      ),
     }));
+  };
 
-    const blue = bluePlayers.slice(0, playersPerTeam).map((p, i) => ({
-      id: `quick-blue-${i}`,
-      name: p.name || `Blue ${i + 1}`,
-      nickname: p.name || `Blue ${i + 1}`,
-      handicap: Number(p.handicap || 0),
-      rawHandicap: Number(p.handicap || 0),
-      team: "blue",
-      teamId: "blue",
-      rosterIndex: i,
-      photo: "",
-      homeClub: "",
-      preferredTee: tee,
-      regular: false,
-    }));
+  const startEvent = () => {
+    if (!eventLocked) {
+      setEventLocked(true);
+    }
 
-    setPlayers(playersPerTeam);
-    setTeamNames({ Red: redName, Blue: blueName });
-    setRoster({ Red: red, Blue: blue });
-
-    setDayConfigs([
-      {
-        label: "Quick Game",
-        teeTime: "",
-        courseId,
-        course: selectedCourse.shortName,
-        tee,
-        format,
-      },
-    ]);
-
-    setActiveDay(0);
-    setStartMatch(0);
-    setStates({});
-    setScorecards({});
     setEventStarted(true);
-    setEventLocked(true);
-    setScreen("score");
-  }
+    setScreen("home");
+  };
+
+  const shownPlayers = roster[editingTeam].slice(0, players);
 
   return (
-    <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
-      <div className="relative z-20 mx-auto max-w-[430px]">
-        <div className="mb-3 text-center">
-          <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
-            Quick Game
-          </div>
-          <h1 className="mt-1 text-[26px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
-            Set Up
-          </h1>
+    <>
+      {/* HEADER */}
+      <div className="flex items-center justify-between pt-2">
+        <div className="flex gap-2 overflow-x-auto">
+          <Button
+            active={adminMode === "event"}
+            onClick={() => setAdminMode("event")}
+            className="px-3 py-2 text-xs"
+          >
+            Event
+          </Button>
+
+          <Button
+            active={adminMode === "teams"}
+            onClick={() => setAdminMode("teams")}
+            className="px-3 py-2 text-xs"
+          >
+            Teams
+          </Button>
+
+          <Button
+            active={adminMode === "players"}
+            onClick={() => setAdminMode("players")}
+            className="px-3 py-2 text-xs"
+          >
+            Players
+          </Button>
+
+          <Button
+            active={adminMode === "pairings"}
+            onClick={() => setAdminMode("pairings")}
+            className="px-3 py-2 text-xs"
+          >
+            Pairings
+          </Button>
         </div>
 
-        <Section title="Course">
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setCourseMode("saved")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all",
-                courseMode === "saved"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Saved
-            </button>
+        <button
+          onClick={() => {
+            if (eventStarted) {
+              setScreen("home");
+            }
+          }}
+          className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold"
+        >
+          Home
+        </button>
+      </div>
 
-            <button
-              type="button"
-              onClick={() => setCourseMode("search")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all",
-                courseMode === "search"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Search API
-            </button>
+      {/* STATUS */}
+      <StatusPanel
+        eventLocked={eventLocked}
+        eventStarted={eventStarted}
+      />
+
+      {/* EVENT */}
+      {adminMode === "event" && (
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          {/* EVENT DETAILS */}
+          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4 backdrop-blur-xl">
+            <div className="mb-3 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
+              EVENT DETAILS
+            </div>
+
+            <div className="space-y-3">
+              <InputGroup
+                label="EVENT NAME"
+                value={eventDetails.name}
+                disabled={eventLocked}
+                onChange={(v: string) =>
+                  setEventDetails((e: any) => ({
+                    ...e,
+                    name: v,
+                  }))
+                }
+              />
+
+              <InputGroup
+                label="LOCATION"
+                value={eventDetails.location}
+                disabled={eventLocked}
+                onChange={(v: string) =>
+                  setEventDetails((e: any) => ({
+                    ...e,
+                    location: v,
+                  }))
+                }
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <InputGroup
+                  label="START DATE"
+                  type="date"
+                  value={eventDetails.startDate}
+                  disabled={eventLocked}
+                  onChange={(v: string) =>
+                    setEventDetails((e: any) => ({
+                      ...e,
+                      startDate: v,
+                    }))
+                  }
+                />
+
+                <InputGroup
+                  label="END DATE"
+                  type="date"
+                  value={eventDetails.endDate}
+                  disabled={eventLocked}
+                  onChange={(v: string) =>
+                    setEventDetails((e: any) => ({
+                      ...e,
+                      endDate: v,
+                    }))
+                  }
+                />
+              </div>
+            </div>
           </div>
 
-          {courseMode === "saved" ? (
-            <div className="space-y-2">
-              {savedCourses.map((course: any) => {
-                const active = courseId === course.id;
-                const isApiCourse = course.source === "GolfCourseAPI";
+          {/* CONFIG */}
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <AdminPicker
+              title="PLAYERS / TEAM"
+              options={playerOptions}
+              value={players}
+              setValue={changePlayers}
+              locked={eventLocked}
+            />
+
+            <AdminPicker
+              title="COMP DAYS"
+              options={dayOptions}
+              value={days}
+              setValue={changeDays}
+              locked={eventLocked}
+            />
+          </div>
+
+          {/* DAYS */}
+          <div className="mt-3 space-y-3">
+            {dayConfigs.slice(0, days).map((day: any, i: number) => {
+              const locked = Boolean(eventLocked || dayLocks[i]);
+
+              return (
+                <div
+                  key={day.label}
+                  className={cx(
+                    "rounded-[22px] border p-3 backdrop-blur-xl",
+                    locked
+                      ? "border-[#d1c79f]/35 bg-black/55"
+                      : "border-white/15 bg-black/40"
+                  )}
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-semibold tracking-[0.18em] text-white/80">
+                        {day.label.toUpperCase()}
+                      </div>
+
+                      <div className="mt-1 text-[10px] text-white/45">
+                        {locked ? "EVENT LOCKED" : "SETUP OPEN"}
+                      </div>
+                    </div>
+
+                    <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#d1c79f]">
+                      {day.format}
+                    </div>
+                  </div>
+
+                  <div className={cx(locked && "pointer-events-none opacity-45")}>
+                    <div className="mb-3 flex items-center gap-2">
+                      <div className="text-[9px] text-white/50">
+                        1ST TEE TIME
+                      </div>
+
+                      <Select
+                        value={day.teeTime}
+                        onChange={(v: any) => setDay(i, "teeTime", v)}
+                        options={times}
+                        darkMode
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="col-span-2">
+                        <Label>COURSE</Label>
+
+                        <Select
+                          value={day.course}
+                          onChange={(v: any) => setDay(i, "course", v)}
+                          options={["St Michaels"]}
+                        />
+                      </div>
+
+                      <div>
+                        <Label>TEE</Label>
+
+                        <Select
+                          value={day.tee}
+                          onChange={(v: any) => setDay(i, "tee", v)}
+                          options={tees}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <Label>GAME FORMAT</Label>
+
+                      <Select
+                        value={day.format}
+                        onChange={(v: any) => setDay(i, "format", v)}
+                        options={validFormats(players)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* LOCK PANEL */}
+          <LockPanel
+            eventLocked={eventLocked}
+            setEventLocked={setEventLocked}
+            eventStarted={eventStarted}
+            startEvent={startEvent}
+          />
+        </div>
+      )}
+
+      {/* TEAMS */}
+      {adminMode === "teams" && (
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          <div className="mb-4 rounded-[20px] border border-[#d1c79f]/25 bg-black/40 p-3">
+            <div className="mb-2 text-[10px] tracking-[0.18em] text-white/50">
+              TEAM SETUP
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="cursor-pointer">
+                <Logo
+                  team={editingTeam === "Red" ? "red" : "blue"}
+                  size="h-16 w-16"
+                  src={teamLogos[editingTeam]}
+                />
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    readImageFile(e.target.files?.[0], (value) =>
+                      setTeamLogos((t: any) => ({
+                        ...t,
+                        [editingTeam]: value,
+                      }))
+                    )
+                  }
+                />
+              </label>
+
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] tracking-[0.18em] text-white/45">
+                  TEAM NAME
+                </div>
+
+                <input
+                  className="mt-1 w-full bg-transparent text-[18px] font-semibold text-white outline-none"
+                  value={teamNames[editingTeam]}
+                  onChange={(e) =>
+                    setTeamNames((names: any) => ({
+                      ...names,
+                      [editingTeam]: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <Button
+              active={editingTeam === "Red"}
+              onClick={() => setEditingTeam("Red")}
+            >
+              {teamNames.Red || "Team Red"}
+            </Button>
+
+            <Button
+              active={editingTeam === "Blue"}
+              onClick={() => setEditingTeam("Blue")}
+            >
+              {teamNames.Blue || "Team Blue"}
+            </Button>
+          </div>
+
+          <div className="space-y-3">
+            {shownPlayers.map((p: any, i: number) => {
+              const teamKey = editingTeam === "Red" ? "red" : "blue";
+
+              return (
+                <div
+                  key={`${editingTeam}-${i}`}
+                  className="rounded-[22px] border border-white/15 bg-black/40 p-3 backdrop-blur-xl"
+                >
+                  <div className="mb-3 flex items-center gap-3">
+                    <label className="relative cursor-pointer">
+                      <Logo
+                        team={teamKey}
+                        size="h-14 w-14"
+                        src={p.photo || teamLogos[editingTeam]}
+                      />
+
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          readImageFile(e.target.files?.[0], (value) =>
+                            updatePlayer(editingTeam, i, "photo", value)
+                          )
+                        }
+                      />
+                    </label>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[10px] tracking-[0.18em] text-white/45">
+                        {p.slot}
+                      </div>
+
+                      <div className="mt-1 flex items-center gap-2">
+                        <input
+                          className="flex-1 bg-transparent text-[16px] font-semibold text-white outline-none"
+                          value={p.name}
+                          onChange={(e) =>
+                            updatePlayer(editingTeam, i, "name", e.target.value)
+                          }
+                        />
+
+                        <input
+                          className="w-[60px] rounded-lg border border-[#d1c79f]/25 bg-black/45 px-2 py-1 text-center text-sm text-white outline-none"
+                          value={p.handicap}
+                          onChange={(e) =>
+                            updatePlayer(
+                              editingTeam,
+                              i,
+                              "handicap",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* PLAYER DATABASE */}
+      {adminMode === "players" && (
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4">
+            <div className="mb-2 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
+              SAVED PLAYERS
+            </div>
+
+            <div className="text-[11px] leading-5 text-white/50">
+              Store regular players for future weekends and quick setup.
+            </div>
+          </div>
+
+          <div className="mt-3 space-y-3">
+            {savedPlayers.map((p: any) => (
+              <div
+                key={p.id}
+                className="rounded-[22px] border border-white/15 bg-black/40 p-3"
+              >
+                <div className="flex items-center gap-3">
+                  <Logo
+                    team="blue"
+                    size="h-14 w-14"
+                    src={p.photo}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-[15px] font-semibold text-white">
+                          {p.name}
+                        </div>
+
+                        <div className="mt-1 text-[11px] text-white/45">
+                          {p.homeClub || "No Home Club"}
+                        </div>
+                      </div>
+
+                      <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-xs font-bold text-[#d1c79f]">
+                        {p.handicap}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2">
+                      <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] text-white/55">
+                        {p.preferredTee}
+                      </div>
+
+                      {p.regular && (
+                        <div className="rounded-full border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-3 py-1 text-[10px] font-bold text-[#d1c79f]">
+                          REGULAR PLAYER
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setSavedPlayers((players: any[]) => [
+                  ...players,
+                  {
+                    id: String(Date.now()),
+                    name: "New Player",
+                    nickname: "",
+                    handicap: "0.0",
+                    homeClub: "",
+                    preferredTee: "Blue",
+                    photo: "",
+                    regular: false,
+                  },
+                ])
+              }
+              className="w-full rounded-[20px] border border-dashed border-[#d1c79f]/25 bg-black/35 py-4 text-sm font-semibold text-[#d1c79f]"
+            >
+              + Add Saved Player
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PAIRINGS */}
+      {adminMode === "pairings" && (
+        <div className="mt-3 flex-1 overflow-y-auto pb-3">
+          {!eventLocked ? (
+            <div className="rounded-[24px] border border-[#d1c79f]/25 bg-black/45 p-5 text-center">
+              <div className="text-[11px] font-bold tracking-[0.26em] text-[#d1c79f]">
+                EVENT NOT LOCKED
+              </div>
+
+              <div className="mt-3 text-sm leading-6 text-white/65">
+                Lock the weekend setup before setting pairings.
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {dayConfigs.slice(0, days).map((day: any, i: number) => {
+                const locked = Boolean(pairingLocks[i]);
 
                 return (
                   <div
-                    key={course.id}
-                    className={cx(
-                      "rounded-[18px] border p-3 transition-all",
-                      active
-                        ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                        : "border-white/10 bg-black/35"
-                    )}
+                    key={day.label}
+                    className="rounded-[24px] border border-[#d1c79f]/20 bg-black/40 p-4"
                   >
-                    <button
-                      type="button"
-                      onClick={() => changeCourse(course.id)}
-                      className="w-full text-left"
-                    >
-                      <div className="text-[10px] font-black uppercase tracking-[0.12em] text-white">
-                        {course.name}
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-[13px] font-black tracking-[0.18em] text-white">
+                          {day.label.toUpperCase()}
+                        </div>
+
+                        <div className="mt-1 text-[11px] text-white/45">
+                          {day.format} • {day.teeTime}
+                        </div>
                       </div>
 
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {isApiCourse
-                          ? "Saved from GolfCourseAPI"
-                          : `${course.region || ""}${course.country ? ` • ${course.country}` : ""}` || "Saved Course"}
-                      </div>
-                    </button>
-
-                    {isApiCourse ? (
                       <button
                         type="button"
-                        onClick={() => removeSavedApiCourse(course.id)}
-                        className="mt-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/45"
+                        onClick={() =>
+                          setPairingLocks((locks: any) => ({
+                            ...locks,
+                            [i]: !locks[i],
+                          }))
+                        }
+                        className={cx(
+                          "rounded-full border px-3 py-2 text-[10px] font-bold",
+                          locked
+                            ? "border-[#d1c79f]/45 bg-[#d1c79f]/20 text-[#efe6bf]"
+                            : "border-white/15 bg-black/35 text-white/70"
+                        )}
                       >
-                        Remove
+                        {locked ? "LOCKED" : "OPEN"}
                       </button>
-                    ) : null}
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setScreen("rosterP")}
+                        disabled={locked}
+                        className="rounded-[18px] border border-red-300/25 bg-red-950/35 px-3 py-3 text-xs font-bold text-red-100 disabled:opacity-35"
+                      >
+                        Edit Red Order
+                      </button>
+
+                      <button
+                        onClick={() => setScreen("rosterB")}
+                        disabled={locked}
+                        className="rounded-[18px] border border-blue-300/25 bg-blue-950/35 px-3 py-3 text-xs font-bold text-blue-100 disabled:opacity-35"
+                      >
+                        Edit Blue Order
+                      </button>
+                    </div>
                   </div>
                 );
               })}
             </div>
-          ) : (
-            <div>
-              <div className="grid grid-cols-[1fr_auto] gap-2">
-                <input
-                  value={courseSearch}
-                  onChange={(e) => setCourseSearch(e.target.value)}
-                  placeholder="Search course"
-                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white outline-none placeholder:text-white/25"
-                />
-
-                <button
-                  type="button"
-                  onClick={handleCourseSearch}
-                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-black"
-                >
-                  Search
-                </button>
-              </div>
-
-              {courseSearchStatus ? (
-                <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
-                  {courseSearchStatus}
-                </div>
-              ) : null}
-
-              <div className="mt-3 max-h-[250px] space-y-2 overflow-y-auto pr-1">
-                {courseSearchResults.map((course: any, index: number) => (
-                  <div
-                    key={`${getApiCourseId(course)}-${index}`}
-                    className="rounded-[18px] border border-white/10 bg-black/35 p-3"
-                  >
-                    <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                      {getApiCourseName(course)}
-                    </div>
-
-                    <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                      {getApiCourseLocation(course) || "GolfCourseAPI result"}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => importApiCourse(course)}
-                      className="mt-3 w-full rounded-full bg-[#d1c79f] py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
-                    >
-                      Import & Save
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
-        </Section>
+        </div>
+      )}
+    </>
+  );
+}
 
-        <div className="mb-3 mt-3 grid grid-cols-2 gap-3">
-          {[1, 2].map((n) => {
-            const active = playersPerTeam === n;
-            return (
-              <button
-                type="button"
-                key={n}
-                onClick={() => setPlayersPerTeam(n)}
-                className={cx(
-                  "relative overflow-hidden rounded-[22px] border px-4 py-3 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
-                  active
-                    ? "border-[#d1c79f]/80 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9b8d5c] text-black"
-                    : "border-white/12 bg-black/42 text-white"
-                )}
-              >
-                <div className="text-[28px] font-black uppercase leading-none tracking-[-0.04em]">
-                  {n}v{n}
-                </div>
-                <div
-                  className={cx(
-                    "mt-0.5 text-[7px] font-black uppercase tracking-[0.2em]",
-                    active ? "text-black/55" : "text-white/35"
-                  )}
-                >
-                  Players
-                </div>
-              </button>
-            );
-          })}
+function StatusPanel({ eventLocked, eventStarted }: any) {
+  return (
+    <div className="mt-3 rounded-[20px] border border-[#d1c79f]/20 bg-black/40 p-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-[10px] font-bold tracking-[0.22em] text-white/45">
+            WEEKEND STATUS
+          </div>
+
+          <div className="mt-1 text-sm font-black tracking-[0.12em] text-white">
+            {eventStarted
+              ? "EVENT LIVE"
+              : eventLocked
+              ? "EVENT LOCKED"
+              : "SETUP OPEN"}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <TeamSetupColumn
-            tone="red"
-            teamName={redName}
-            setTeamName={setRedName}
-            players={redPlayers}
-            count={playersPerTeam}
-            updatePlayer={updatePlayer}
-          />
-          <TeamSetupColumn
-            tone="blue"
-            teamName={blueName}
-            setTeamName={setBlueName}
-            players={bluePlayers}
-            count={playersPerTeam}
-            updatePlayer={updatePlayer}
-          />
-        </div>
-
-        <Section title="Tee">
-          <div className="grid grid-cols-4 gap-2">
-            {tees.map((t) => (
-              <button
-                type="button"
-                key={t.id}
-                onClick={() => setTee(t.id)}
-                className={cx(
-                  "rounded-2xl border px-2 py-2 text-[10px] font-black uppercase tracking-[0.08em] transition-all",
-                  tee === t.id
-                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/12 bg-black/42 text-white"
-                )}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Format">
-          <div className="relative">
-            <select
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[10px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
-            >
-              {QUICK_FORMATS.map((f) => (
-                <option key={f} value={f} className="bg-black text-white">
-                  {f}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
-              ▾
-            </div>
-          </div>
-        </Section>
-
-        <div className="mt-4 flex justify-center pb-6">
-          <button
-            type="button"
-            onClick={startQuickGame}
-            className="flex h-[78px] w-[78px] items-center justify-center rounded-full border border-[#d1c79f]/40 bg-gradient-to-b from-[#245438] via-[#163d2b] to-[#071b13] shadow-[0_18px_40px_rgba(0,0,0,0.65),0_0_22px_rgba(42,115,73,0.45)]"
-            aria-label="Start quick game"
-          >
-            <img
-              src="/launch-logo.png"
-              alt="DUEL"
-              className="h-[31px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)]"
-            />
-          </button>
+        <div
+          className={cx(
+            "rounded-full px-3 py-1 text-[10px] font-black tracking-[0.14em]",
+            eventStarted
+              ? "bg-[#4ade80] text-black"
+              : eventLocked
+              ? "bg-[#d1c79f] text-black"
+              : "border border-white/15 bg-black/35 text-white/60"
+          )}
+        >
+          {eventStarted ? "LIVE" : eventLocked ? "READY" : "ADMIN"}
         </div>
       </div>
     </div>
   );
 }
 
-function TeamSetupColumn({
-  tone,
-  teamName,
-  setTeamName,
-  players,
-  count,
-  updatePlayer,
+function LockPanel({
+  eventLocked,
+  setEventLocked,
+  eventStarted,
+  startEvent,
 }: any) {
-  const isRed = tone === "red";
+  return (
+    <div className="mt-4 rounded-[24px] border border-[#d1c79f]/25 bg-black/55 p-4">
+      <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
+        EVENT CONTROL
+      </div>
 
+      <button
+        type="button"
+        disabled={eventStarted}
+        onClick={() => setEventLocked((v: boolean) => !v)}
+        className={cx(
+          "mt-4 w-full rounded-[18px] px-4 py-4 text-sm font-black tracking-[0.16em]",
+          eventStarted
+            ? "border border-white/10 bg-black/25 text-white/25"
+            : eventLocked
+            ? "border border-[#d1c79f]/30 bg-black/35 text-[#efe6bf]"
+            : "bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+        )}
+      >
+        {eventStarted
+          ? "EVENT LIVE"
+          : eventLocked
+          ? "UNLOCK EVENT"
+          : "LOCK EVENT"}
+      </button>
+
+      {eventLocked && !eventStarted && (
+        <button
+          type="button"
+          onClick={startEvent}
+          className="mt-3 w-full rounded-[18px] bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black"
+        >
+          START EVENT
+        </button>
+      )}
+    </div>
+  );
+}
+
+function AdminPicker({
+  title,
+  options,
+  value,
+  setValue,
+  locked = false,
+}: any) {
   return (
     <div
       className={cx(
-        "rounded-[24px] border p-2.5 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
-        isRed
-          ? "border-[#7a2424]/45 bg-[#250305]/54"
-          : "border-[#343957]/55 bg-[#060a16]/56"
+        "rounded-[18px] border border-[#d1c79f]/25 bg-black/40 p-3",
+        locked && "opacity-45"
       )}
     >
-      <div className="mb-2">
-        <div
-          className={cx(
-            "mb-0.5 text-[7px] font-black uppercase tracking-[0.24em]",
-            isRed ? "text-red-200/45" : "text-blue-100/45"
-          )}
-        >
-          Team
-        </div>
-        <input
-          value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
-          className="w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
-        />
-        <div
-          className={cx(
-            "mt-1.5 h-[2px] w-full rounded-full",
-            isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
-          )}
-        />
+      <div className="mb-2 text-[9px] tracking-[0.16em] text-white/50">
+        {title}
       </div>
 
-      <div className="space-y-2">
-        {players.slice(0, count).map((p: any, i: number) => (
-          <div key={i} className="rounded-[18px] border border-white/8 bg-black/34 p-2.5">
-            <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
-              Player {i + 1}
-            </div>
-            <input
-              value={p.name}
-              onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-              className="w-full border-0 bg-transparent p-0 text-[15px] font-black text-white outline-none placeholder:text-white/25"
-            />
-
-            <div className="mt-2 grid grid-cols-[1fr_46px] items-end gap-2">
-              <div>
-                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
-                  Handicap
-                </div>
-                <input
-                  type="number"
-                  value={p.handicap}
-                  onChange={(e) => updatePlayer(tone, i, "handicap", e.target.value)}
-                  className="w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none"
-                />
-              </div>
-              <div
-                className={cx(
-                  "rounded-full px-2 py-0.5 text-center text-[7px] font-black uppercase tracking-[0.12em]",
-                  isRed ? "bg-[#661716] text-red-100" : "bg-[#2a2e46] text-blue-100"
-                )}
-              >
-                HCP
-              </div>
-            </div>
-          </div>
+      <div className="grid grid-cols-4 gap-1.5">
+        {options.map((o: any) => (
+          <Button
+            key={o}
+            active={o === value}
+            onClick={() => !locked && setValue(o)}
+            className="rounded-lg py-2"
+          >
+            {o}
+          </Button>
         ))}
       </div>
     </div>
   );
 }
 
-function Section({ title, children }: any) {
+function InputGroup({
+  label,
+  value,
+  onChange,
+  disabled = false,
+  type = "text",
+}: any) {
   return (
-    <div className="mt-3 rounded-[22px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
-        {title}
+    <div>
+      <div className="mb-1.5 text-[9px] tracking-[0.14em] text-white/50">
+        {label}
       </div>
+
+      <input
+        type={type}
+        disabled={disabled}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={cx(
+          "w-full rounded-[14px] border border-[#d1c79f]/20 bg-black/40 px-4 py-3 text-sm text-white outline-none",
+          disabled && "opacity-45"
+        )}
+      />
+    </div>
+  );
+}
+
+function Label({ children }: any) {
+  return (
+    <div className="mb-1.5 text-[9px] tracking-[0.14em] text-white/50">
       {children}
     </div>
   );
