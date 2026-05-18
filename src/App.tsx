@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import {
   BACKGROUND_IMAGES,
   TEAM,
-  AdminIcon,
   cx,
   homeTotals,
   makeRoster,
@@ -310,15 +309,6 @@ export default function App() {
               savedPlayers={savedPlayers}
               setSavedPlayers={setSavedPlayers}
             />
-          )}
-
-          {mode !== "quick" && screen === "home" && eventStarted && (
-            <button
-              onClick={() => setScreen("admin")}
-              className="absolute left-4 top-4 z-40"
-            >
-              <AdminIcon />
-            </button>
           )}
 
           {showBottomNav && (
