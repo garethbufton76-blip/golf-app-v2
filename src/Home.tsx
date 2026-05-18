@@ -336,7 +336,7 @@ export default function Home({
             Live Matches
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {matchCards.map((matchCard) => {
               const isRedLeader = matchCard.result.leader === "red";
               const isBlueLeader = matchCard.result.leader === "blue";
@@ -348,45 +348,45 @@ export default function Home({
                   type="button"
                   onClick={() => openMatch(matchCard.index)}
                   className={cx(
-                    "relative w-full overflow-hidden rounded-[26px] border px-5 py-5 text-left shadow-[0_18px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    "relative w-full overflow-hidden rounded-[22px] border px-4 py-3 text-left shadow-[0_14px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
-                      ? "border-white/78 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
+                      ? "border-white/70 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
                       : isBlueLeader
-                      ? "border-white/78 bg-gradient-to-r from-[#091018]/98 via-[#101319]/96 to-[#10233e]/94"
-                      : "border-white/62 bg-gradient-to-r from-[#102719]/88 via-[#111311]/96 to-[#090909]/98"
+                      ? "border-white/70 bg-gradient-to-r from-[#091018]/98 via-[#101319]/96 to-[#10233e]/94"
+                      : "border-white/50 bg-gradient-to-r from-[#102719]/88 via-[#111311]/96 to-[#090909]/98"
                   )}
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_18%,rgba(75,178,111,0.16),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.035),transparent_42%,rgba(255,255,255,0.02))]" />
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_18%,rgba(75,178,111,0.14),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.03),transparent_42%,rgba(255,255,255,0.015))]" />
 
                   <div className="relative z-10">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="text-[12px] font-black uppercase tracking-[0.24em] text-white">
+                      <div className="max-w-[210px] text-[10px] font-black uppercase leading-[1.35] tracking-[0.24em] text-white">
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)]">
+                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-[1fr_1.15fr] items-center gap-5">
+                    <div className="mt-4 grid grid-cols-[1fr_1fr] items-center gap-4">
                       <div className="min-w-0">
                         <div
                           className={cx(
-                            "truncate text-[21px] font-black uppercase tracking-[0.06em]",
+                            "truncate text-[15px] font-black uppercase tracking-[0.06em]",
                             isRedLeader ? "text-[#ff4048]" : "text-red-100/92"
                           )}
                         >
                           {matchCard.redNames}
                         </div>
 
-                        <div className="mt-4 text-[64px] font-black uppercase leading-none tracking-[-0.08em] text-white">
+                        <div className="mt-2 text-[42px] font-black uppercase leading-none tracking-[-0.08em] text-white">
                           VS
                         </div>
 
                         <div
                           className={cx(
-                            "mt-4 truncate text-[21px] font-black uppercase tracking-[0.06em]",
+                            "mt-2 truncate text-[15px] font-black uppercase tracking-[0.06em]",
                             isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
                           )}
                         >
@@ -397,7 +397,7 @@ export default function Home({
                       <div className="min-w-0 text-right">
                         <div
                           className={cx(
-                            "font-black uppercase leading-[0.82] tracking-[-0.08em]",
+                            "font-black uppercase leading-[0.84] tracking-[-0.07em]",
                             isRedLeader
                               ? "text-[#ff2532]"
                               : isBlueLeader
@@ -407,20 +407,15 @@ export default function Home({
                           style={{
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                            fontSize: isAllSquare ? "42px" : "86px",
+                            fontSize: isAllSquare ? "31px" : "58px",
                           }}
                         >
                           {matchCard.main}
                         </div>
-
-                        <div className="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/42">
-                          {matchCard.holesPlayed} THRU •{" "}
-                          {matchCard.holesToPlay} TO PLAY
-                        </div>
                       </div>
                     </div>
 
-                    <div className="mt-6 truncate text-[13px] font-black uppercase tracking-[0.22em] text-white">
+                    <div className="mt-4 truncate text-[11px] font-black uppercase tracking-[0.2em] text-white">
                       {matchCard.latest}
                     </div>
                   </div>
@@ -433,4 +428,3 @@ export default function Home({
     </div>
   );
 }
-
