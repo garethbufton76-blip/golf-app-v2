@@ -383,7 +383,7 @@ export default function Home({
                       </div>
                     </div>
 
-                    <div className="mt-1.5 grid grid-cols-[1fr_1fr] items-center gap-2">
+                    <div className="mt-1 grid grid-cols-[1fr_1fr] items-center gap-2">
                       <div className="min-w-0">
                         <div
                           className={cx(
@@ -411,7 +411,7 @@ export default function Home({
                       <div className="min-w-0 text-right">
                         <div
                           className={cx(
-                            "font-black uppercase leading-[0.82] tracking-[-0.08em]",
+                            "font-black uppercase leading-[0.72] tracking-[-0.1em]",
                             isRedLeader
                               ? "text-[#ff2532]"
                               : isBlueLeader
@@ -421,7 +421,7 @@ export default function Home({
                           style={{
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                            fontSize: isAllSquare ? "26px" : "40px",
+                            fontSize: isAllSquare ? "42px" : "72px",
                           }}
                         >
                           {heroScore}
@@ -442,4 +442,3 @@ export default function Home({
     </div>
   );
 }
-
