@@ -365,9 +365,9 @@ export default function Home({
                   className={cx(
                     "relative w-full overflow-hidden rounded-[20px] border px-4 py-3 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#3a0810]/98 via-[#15080b]/98 to-[#060606]/99"
+                      ? "border-white/68 bg-gradient-to-r from-[#320611]/98 via-[#19060c]/98 to-[#060606]/99"
                       : isBlueLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#061224]/99 via-[#07101d]/98 to-[#0b2548]/98"
+                      ? "border-white/68 bg-gradient-to-r from-[#050b18]/99 via-[#07101d]/98 to-[#0a142b]/98"
                       : "border-white/48 bg-gradient-to-r from-[#12281d]/90 via-[#111311]/97 to-[#090909]/99"
                   )}
                 >
@@ -442,3 +442,4 @@ export default function Home({
     </div>
   );
 }
+
