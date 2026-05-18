@@ -152,135 +152,172 @@ export default function Home({
           </div>
         )}
 
-        <div
-          className={cx(
-            "mx-auto grid w-full max-w-[720px] grid-cols-[1fr_auto_1fr] items-center transition-all duration-500",
-            liveExpanded ? "gap-6 min-h-[405px]" : "gap-3"
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => setScreen("rosterP")}
-            className="text-center"
-          >
-            <Logo
-              team="red"
-              size={liveExpanded ? "mx-auto h-28 w-28" : "mx-auto h-20 w-20"}
-              src={teamLogos?.Red}
-            />
+        {liveExpanded ? (
+          <div className="mx-auto grid w-full max-w-[720px] grid-cols-[1fr_auto_1fr] items-center gap-6 min-h-[405px] transition-all duration-500">
+            <button
+              type="button"
+              onClick={() => setScreen("rosterP")}
+              className="text-center"
+            >
+              <Logo
+                team="red"
+                size="mx-auto h-28 w-28"
+                src={teamLogos?.Red}
+              />
 
-            {!liveExpanded && (
-              <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
-                {teamNames?.Red || "Team Red"}
+              <div
+                className="mt-14 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                style={{
+                  fontFamily:
+                    'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                  transform: "scaleY(1.22) scaleX(0.84)",
+                }}
+              >
+                {formatScore(totals.official.red)}
               </div>
-            )}
+            </button>
 
-            <div
-              className={cx(
-                "font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500",
-                liveExpanded ? "mt-14 text-[112px]" : "mt-1 text-[74px]"
-              )}
-              style={{
-                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                transform: liveExpanded
-                  ? "scaleY(1.22) scaleX(0.84)"
-                  : "scaleY(1.12) scaleX(0.86)",
-              }}
-            >
-              {formatScore(totals.official.red)}
-            </div>
-          </button>
+            <div className="flex flex-col items-center justify-center self-end pb-8 transition-all duration-500">
+              <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                LIVE
+              </div>
 
-          <div
-            className={cx(
-              "flex flex-col items-center justify-center transition-all duration-500",
-              liveExpanded ? "self-end pb-8" : ""
-            )}
-          >
-            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
-              LIVE
-            </div>
+              <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 px-6 py-3 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-500">
+                <span className="text-[28px] font-black">
+                  {formatScore(totals.live.red)}
+                </span>
 
-            <div
-              className={cx(
-                "mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-500",
-                liveExpanded ? "px-6 py-3" : "px-4 py-2"
-              )}
-            >
-              <span
-                className={cx(
-                  "font-black",
-                  liveExpanded ? "text-[28px]" : "text-lg"
-                )}
+                <span className="mx-3 text-white/35">-</span>
+
+                <span className="text-[28px] font-black">
+                  {formatScore(totals.live.blue)}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLiveExpanded((value) => !value)}
+                className="mt-4 flex h-9 w-9 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95"
+                aria-label="Show live matches"
               >
-                {formatScore(totals.live.red)}
-              </span>
-
-              <span className="mx-3 text-white/35">-</span>
-
-              <span
-                className={cx(
-                  "font-black",
-                  liveExpanded ? "text-[28px]" : "text-lg"
-                )}
-              >
-                {formatScore(totals.live.blue)}
-              </span>
+                <span className="translate-y-[-1px] text-[22px] leading-none">
+                  ⌄
+                </span>
+              </button>
             </div>
 
             <button
               type="button"
-              onClick={() => setLiveExpanded((value) => !value)}
-              className={cx(
-                "mt-4 flex h-9 w-9 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95",
-                liveExpanded ? "" : "rotate-180"
-              )}
-              aria-label={
-                liveExpanded ? "Show live matches" : "Show headline score"
-              }
+              onClick={() => setScreen("rosterB")}
+              className="text-center"
             >
-              <span className="translate-y-[-1px] text-[22px] leading-none">
-                ⌄
-              </span>
+              <Logo
+                team="blue"
+                size="mx-auto h-28 w-28"
+                src={teamLogos?.Blue}
+              />
+
+              <div
+                className="mt-14 text-[112px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                style={{
+                  fontFamily:
+                    'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                  transform: "scaleY(1.22) scaleX(0.84)",
+                }}
+              >
+                {formatScore(totals.official.blue)}
+              </div>
             </button>
           </div>
+        ) : (
+          <>
+            <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 items-start gap-8 transition-all duration-500">
+              <button
+                type="button"
+                onClick={() => setScreen("rosterP")}
+                className="text-center"
+              >
+                <Logo
+                  team="red"
+                  size="mx-auto h-20 w-20"
+                  src={teamLogos?.Red}
+                />
 
-          <button
-            type="button"
-            onClick={() => setScreen("rosterB")}
-            className="text-center"
-          >
-            <Logo
-              team="blue"
-              size={liveExpanded ? "mx-auto h-28 w-28" : "mx-auto h-20 w-20"}
-              src={teamLogos?.Blue}
-            />
+                <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
+                  {teamNames?.Red || "Team Red"}
+                </div>
 
-            {!liveExpanded && (
-              <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
-                {teamNames?.Blue || "Team Blue"}
-              </div>
-            )}
+                <div
+                  className="mt-1 text-[74px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  style={{
+                    fontFamily:
+                      'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                    transform: "scaleY(1.12) scaleX(0.86)",
+                  }}
+                >
+                  {formatScore(totals.official.red)}
+                </div>
+              </button>
 
-            <div
-              className={cx(
-                "font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500",
-                liveExpanded ? "mt-14 text-[112px]" : "mt-1 text-[74px]"
-              )}
-              style={{
-                fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                transform: liveExpanded
-                  ? "scaleY(1.22) scaleX(0.84)"
-                  : "scaleY(1.12) scaleX(0.86)",
-              }}
-            >
-              {formatScore(totals.official.blue)}
+              <button
+                type="button"
+                onClick={() => setScreen("rosterB")}
+                className="text-center"
+              >
+                <Logo
+                  team="blue"
+                  size="mx-auto h-20 w-20"
+                  src={teamLogos?.Blue}
+                />
+
+                <div className="mt-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/60">
+                  {teamNames?.Blue || "Team Blue"}
+                </div>
+
+                <div
+                  className="mt-1 text-[74px] font-black leading-none tracking-[-0.1em] text-white drop-shadow-[0_14px_18px_rgba(0,0,0,0.65)] transition-all duration-500"
+                  style={{
+                    fontFamily:
+                      'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                    transform: "scaleY(1.12) scaleX(0.86)",
+                  }}
+                >
+                  {formatScore(totals.official.blue)}
+                </div>
+              </button>
             </div>
-          </button>
-        </div>
 
-        {!liveExpanded && (
-          <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-[#d1c79f]/45 to-transparent" />
+            <div className="mt-2 flex flex-col items-center justify-center">
+              <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                LIVE
+              </div>
+
+              <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 px-4 py-2 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl">
+                <span className="text-lg font-black">
+                  {formatScore(totals.live.red)}
+                </span>
+
+                <span className="mx-3 text-white/35">-</span>
+
+                <span className="text-lg font-black">
+                  {formatScore(totals.live.blue)}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setLiveExpanded((value) => !value)}
+                className="mt-3 flex h-8 w-8 rotate-180 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95"
+                aria-label="Show headline score"
+              >
+                <span className="translate-y-[-1px] text-[20px] leading-none">
+                  ⌄
+                </span>
+              </button>
+            </div>
+
+            <div className="mt-4 h-px w-full bg-gradient-to-r from-transparent via-[#d1c79f]/45 to-transparent" />
+          </>
         )}
       </div>
 
