@@ -399,7 +399,7 @@ export default function Home({
                       <div className="min-w-0 text-center">
                         <div
                           className={cx(
-                            "font-black uppercase leading-[0.76] tracking-[-0.1em]",
+                            "font-black uppercase leading-[0.76] tracking-[0.08em]",
                             isRedLeader
                               ? "text-[#ff3a46]"
                               : isBlueLeader
@@ -410,6 +410,7 @@ export default function Home({
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
                             fontSize: isAllSquare ? "38px" : "68px",
+                            letterSpacing: isAllSquare ? "0.12em" : "0.08em",
                           }}
                         >
                           {heroScore}
@@ -441,3 +442,4 @@ export default function Home({
     </div>
   );
 }
+
