@@ -363,7 +363,7 @@ export default function Home({
                   type="button"
                   onClick={() => openMatch(matchCard.index)}
                   className={cx(
-                    "relative w-full overflow-hidden rounded-[20px] border px-4 py-3 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    "relative w-full overflow-hidden rounded-[24px] border px-4 py-4 text-left shadow-[0_14px_34px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
                       ? "border-white/68 bg-[#320611]"
                       : isBlueLeader
@@ -384,20 +384,20 @@ export default function Home({
 
                   <div className="relative z-10">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="max-w-[220px] text-[9px] font-black uppercase leading-[1.25] tracking-[0.22em] text-white">
+                      <div className="max-w-[230px] text-[9px] font-black uppercase leading-[1.2] tracking-[0.24em] text-white">
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-2 py-0.5 text-[7px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-3 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
 
-                    <div className="mt-3 grid grid-cols-[0.82fr_1.02fr_0.82fr] items-center gap-2">
+                    <div className="mt-5 grid grid-cols-[0.9fr_1.05fr_0.9fr] items-center gap-2">
                       <div className="min-w-0 text-left">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[14px] font-semibold uppercase leading-[1.05] tracking-[0.01em]",
+                            "whitespace-pre-line text-[18px] font-black uppercase leading-[1.08] tracking-[0.01em]",
                             isRedLeader ? "text-[#ff3a46]" : "text-red-100/92"
                           )}
                         >
@@ -419,7 +419,7 @@ export default function Home({
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
                             fontSize: isAllSquare ? "32px" : "54px",
-                            letterSpacing: isAllSquare ? "0.03em" : "0.02em",
+                            letterSpacing: isAllSquare ? "0.02em" : "0.01em",
                           }}
                         >
                           {heroScore}
@@ -429,7 +429,7 @@ export default function Home({
                       <div className="min-w-0 text-right">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[14px] font-semibold uppercase leading-[1.05] tracking-[0.01em]",
+                            "whitespace-pre-line text-[18px] font-black uppercase leading-[1.08] tracking-[0.01em]",
                             isBlueLeader ? "text-[#5f95ff]" : "text-blue-100/92"
                           )}
                         >
@@ -438,7 +438,7 @@ export default function Home({
                       </div>
                     </div>
 
-                    <div className="mt-3 text-center text-[8px] font-black uppercase tracking-[0.18em] text-white/85">
+                    <div className="mt-5 text-center text-[10px] font-black uppercase tracking-[0.22em] text-white/88">
                       {matchCard.latest}
                     </div>
                   </div>
