@@ -1,4 +1,3 @@
-```tsx
 import { useState } from "react";
 import {
   Logo,
@@ -26,7 +25,8 @@ function DayButtons({
     <div
       className="mb-3 grid gap-2"
       style={{
-        gridTemplateColumns: `repeat(${shown.length}, minmax(0, 1fr))`,
+        gridTemplateColumns:
+          "repeat(" + shown.length + ", minmax(0, 1fr))",
       }}
     >
       {shown.map((d: any, i: number) => (
@@ -50,6 +50,7 @@ function formatScore(value: any) {
 
 function namesFor(players: any[]) {
   if (!players?.length) return "TBC";
+
   return players.map((p: any) => first(p.name)).join(" / ");
 }
 
@@ -59,10 +60,18 @@ function latestHoleText(holes: any[], teamNames: any) {
     .find((h: any) => h.status && h.status !== "pending");
 
   if (!latest) return "No holes scored yet";
-  if (latest.status === "as") return `Hole ${latest.hole} halved`;
-  if (latest.status === "red") return `${teamNames?.Red || "Red"} won Hole ${latest.hole}`;
-  if (latest.status === "blue") return `${teamNames?.Blue || "Blue"} won Hole ${latest.hole}`;
-  return `Hole ${latest.hole} updated`;
+
+  if (latest.status === "as") return "Hole " + latest.hole + " halved";
+
+  if (latest.status === "red") {
+    return (teamNames?.Red || "Red") + " won Hole " + latest.hole;
+  }
+
+  if (latest.status === "blue") {
+    return (teamNames?.Blue || "Blue") + " won Hole " + latest.hole;
+  }
+
+  return "Hole " + latest.hole + " updated";
 }
 
 function displayMatchMain(result: any, teamNames: any) {
@@ -104,7 +113,7 @@ export default function Home({
 
     return {
       index: i,
-      label: `Match ${i + 1}`,
+      label: "Match " + (i + 1),
       holes,
       result,
       match,
@@ -198,13 +207,23 @@ export default function Home({
                 liveExpanded ? "px-6 py-3" : "px-4 py-2"
               )}
             >
-              <span className={cx("font-black", liveExpanded ? "text-[28px]" : "text-lg")}>
+              <span
+                className={cx(
+                  "font-black",
+                  liveExpanded ? "text-[28px]" : "text-lg"
+                )}
+              >
                 {formatScore(totals.live.red)}
               </span>
 
               <span className="mx-3 text-white/35">-</span>
 
-              <span className={cx("font-black", liveExpanded ? "text-[28px]" : "text-lg")}>
+              <span
+                className={cx(
+                  "font-black",
+                  liveExpanded ? "text-[28px]" : "text-lg"
+                )}
+              >
                 {formatScore(totals.live.blue)}
               </span>
             </div>
@@ -216,9 +235,13 @@ export default function Home({
                 "mt-4 flex h-9 w-9 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95",
                 liveExpanded ? "" : "rotate-180"
               )}
-              aria-label={liveExpanded ? "Show live matches" : "Show headline score"}
+              aria-label={
+                liveExpanded ? "Show live matches" : "Show headline score"
+              }
             >
-              <span className="translate-y-[-1px] text-[22px] leading-none">⌄</span>
+              <span className="translate-y-[-1px] text-[22px] leading-none">
+                ⌄
+              </span>
             </button>
           </div>
 
@@ -312,7 +335,8 @@ export default function Home({
                         </div>
 
                         <div className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">
-                          {matchCard.holesPlayed} thru • {matchCard.holesToPlay} to play
+                          {matchCard.holesPlayed} thru •{" "}
+                          {matchCard.holesToPlay} to play
                         </div>
                       </div>
                     </div>
@@ -331,4 +355,3 @@ export default function Home({
     </div>
   );
 }
-```
