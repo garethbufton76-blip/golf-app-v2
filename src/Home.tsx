@@ -336,7 +336,7 @@ export default function Home({
             Live Matches
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {matchCards.map((matchCard) => {
               const isRedLeader = matchCard.result.leader === "red";
               const isBlueLeader = matchCard.result.leader === "blue";
@@ -348,7 +348,7 @@ export default function Home({
                   type="button"
                   onClick={() => openMatch(matchCard.index)}
                   className={cx(
-                    "relative w-full overflow-hidden rounded-[22px] border px-4 py-3 text-left shadow-[0_14px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    "relative w-full overflow-hidden rounded-[20px] border px-4 py-2.5 text-left shadow-[0_14px_36px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
                       ? "border-white/70 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
                       : isBlueLeader
@@ -369,24 +369,24 @@ export default function Home({
                       </div>
                     </div>
 
-                    <div className="mt-4 grid grid-cols-[1fr_1fr] items-center gap-4">
+                    <div className="mt-2 grid grid-cols-[1fr_1fr] items-center gap-3">
                       <div className="min-w-0">
                         <div
                           className={cx(
-                            "truncate text-[15px] font-black uppercase tracking-[0.06em]",
+                            "truncate text-[13px] font-black uppercase tracking-[0.06em]",
                             isRedLeader ? "text-[#ff4048]" : "text-red-100/92"
                           )}
                         >
                           {matchCard.redNames}
                         </div>
 
-                        <div className="mt-2 text-[42px] font-black uppercase leading-none tracking-[-0.08em] text-white">
+                        <div className="mt-2 text-[30px] font-black uppercase leading-none tracking-[-0.08em] text-white">
                           VS
                         </div>
 
                         <div
                           className={cx(
-                            "mt-2 truncate text-[15px] font-black uppercase tracking-[0.06em]",
+                            "mt-2 truncate text-[13px] font-black uppercase tracking-[0.06em]",
                             isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
                           )}
                         >
@@ -407,10 +407,10 @@ export default function Home({
                           style={{
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                            fontSize: isAllSquare ? "31px" : "58px",
+                            fontSize: isAllSquare ? "22px" : "42px",
                           }}
                         >
-                          {matchCard.main}
+                          {isAllSquare ? "A/S" : matchCard.main}
                         </div>
                       </div>
                     </div>
