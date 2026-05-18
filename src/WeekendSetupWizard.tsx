@@ -305,6 +305,42 @@ export default function WeekendSetupWizard({
       .join(", ");
   }
 
+  function extractTeeOptions(courseData: any) {
+    const teeCandidates =
+      courseData?.tees ||
+      courseData?.tee_sets ||
+      courseData?.teeBoxes ||
+      courseData?.tee_boxes ||
+      courseData?.course?.tees ||
+      courseData?.course?.tee_sets ||
+      [];
+
+    if (!Array.isArray(teeCandidates) || teeCandidates.length === 0) {
+      return ["Blue", "White", "Gold", "Red"];
+    }
+
+    const labels = teeCandidates
+      .map((tee: any) => {
+        if (typeof tee === "string") return tee;
+
+        return (
+          tee?.tee_name ||
+          tee?.teeName ||
+          tee?.name ||
+          tee?.color ||
+          tee?.colour ||
+          tee?.tee ||
+          tee?.label ||
+          ""
+        );
+      })
+      .filter(Boolean);
+
+    const unique = Array.from(new Set(labels));
+
+    return unique.length ? unique : ["Blue", "White", "Gold", "Red"];
+  }
+
   function updateSavedPlayer(index: number, field: string, value: any) {
     setSavedPlayers((current: any[]) => {
       const next = Array.isArray(current) ? [...current] : [];
@@ -325,6 +361,13 @@ export default function WeekendSetupWizard({
       next[index] = {
         ...normalisePlayer(next[index], index),
         [field]: value,
+        ...(field === "photo"
+          ? {
+              image: value,
+              photoUrl: value,
+              avatar: value,
+            }
+          : {}),
       };
 
       return next;
@@ -340,6 +383,10 @@ export default function WeekendSetupWizard({
         teamId: "red",
         name: player.name || "Red " + (index + 1),
         handicap: String(player.handicap || "0"),
+        photo: player.photo || "",
+        image: player.photo || player.image || "",
+        photoUrl: player.photo || player.photoUrl || "",
+        avatar: player.photo || player.avatar || "",
       })),
       Blue: blue.map((player, index) => ({
         ...player,
@@ -347,6 +394,10 @@ export default function WeekendSetupWizard({
         teamId: "blue",
         name: player.name || "Blue " + (index + 1),
         handicap: String(player.handicap || "0"),
+        photo: player.photo || "",
+        image: player.photo || player.image || "",
+        photoUrl: player.photo || player.photoUrl || "",
+        avatar: player.photo || player.avatar || "",
       })),
     }));
   }
@@ -910,6 +961,8 @@ export default function WeekendSetupWizard({
                             courseName={courseName}
                             courseLocation={courseLocation}
                             onSelect={(course: any) => {
+                              const teeOptions = extractTeeOptions(course);
+
                               updateRoundConfig(
                                 dayIndex,
                                 roundIndex,
@@ -930,6 +983,22 @@ export default function WeekendSetupWizard({
                                 "courseApiData",
                                 course
                               );
+
+                              updateRoundConfig(
+                                dayIndex,
+                                roundIndex,
+                                "teeOptions",
+                                teeOptions
+                              );
+
+                              if (teeOptions.length) {
+                                updateRoundConfig(
+                                  dayIndex,
+                                  roundIndex,
+                                  "tee",
+                                  teeOptions[0]
+                                );
+                              }
                             }}
                             onManual={(value: string) =>
                               updateRoundConfig(dayIndex, roundIndex, "course", value)
@@ -937,13 +1006,31 @@ export default function WeekendSetupWizard({
                           />
 
                           <div className="mt-3 grid grid-cols-2 gap-3">
-                            <Field
-                              label="Tee"
-                              value={round.tee}
-                              onChange={(value: string) =>
-                                updateRoundConfig(dayIndex, roundIndex, "tee", value)
-                              }
-                            />
+                            <div>
+                              <Label>Tee</Label>
+
+                              <select
+                                value={round.tee}
+                                onChange={(e) =>
+                                  updateRoundConfig(
+                                    dayIndex,
+                                    roundIndex,
+                                    "tee",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full rounded-[16px] border border-white/10 bg-black/45 px-4 py-3 text-[12px] font-black uppercase tracking-[0.08em] text-white outline-none"
+                              >
+                                {(round.teeOptions ||
+                                  extractTeeOptions(round.courseApiData)).map(
+                                  (tee: string) => (
+                                    <option key={tee} value={tee}>
+                                      {tee}
+                                    </option>
+                                  )
+                                )}
+                              </select>
+                            </div>
 
                             <Field
                               label="Tee Time"
@@ -1201,7 +1288,7 @@ function CourseSearchPicker({
       <Label>Course Search</Label>
 
       <div className="rounded-[18px] border border-white/10 bg-black/35 p-3">
-        <div className="grid grid-cols-[1fr_94px] gap-2">
+        <div className="grid grid-cols-[1fr_72px] gap-2">
           <input
             value={query}
             onChange={(e) =>
@@ -1217,7 +1304,7 @@ function CourseSearchPicker({
           <button
             type="button"
             onClick={() => searchCourses(searchKey)}
-            className="rounded-[14px] bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9f925f] px-3 py-3 text-[10px] font-black uppercase tracking-[0.14em] text-black"
+            className="rounded-[14px] bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9f925f] px-2 py-3 text-[8px] font-black uppercase tracking-[0.1em] text-black"
           >
             {loading ? "..." : "Search"}
           </button>
