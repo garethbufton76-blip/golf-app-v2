@@ -336,61 +336,101 @@ export default function Home({
             Live Matches
           </div>
 
-          <div className="space-y-3">
-            {matchCards.map((matchCard) => (
-              <button
-                key={matchCard.label}
-                type="button"
-                onClick={() => openMatch(matchCard.index)}
-                className={cx(
-                  "w-full overflow-hidden rounded-[22px] border p-4 text-left shadow-[0_14px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl",
-                  matchCard.result.leader === "red"
-                    ? "border-red-300/18 bg-gradient-to-r from-[#68171d]/92 via-[#241316]/94 to-[#0b1018]/94"
-                    : matchCard.result.leader === "blue"
-                    ? "border-blue-300/18 bg-gradient-to-r from-[#0b1018]/94 via-[#13233f]/94 to-[#173f73]/86"
-                    : "border-white/10 bg-gradient-to-r from-[#1d1d22]/88 via-[#101318]/94 to-[#111827]/90"
-                )}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[9px] font-black uppercase tracking-[0.22em] text-white/42">
-                      {matchCard.label} • {day.format}
+          <div className="space-y-4">
+            {matchCards.map((matchCard) => {
+              const isRedLeader = matchCard.result.leader === "red";
+              const isBlueLeader = matchCard.result.leader === "blue";
+              const isAllSquare = !matchCard.result.leader;
+
+              return (
+                <button
+                  key={matchCard.label}
+                  type="button"
+                  onClick={() => openMatch(matchCard.index)}
+                  className={cx(
+                    "relative w-full overflow-hidden rounded-[26px] border px-5 py-5 text-left shadow-[0_18px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    isRedLeader
+                      ? "border-white/78 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
+                      : isBlueLeader
+                      ? "border-white/78 bg-gradient-to-r from-[#091018]/98 via-[#101319]/96 to-[#10233e]/94"
+                      : "border-white/62 bg-gradient-to-r from-[#102719]/88 via-[#111311]/96 to-[#090909]/98"
+                  )}
+                >
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_18%,rgba(75,178,111,0.16),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.035),transparent_42%,rgba(255,255,255,0.02))]" />
+
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-[12px] font-black uppercase tracking-[0.24em] text-white">
+                        {matchCard.label} • {day.format}
+                      </div>
+
+                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-4 py-2 text-[11px] font-black uppercase tracking-[0.16em] text-black shadow-[0_10px_24px_rgba(0,0,0,0.35)]">
+                        ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
+                      </div>
                     </div>
 
-                    <div className="mt-1 flex items-center justify-between gap-3">
+                    <div className="mt-6 grid grid-cols-[1fr_1.15fr] items-center gap-5">
                       <div className="min-w-0">
-                        <div className="truncate text-[12px] font-black uppercase tracking-[0.08em] text-red-100/85">
+                        <div
+                          className={cx(
+                            "truncate text-[21px] font-black uppercase tracking-[0.06em]",
+                            isRedLeader ? "text-[#ff4048]" : "text-red-100/92"
+                          )}
+                        >
                           {matchCard.redNames}
                         </div>
 
-                        <div className="mt-1 truncate text-[12px] font-black uppercase tracking-[0.08em] text-blue-100/85">
+                        <div className="mt-4 text-[64px] font-black uppercase leading-none tracking-[-0.08em] text-white">
+                          VS
+                        </div>
+
+                        <div
+                          className={cx(
+                            "mt-4 truncate text-[21px] font-black uppercase tracking-[0.06em]",
+                            isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
+                          )}
+                        >
                           {matchCard.blueNames}
                         </div>
                       </div>
 
-                      <div className="shrink-0 text-right">
-                        <div className="text-[17px] font-black uppercase tracking-[0.06em] text-white">
+                      <div className="min-w-0 text-right">
+                        <div
+                          className={cx(
+                            "font-black uppercase leading-[0.82] tracking-[-0.08em]",
+                            isRedLeader
+                              ? "text-[#ff2532]"
+                              : isBlueLeader
+                              ? "text-[#4ea3ff]"
+                              : "text-white"
+                          )}
+                          style={{
+                            fontFamily:
+                              'Impact, "Arial Narrow", "Arial Black", sans-serif',
+                            fontSize: isAllSquare ? "42px" : "86px",
+                          }}
+                        >
                           {matchCard.main}
                         </div>
 
-                        <div className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-white/45">
-                          {matchCard.holesPlayed} thru •{" "}
-                          {matchCard.holesToPlay} to play
+                        <div className="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/42">
+                          {matchCard.holesPlayed} THRU •{" "}
+                          {matchCard.holesToPlay} TO PLAY
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="mt-3 flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-[0.13em] text-white/52">
-                  <span className="truncate">{matchCard.latest}</span>
-                  <span className="shrink-0">{matchCard.sub}</span>
-                </div>
-              </button>
-            ))}
+                    <div className="mt-6 truncate text-[13px] font-black uppercase tracking-[0.22em] text-white">
+                      {matchCard.latest}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
     </div>
   );
 }
+
