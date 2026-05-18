@@ -14,12 +14,34 @@ import Score from "./Score";
 import Admin from "./Admin";
 import QuickGame from "./QuickGame";
 import BottomNav from "./BottomNav";
+import EventGate from "./EventGate";
+import WeekendSetupWizard from "./WeekendSetupWizard";
 
 type AppMode = "launch" | "weekend" | "quick";
 type GameTab = "live" | "score" | "team";
 
+type WeekendEvent = {
+  id: string;
+  eventCode: string;
+  adminPin: string;
+  createdAt: string;
+  name: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  days: number;
+};
+
 export default function App() {
   const [mode, setMode] = useState<AppMode>("launch");
+  const [activeEvent, setActiveEvent] = useState<WeekendEvent | null>(() => {
+    try {
+      const stored = localStorage.getItem("duel_active_weekend_event");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
 
   const [screen, setScreen] = useState("home");
   const [players, setPlayers] = useState(2);
@@ -150,12 +172,118 @@ export default function App() {
     }
   }
 
+
+  function saveActiveEvent(event: WeekendEvent) {
+    setActiveEvent(event);
+    localStorage.setItem("duel_active_weekend_event", JSON.stringify(event));
+  }
+
+  function persistWeekendEvent(extra: any = {}) {
+    if (!activeEvent) return;
+
+    const updated = {
+      ...activeEvent,
+      name: eventDetails.name,
+      location: eventDetails.location,
+      startDate: eventDetails.startDate,
+      endDate: eventDetails.endDate,
+      days,
+      ...extra,
+    };
+
+    const events = JSON.parse(localStorage.getItem("duel_weekend_events") || "{}");
+
+    events[updated.eventCode] = {
+      ...events[updated.eventCode],
+      ...updated,
+      eventDetails,
+      teamNames,
+      teamLogos,
+      players,
+      days,
+      dayConfigs,
+      roster,
+      states,
+      scorecards,
+      savedPlayers,
+      eventStarted,
+      eventLocked,
+      ...extra,
+    };
+
+    localStorage.setItem("duel_weekend_events", JSON.stringify(events));
+    saveActiveEvent(updated);
+  }
+
+  function createWeekendEvent() {
+    const eventCode = "DUEL-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+    const adminPin = String(Math.floor(1000 + Math.random() * 9000));
+
+    const event: WeekendEvent = {
+      id: "event-" + Date.now(),
+      eventCode,
+      adminPin,
+      createdAt: new Date().toISOString(),
+      name: eventDetails.name || "Dual Weekend",
+      location: eventDetails.location || "Golf Weekend",
+      startDate: eventDetails.startDate || "",
+      endDate: eventDetails.endDate || "",
+      days,
+    };
+
+    saveActiveEvent(event);
+
+    const events = JSON.parse(localStorage.getItem("duel_weekend_events") || "{}");
+    events[eventCode] = {
+      ...event,
+      eventDetails,
+      teamNames,
+      teamLogos,
+      players,
+      days,
+      dayConfigs,
+      roster,
+      states,
+      scorecards,
+      savedPlayers,
+    };
+
+    localStorage.setItem("duel_weekend_events", JSON.stringify(events));
+    setScreen("setupWizard");
+  }
+
+  function joinWeekendEvent(eventCode: string, adminPin: string) {
+    const cleanCode = eventCode.trim().toUpperCase();
+    const cleanPin = adminPin.trim();
+    const events = JSON.parse(localStorage.getItem("duel_weekend_events") || "{}");
+    const found = events[cleanCode];
+
+    if (!found || found.adminPin !== cleanPin) return false;
+
+    saveActiveEvent(found);
+    if (found.eventDetails) setEventDetails(found.eventDetails);
+    if (found.teamNames) setTeamNames(found.teamNames);
+    if (found.teamLogos) setTeamLogos(found.teamLogos);
+    if (found.players) setPlayers(found.players);
+    if (found.days) setDays(found.days);
+    if (found.dayConfigs) setDayConfigs(found.dayConfigs);
+    if (found.roster) setRoster(found.roster);
+    if (found.states) setStates(found.states);
+    if (found.scorecards) setScorecards(found.scorecards);
+    if (found.savedPlayers) setSavedPlayers(found.savedPlayers);
+
+    setEventStarted(Boolean(found.eventStarted));
+    setEventLocked(Boolean(found.eventLocked));
+    setScreen(found.eventStarted ? "home" : "setupWizard");
+    return true;
+  }
+
   if (mode === "launch") {
     return (
       <Launch
         onWeekend={() => {
           setMode("weekend");
-          setScreen("admin");
+          setScreen("eventGate");
           setActiveTab("score");
         }}
         onQuick={() => {
@@ -170,7 +298,9 @@ export default function App() {
   const showBottomNav =
     eventStarted &&
     screen !== "admin" &&
-    screen !== "quick";
+    screen !== "quick" &&
+    screen !== "eventGate" &&
+    screen !== "setupWizard";
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-black text-white">
@@ -191,6 +321,47 @@ export default function App() {
         <div className="absolute inset-0 bg-black/15" />
 
         <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
+          {mode === "weekend" && screen === "eventGate" && (
+            <EventGate
+              activeEvent={activeEvent}
+              onCreate={createWeekendEvent}
+              onJoin={joinWeekendEvent}
+              onContinue={() => setScreen("setupWizard")}
+              onBack={() => {
+                setMode("launch");
+                setScreen("home");
+              }}
+            />
+          )}
+
+          {mode === "weekend" && screen === "setupWizard" && (
+            <WeekendSetupWizard
+              activeEvent={activeEvent}
+              saveActiveEvent={saveActiveEvent}
+              persistWeekendEvent={persistWeekendEvent}
+              eventDetails={eventDetails}
+              setEventDetails={setEventDetails}
+              teamNames={teamNames}
+              setTeamNames={setTeamNames}
+              teamLogos={teamLogos}
+              setTeamLogos={setTeamLogos}
+              players={players}
+              setPlayers={setPlayers}
+              days={days}
+              setDays={setDays}
+              roster={roster}
+              setRoster={setRoster}
+              savedPlayers={savedPlayers}
+              setSavedPlayers={setSavedPlayers}
+              dayConfigs={dayConfigs}
+              setDayConfigs={setDayConfigs}
+              setScreen={setScreen}
+              setEventLocked={setEventLocked}
+              setEventStarted={setEventStarted}
+              setActiveTab={setActiveTab}
+            />
+          )}
+
           {mode === "quick" && (
             <QuickGame
               setScreen={handleQuickScreen}
@@ -281,7 +452,7 @@ export default function App() {
             />
           )}
 
-          {mode !== "quick" && (screen === "admin" || !eventStarted) && (
+          {mode !== "quick" && screen !== "eventGate" && screen !== "setupWizard" && (screen === "admin" || !eventStarted) && (
             <Admin
               setScreen={setScreen}
               players={players}
@@ -322,4 +493,3 @@ export default function App() {
     </div>
   );
 }
-
