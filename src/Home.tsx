@@ -364,10 +364,10 @@ export default function Home({
                   className={cx(
                     "relative w-full overflow-hidden rounded-[20px] border px-4 py-3 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
+                      ? "border-white/68 bg-gradient-to-r from-[#123b24]/96 via-[#1a1315]/97 to-[#0a0a0a]/99"
                       : isBlueLeader
-                      ? "border-white/68 bg-gradient-to-r from-[#091018]/98 via-[#101319]/96 to-[#10233e]/94"
-                      : "border-white/48 bg-gradient-to-r from-[#102719]/88 via-[#111311]/96 to-[#090909]/98"
+                      ? "border-white/68 bg-gradient-to-r from-[#0d1726]/98 via-[#101319]/97 to-[#163768]/96"
+                      : "border-white/48 bg-gradient-to-r from-[#12281d]/90 via-[#111311]/97 to-[#090909]/99"
                   )}
                 >
                   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_8%_18%,rgba(75,178,111,0.13),transparent_34%),linear-gradient(90deg,rgba(255,255,255,0.03),transparent_42%,rgba(255,255,255,0.015))]" />
@@ -387,8 +387,8 @@ export default function Home({
                       <div className="min-w-0 text-left">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[20px] font-black uppercase leading-[0.98] tracking-[-0.04em]",
-                            isRedLeader ? "text-[#ff2532]" : "text-red-100/92"
+                            "whitespace-pre-line text-[18px] font-semibold uppercase leading-[1.02] tracking-[0.01em]",
+                            isRedLeader ? "text-[#ff3a46]" : "text-red-100/92"
                           )}
                         >
                           {matchCard.redNames.replaceAll(" / ", "\n&\n")}
@@ -400,9 +400,9 @@ export default function Home({
                           className={cx(
                             "font-black uppercase leading-[0.76] tracking-[-0.1em]",
                             isRedLeader
-                              ? "text-[#ff2532]"
+                              ? "text-[#ff3a46]"
                               : isBlueLeader
-                              ? "text-[#4ea3ff]"
+                              ? "text-[#5f95ff]"
                               : "text-white"
                           )}
                           style={{
@@ -418,8 +418,8 @@ export default function Home({
                       <div className="min-w-0 text-right">
                         <div
                           className={cx(
-                            "whitespace-pre-line text-[20px] font-black uppercase leading-[0.98] tracking-[-0.04em]",
-                            isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
+                            "whitespace-pre-line text-[18px] font-semibold uppercase leading-[1.02] tracking-[0.01em]",
+                            isBlueLeader ? "text-[#5f95ff]" : "text-blue-100/92"
                           )}
                         >
                           {matchCard.blueNames.replaceAll(" / ", "\n&\n")}
