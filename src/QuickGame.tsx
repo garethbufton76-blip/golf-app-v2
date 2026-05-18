@@ -1,4 +1,4 @@
-// src/QuickGame.tsx
+/ src/QuickGame.tsx
 
 import { useMemo, useState } from "react";
 import { cx } from "./data";
@@ -324,7 +324,7 @@ export default function QuickGame({
                       onClick={() => changeCourse(course.id)}
                       className="w-full text-left"
                     >
-                      <div className="text-[12px] font-black uppercase tracking-[0.12em] text-white">
+                      <div className="text-[10px] font-black uppercase tracking-[0.12em] text-white">
                         {course.name}
                       </div>
 
@@ -476,7 +476,7 @@ export default function QuickGame({
             <select
               value={format}
               onChange={(e) => setFormat(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
+              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[10px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
             >
               {QUICK_FORMATS.map((f) => (
                 <option key={f} value={f} className="bg-black text-white">
