@@ -3,6 +3,18 @@ import { Button, cx, validFormats } from "./data";
 
 const PLAYER_OPTIONS = [1, 2, 4, 6, 8, 10, 12];
 
+const COURSE_OPTIONS = [
+  "St Michaels Golf Club",
+  "Bonville Golf Resort",
+  "Barnbougle Dunes",
+  "Barnbougle Lost Farm",
+  "The Lakes Golf Club",
+  "New South Wales Golf Club",
+  "Royal Sydney Golf Club",
+  "The Australian Golf Club",
+  "Custom Course",
+];
+
 function firstName(name: string) {
   return String(name || "").split(" ")[0] || "Player";
 }
@@ -100,6 +112,8 @@ export default function WeekendSetupWizard({
   const adminPin = activeEvent?.adminPin || "0000";
 
   const totalPlayers = players * 2;
+  const roundsPerDay = Number(eventDetails.roundsPerDay || 1);
+  const totalRounds = days * roundsPerDay;
   const progress = ((step + 1) / 6) * 100;
 
   const playerList = useMemo(() => {
@@ -296,6 +310,37 @@ export default function WeekendSetupWizard({
     );
   }
 
+  function updateRoundConfig(dayIndex: number, roundIndex: number, field: string, value: any) {
+    setDayConfigs((current: any[]) =>
+      current.map((day: any, i: number) => {
+        if (i !== dayIndex) return day;
+
+        const rounds = Array.from({ length: roundsPerDay }, (_, r) => ({
+          label: "Round " + (r + 1),
+          course: day.course || "St Michaels Golf Club",
+          tee: day.tee || "Blue",
+          teeTime: day.teeTime || "8:00",
+          format: day.format || "Singles Match Play",
+          ...(day.rounds?.[r] || {}),
+        }));
+
+        rounds[roundIndex] = {
+          ...rounds[roundIndex],
+          [field]: value,
+        };
+
+        return {
+          ...day,
+          rounds,
+          course: roundIndex === 0 && field === "course" ? value : day.course,
+          tee: roundIndex === 0 && field === "tee" ? value : day.tee,
+          teeTime: roundIndex === 0 && field === "teeTime" ? value : day.teeTime,
+          format: roundIndex === 0 && field === "format" ? value : day.format,
+        };
+      })
+    );
+  }
+
   function launchDuel() {
     persistEvent({
       eventLocked: true,
@@ -358,7 +403,7 @@ export default function WeekendSetupWizard({
 
       <div className="mt-4 flex-1 overflow-y-auto pb-24">
         {step === 0 && (
-          <Panel title="1. Event Details" subtitle="Name the weekend and set the dates.">
+          <Panel title="1. Event Details" subtitle="Set players, days, rounds and the event details.">
             <Field
               label="Event Name"
               value={eventDetails.name}
@@ -452,6 +497,37 @@ export default function WeekendSetupWizard({
                     {option}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            <div>
+              <Label>Rounds per day</Label>
+
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 2, 3].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() =>
+                      setEventDetails((current: any) => ({
+                        ...current,
+                        roundsPerDay: option,
+                      }))
+                    }
+                    className={cx(
+                      "rounded-xl border py-3 text-[12px] font-black",
+                      roundsPerDay === option
+                        ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                        : "border-white/10 bg-black/35 text-white/55"
+                    )}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-2 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-white/42">
+                {totalRounds} total rounds
               </div>
             </div>
           </Panel>
@@ -690,56 +766,143 @@ export default function WeekendSetupWizard({
         )}
 
         {step === 4 && (
-          <Panel title="5. Rounds" subtitle="Set each day before you press DUEL.">
+          <Panel
+            title="5. Rounds & Courses"
+            subtitle="Choose each course, tee, format and start time before DUEL."
+          >
             <div className="space-y-3">
-              {dayConfigs.slice(0, days).map((day: any, index: number) => (
+              {dayConfigs.slice(0, days).map((day: any, dayIndex: number) => (
                 <div
                   key={day.label}
                   className="rounded-[24px] border border-white/10 bg-black/42 p-4"
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <div className="text-[13px] font-black uppercase tracking-[0.18em] text-white">
-                      Day {index + 1}
+                      Day {dayIndex + 1}
                     </div>
 
                     <div className="rounded-full border border-[#d1c79f]/25 bg-[#d1c79f]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-[#d1c79f]">
-                      Setup
+                      {roundsPerDay} Round{roundsPerDay > 1 ? "s" : ""}
                     </div>
                   </div>
 
-                  <Field
-                    label="Course"
-                    value={day.course}
-                    onChange={(value: string) => updateDay(index, "course", value)}
-                  />
+                  <div className="space-y-3">
+                    {Array.from({ length: roundsPerDay }, (_, roundIndex) => {
+                      const round = {
+                        label: "Round " + (roundIndex + 1),
+                        course: day.course || "St Michaels Golf Club",
+                        tee: day.tee || "Blue",
+                        teeTime: day.teeTime || "8:00",
+                        format: day.format || "Singles Match Play",
+                        ...(day.rounds?.[roundIndex] || {}),
+                      };
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field
-                      label="Tee"
-                      value={day.tee}
-                      onChange={(value: string) => updateDay(index, "tee", value)}
-                    />
+                      return (
+                        <div
+                          key={dayIndex + "-" + roundIndex}
+                          className="rounded-[20px] border border-white/10 bg-black/35 p-3"
+                        >
+                          <div className="mb-3 text-[11px] font-black uppercase tracking-[0.18em] text-white/70">
+                            Round {roundIndex + 1}
+                          </div>
 
-                    <Field
-                      label="First Tee Time"
-                      value={day.teeTime}
-                      onChange={(value: string) => updateDay(index, "teeTime", value)}
-                    />
+                          <Label>Course</Label>
+
+                          <select
+                            value={
+                              COURSE_OPTIONS.includes(round.course)
+                                ? round.course
+                                : "Custom Course"
+                            }
+                            onChange={(e) => {
+                              const nextCourse =
+                                e.target.value === "Custom Course"
+                                  ? ""
+                                  : e.target.value;
+
+                              updateRoundConfig(
+                                dayIndex,
+                                roundIndex,
+                                "course",
+                                nextCourse
+                              );
+                            }}
+                            className="w-full rounded-[16px] border border-white/10 bg-black/45 px-4 py-3 text-[12px] font-black uppercase tracking-[0.08em] text-white outline-none"
+                          >
+                            {COURSE_OPTIONS.map((course) => (
+                              <option key={course} value={course}>
+                                {course}
+                              </option>
+                            ))}
+                          </select>
+
+                          {!COURSE_OPTIONS.includes(round.course) ||
+                          round.course === "" ? (
+                            <div className="mt-2">
+                              <Field
+                                label="Custom Course"
+                                value={round.course}
+                                onChange={(value: string) =>
+                                  updateRoundConfig(
+                                    dayIndex,
+                                    roundIndex,
+                                    "course",
+                                    value
+                                  )
+                                }
+                              />
+                            </div>
+                          ) : null}
+
+                          <div className="mt-3 grid grid-cols-2 gap-3">
+                            <Field
+                              label="Tee"
+                              value={round.tee}
+                              onChange={(value: string) =>
+                                updateRoundConfig(dayIndex, roundIndex, "tee", value)
+                              }
+                            />
+
+                            <Field
+                              label="Tee Time"
+                              value={round.teeTime}
+                              onChange={(value: string) =>
+                                updateRoundConfig(
+                                  dayIndex,
+                                  roundIndex,
+                                  "teeTime",
+                                  value
+                                )
+                              }
+                            />
+                          </div>
+
+                          <div className="mt-3">
+                            <Label>Format</Label>
+
+                            <select
+                              value={round.format}
+                              onChange={(e) =>
+                                updateRoundConfig(
+                                  dayIndex,
+                                  roundIndex,
+                                  "format",
+                                  e.target.value
+                                )
+                              }
+                              className="w-full rounded-[16px] border border-white/10 bg-black/45 px-4 py-3 text-[12px] font-black uppercase tracking-[0.08em] text-white outline-none"
+                            >
+                              {validFormats(players).map((format: string) => (
+                                <option key={format} value={format}>
+                                  {format}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  <Label>Format</Label>
-
-                  <select
-                    value={day.format}
-                    onChange={(e) => updateDay(index, "format", e.target.value)}
-                    className="w-full rounded-[16px] border border-white/10 bg-black/45 px-4 py-3 text-[12px] font-black uppercase tracking-[0.08em] text-white outline-none"
-                  >
-                    {validFormats(players).map((format: string) => (
-                      <option key={format} value={format}>
-                        {format}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               ))}
             </div>
@@ -764,16 +927,26 @@ export default function WeekendSetupWizard({
               <div className="mt-5 grid grid-cols-3 gap-2">
                 <ReviewStat label="Players" value={totalPlayers} />
                 <ReviewStat label="Days" value={days} />
-                <ReviewStat label="Round" value="1" />
+                <ReviewStat label="Rounds" value={totalRounds} />
               </div>
 
-              <button
-                type="button"
-                onClick={launchDuel}
-                className="mt-6 w-full rounded-[30px] border border-[#efe6bf]/60 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9f925f] py-6 text-[30px] font-black uppercase tracking-[0.22em] text-black shadow-[0_22px_55px_rgba(0,0,0,0.55)] active:scale-[0.98]"
-              >
-                DUEL
-              </button>
+              <div className="mt-7 flex justify-center">
+                <button
+                  type="button"
+                  onClick={launchDuel}
+                  className="flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border border-[#d1c79f]/30 bg-[#0b2b1b] shadow-[0_24px_60px_rgba(0,0,0,0.65)] ring-1 ring-white/10 transition-all active:scale-[0.96]"
+                >
+                  <img
+                    src="/launch-logo.png"
+                    alt="DUEL"
+                    className="h-16 w-auto object-contain drop-shadow-[0_12px_22px_rgba(0,0,0,0.8)]"
+                  />
+                </button>
+              </div>
+
+              <div className="mt-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                Press to start round
+              </div>
             </div>
           </Panel>
         )}
