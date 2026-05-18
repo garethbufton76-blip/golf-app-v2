@@ -349,7 +349,7 @@ export default function Home({
             Live Matches
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {matchCards.map((matchCard) => {
               const isRedLeader = matchCard.result.leader === "red";
               const isBlueLeader = matchCard.result.leader === "blue";
@@ -362,7 +362,7 @@ export default function Home({
                   type="button"
                   onClick={() => openMatch(matchCard.index)}
                   className={cx(
-                    "relative w-full overflow-hidden rounded-[18px] border px-3.5 py-2 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    "relative w-full overflow-hidden rounded-[20px] border px-4 py-3 text-left shadow-[0_12px_30px_rgba(0,0,0,0.48)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
                       ? "border-white/68 bg-gradient-to-r from-[#102719]/94 via-[#111311]/96 to-[#090909]/98"
                       : isBlueLeader
@@ -374,44 +374,31 @@ export default function Home({
 
                   <div className="relative z-10">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="max-w-[200px] text-[8px] font-black uppercase leading-[1.25] tracking-[0.22em] text-white">
+                      <div className="max-w-[220px] text-[9px] font-black uppercase leading-[1.25] tracking-[0.22em] text-white">
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
 
-                    <div className="mt-1 grid grid-cols-[1fr_1fr] items-center gap-2">
-                      <div className="min-w-0">
+                    <div className="mt-3 grid grid-cols-[0.82fr_1.02fr_0.82fr] items-center gap-2">
+                      <div className="min-w-0 text-left">
                         <div
                           className={cx(
-                            "truncate text-[11px] font-black uppercase tracking-[0.06em]",
-                            isRedLeader ? "text-[#ff4048]" : "text-red-100/92"
+                            "whitespace-pre-line text-[20px] font-black uppercase leading-[0.98] tracking-[-0.04em]",
+                            isRedLeader ? "text-[#ff2532]" : "text-red-100/92"
                           )}
                         >
-                          {matchCard.redNames}
-                        </div>
-
-                        <div className="mt-0.5 text-[24px] font-black uppercase leading-none tracking-[-0.08em] text-white">
-                          VS
-                        </div>
-
-                        <div
-                          className={cx(
-                            "mt-1 truncate text-[11px] font-black uppercase tracking-[0.06em]",
-                            isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
-                          )}
-                        >
-                          {matchCard.blueNames}
+                          {matchCard.redNames.replaceAll(" / ", "\n&\n")}
                         </div>
                       </div>
 
-                      <div className="min-w-0 text-right">
+                      <div className="min-w-0 text-center">
                         <div
                           className={cx(
-                            "font-black uppercase leading-[0.72] tracking-[-0.1em]",
+                            "font-black uppercase leading-[0.76] tracking-[-0.1em]",
                             isRedLeader
                               ? "text-[#ff2532]"
                               : isBlueLeader
@@ -421,15 +408,26 @@ export default function Home({
                           style={{
                             fontFamily:
                               'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                            fontSize: isAllSquare ? "42px" : "72px",
+                            fontSize: isAllSquare ? "38px" : "68px",
                           }}
                         >
                           {heroScore}
                         </div>
                       </div>
+
+                      <div className="min-w-0 text-right">
+                        <div
+                          className={cx(
+                            "whitespace-pre-line text-[20px] font-black uppercase leading-[0.98] tracking-[-0.04em]",
+                            isBlueLeader ? "text-[#4ea3ff]" : "text-blue-100/92"
+                          )}
+                        >
+                          {matchCard.blueNames.replaceAll(" / ", "\n&\n")}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="mt-1 truncate text-[8px] font-black uppercase tracking-[0.2em] text-white">
+                    <div className="mt-3 truncate text-[10px] font-black uppercase tracking-[0.2em] text-white">
                       {matchCard.latest}
                     </div>
                   </div>
