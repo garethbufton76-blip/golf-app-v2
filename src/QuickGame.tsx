@@ -645,19 +645,20 @@ function TeamSetupColumn({
         {players.slice(0, count).map((p: any, i: number) => {
           const playHcp = playingHandicap(p.handicap);
           const defaultName = isRed ? `Red ${i + 1}` : `Blue ${i + 1}`;
-          const hasRealName = String(p.name || "").trim() !== defaultName;
+          const currentName = String(p.name || "");
+          const hasRealName = currentName.trim() !== defaultName;
 
           return (
             <div
               key={i}
               className={cx(
-                "relative grid grid-cols-[66px_1fr_68px] items-center gap-4 rounded-[24px] border px-4 py-4",
+                "relative grid grid-cols-[58px_minmax(0,1fr)_58px] items-center gap-3 rounded-[24px] border px-3 py-3.5",
                 isRed
                   ? "border-red-100/72 bg-[#250306]"
                   : "border-blue-100/72 bg-[#050b18]"
               )}
             >
-              <label className="relative flex h-[66px] w-[66px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
+              <label className="relative flex h-[58px] w-[58px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
                 {p.photo ? (
                   <img
                     src={p.photo}
@@ -666,8 +667,8 @@ function TeamSetupColumn({
                   />
                 ) : (
                   <div className="flex h-full w-full flex-col items-center justify-center px-1 text-center">
-                    <div className="text-[20px] leading-none text-white/75">＋</div>
-                    <div className="mt-0.5 text-[6px] font-black uppercase leading-[1.05] tracking-[0.08em] text-white/45">
+                    <div className="text-[18px] leading-none text-white/75">＋</div>
+                    <div className="mt-0.5 text-[5px] font-black uppercase leading-[1.05] tracking-[0.05em] text-white/45">
                       Click to<br />add photo
                     </div>
                   </div>
@@ -681,47 +682,49 @@ function TeamSetupColumn({
                 />
               </label>
 
-              <div className="min-w-0 pr-1">
+              <div className="min-w-0">
                 <input
                   value={p.name}
                   onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
                   placeholder={defaultName}
                   className={cx(
-                    "w-full border-0 bg-transparent p-0 text-[24px] font-black leading-none text-white outline-none placeholder:text-white/25",
+                    "w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none placeholder:text-white/25",
                     hasRealName ? "opacity-100" : "opacity-50"
                   )}
                 />
               </div>
 
-              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/28 bg-black/28 px-2 text-center">
-                <div className="text-[7px] font-black uppercase tracking-[0.16em] text-white/42">
-                  GWR
+              <div className="relative flex flex-col items-center">
+                <div className="flex h-[58px] w-[58px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/30 bg-black/26 px-1 text-center">
+                  <div className="text-[6px] font-black uppercase tracking-[0.13em] text-white/42">
+                    GWR
+                  </div>
+
+                  <input
+                    type="number"
+                    value={p.handicap}
+                    onChange={(e) =>
+                      updatePlayer(tone, i, "handicap", e.target.value)
+                    }
+                    className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none text-white outline-none"
+                  />
                 </div>
 
-                <input
-                  type="number"
-                  value={p.handicap}
-                  onChange={(e) =>
-                    updatePlayer(tone, i, "handicap", e.target.value)
-                  }
-                  className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[24px] font-black leading-none text-white outline-none"
-                />
-              </div>
-
-              <div className="absolute bottom-3 right-4 rounded-full border border-[#d1c79f]/18 bg-black/70 px-3 py-1.5 shadow-[0_8px_18px_rgba(0,0,0,0.28)]">
-                <span className="mr-1.5 text-[7px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/72">
-                  Play
-                </span>
-                <span className="text-[14px] font-black leading-none text-[#d1c79f]">
-                  {playHcp}
-                </span>
+                <div className="absolute -bottom-4 right-0 rounded-full border border-[#d1c79f]/18 bg-black/78 px-2.5 py-1 shadow-[0_8px_18px_rgba(0,0,0,0.28)]">
+                  <span className="mr-1 text-[6px] font-black uppercase tracking-[0.1em] text-[#d1c79f]/72">
+                    Play
+                  </span>
+                  <span className="text-[12px] font-black leading-none text-[#d1c79f]">
+                    {playHcp}
+                  </span>
+                </div>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
+      <div className="mt-5 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
         Playing handicap calculated from slope {courseSlope || 113}
       </div>
     </div>
