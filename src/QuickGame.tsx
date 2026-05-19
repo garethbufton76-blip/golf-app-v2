@@ -98,22 +98,59 @@ export default function QuickGame({
   }
 
   function getApiCourseLocation(course: any) {
+    const raw = course?.raw || course || {};
+
     const country =
-      course?.country ||
-      course?.country_name ||
-      course?.nation ||
+      raw?.country ||
+      raw?.country_name ||
+      raw?.nation ||
+      raw?.location?.country ||
+      raw?.address?.country ||
+      "";
+
+    const state =
+      raw?.state ||
+      raw?.state_name ||
+      raw?.province ||
+      raw?.region ||
+      raw?.administrative_area ||
+      raw?.location?.state ||
+      raw?.location?.region ||
+      raw?.address?.state ||
+      raw?.address?.region ||
       "";
 
     const county =
-      course?.county ||
-      course?.county_name ||
-      course?.state ||
-      course?.province ||
-      course?.region ||
-      course?.administrative_area ||
+      raw?.county ||
+      raw?.county_name ||
+      raw?.district ||
+      raw?.municipality ||
+      raw?.location?.county ||
+      raw?.address?.county ||
       "";
 
-    return [country, county].filter(Boolean).join(" • ");
+    const city =
+      raw?.city ||
+      raw?.town ||
+      raw?.suburb ||
+      raw?.locality ||
+      raw?.location?.city ||
+      raw?.location?.town ||
+      raw?.address?.city ||
+      raw?.address?.suburb ||
+      "";
+
+    const postcode =
+      raw?.postcode ||
+      raw?.postal_code ||
+      raw?.zip ||
+      raw?.address?.postcode ||
+      raw?.address?.postal_code ||
+      "";
+
+    const parts = [country, state || county, city, postcode].filter(Boolean);
+
+    return parts.length ? parts.join(" • ") : "";
   }
 
   function getApiCourseId(course: any) {
@@ -165,7 +202,12 @@ export default function QuickGame({
       name: getApiCourseName(apiCourse),
       shortName: getApiCourseName(apiCourse),
       region: getApiCourseLocation(apiCourse),
-      country: apiCourse?.country || "",
+      country:
+        apiCourse?.country ||
+        apiCourse?.country_name ||
+        apiCourse?.location?.country ||
+        apiCourse?.address?.country ||
+        "",
       source: "GolfCourseAPI",
       raw: apiCourse,
     };
@@ -353,7 +395,7 @@ export default function QuickGame({
                       </div>
 
                       <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "Country / County unavailable"}
+                        {getApiCourseLocation(course) || "Course details unavailable"}
                       </div>
 
                       <button
