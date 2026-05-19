@@ -408,13 +408,7 @@ export default function QuickGame({
                     </div>
                   ))}
                 </div>
-              ) : courseSearchStatus ? null : (
-                <div className="mt-3 rounded-[16px] border border-white/10 bg-black/25 p-3 text-center">
-                  <div className="text-[9px] font-black uppercase tracking-[0.18em] text-white/35">
-                    Search for a course to begin
-                  </div>
-                </div>
-              )}
+              ) : null}
             </div>
           ) : (
             <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
