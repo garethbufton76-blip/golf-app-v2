@@ -408,20 +408,12 @@ export default function QuickGame({
                     </div>
                   ))}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => changeCourse("st-michaels")}
-                  className="mt-3 w-full rounded-[16px] border border-[#d1c79f]/45 bg-[#d1c79f]/10 p-3 text-left"
-                >
-                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                    St Michaels Golf Club
+              ) : courseSearchStatus ? null : (
+                <div className="mt-3 rounded-[16px] border border-white/10 bg-black/25 p-3 text-center">
+                  <div className="text-[9px] font-black uppercase tracking-[0.18em] text-white/35">
+                    Search for a course to begin
                   </div>
-
-                  <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                    Suggested • NSW • Australia
-                  </div>
-                </button>
+                </div>
               )}
             </div>
           ) : (
