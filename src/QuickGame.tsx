@@ -622,8 +622,8 @@ function TeamSetupColumn({
       className={cx(
         "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
         isRed
-          ? "border-[#7a2424]/45 bg-[#250305]/54"
-          : "border-[#343957]/55 bg-[#060a16]/56"
+          ? "border-[#7a2424]/55 bg-[#320611]/88"
+          : "border-[#33466c]/60 bg-[#0a142b]/88"
       )}
     >
       <div className="mb-3">
@@ -636,7 +636,7 @@ function TeamSetupColumn({
         <div
           className={cx(
             "mt-3 h-[2px] w-full rounded-full",
-            isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
+            isRed ? "bg-[#781522]" : "bg-[#223a65]"
           )}
         />
       </div>
@@ -649,45 +649,13 @@ function TeamSetupColumn({
             <div
               key={i}
               className={cx(
-                "grid grid-cols-[1fr_68px_68px_54px] items-center gap-2 rounded-[22px] border bg-white/[0.035] px-4 py-3.5",
-                isRed ? "border-red-100/70" : "border-blue-100/70"
+                "grid grid-cols-[58px_1fr_64px_64px] items-center gap-3 rounded-[24px] border px-4 py-3.5",
+                isRed
+                  ? "border-red-100/18 bg-[#250306]/82"
+                  : "border-blue-100/18 bg-[#050b18]/82"
               )}
             >
-              <div className="min-w-0">
-                <input
-                  value={p.name}
-                  onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-                  placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
-                  className="w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
-                />
-              </div>
-
-              <div className="rounded-[16px] border border-white/10 bg-black/32 px-2 py-2 text-center">
-                <div className="text-[7px] font-black uppercase tracking-[0.14em] text-white/38">
-                  GWR
-                </div>
-
-                <input
-                  type="number"
-                  value={p.handicap}
-                  onChange={(e) =>
-                    updatePlayer(tone, i, "handicap", e.target.value)
-                  }
-                  className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none text-white outline-none"
-                />
-              </div>
-
-              <div className="rounded-[16px] border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-2 py-2 text-center">
-                <div className="text-[7px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/70">
-                  Play
-                </div>
-
-                <div className="mt-1 text-[22px] font-black leading-none text-white">
-                  {playHcp}
-                </div>
-              </div>
-
-              <label className="relative flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
+              <label className="relative flex h-[58px] w-[58px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
                 {p.photo ? (
                   <img
                     src={p.photo}
@@ -695,7 +663,7 @@ function TeamSetupColumn({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-[24px] leading-none text-white/70">＋</span>
+                  <span className="text-[28px] leading-none text-white/70">＋</span>
                 )}
 
                 <input
@@ -705,6 +673,40 @@ function TeamSetupColumn({
                   onChange={(e) => readPlayerPhoto(e.target.files?.[0], i)}
                 />
               </label>
+
+              <div className="min-w-0">
+                <input
+                  value={p.name}
+                  onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
+                  placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
+                  className="w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
+                />
+              </div>
+
+              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/28 bg-black/26 px-2 text-center">
+                <div className="text-[7px] font-black uppercase tracking-[0.16em] text-white/38">
+                  GWR
+                </div>
+
+                <input
+                  type="number"
+                  value={p.handicap}
+                  onChange={(e) =>
+                    updatePlayer(tone, i, "handicap", e.target.value)
+                  }
+                  className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[24px] font-black leading-none text-white outline-none"
+                />
+              </div>
+
+              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/20 bg-black/55 px-2 text-center">
+                <div className="text-[7px] font-black uppercase tracking-[0.14em] text-[#d1c79f]/72">
+                  Play
+                </div>
+
+                <div className="mt-1 text-[24px] font-black leading-none text-[#d1c79f]">
+                  {playHcp}
+                </div>
+              </div>
             </div>
           );
         })}
