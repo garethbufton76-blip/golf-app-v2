@@ -98,14 +98,22 @@ export default function QuickGame({
   }
 
   function getApiCourseLocation(course: any) {
-    return [
-      course?.city,
-      course?.state,
-      course?.province,
-      course?.country,
-    ]
-      .filter(Boolean)
-      .join(", ");
+    const country =
+      course?.country ||
+      course?.country_name ||
+      course?.nation ||
+      "";
+
+    const county =
+      course?.county ||
+      course?.county_name ||
+      course?.state ||
+      course?.province ||
+      course?.region ||
+      course?.administrative_area ||
+      "";
+
+    return [country, county].filter(Boolean).join(" • ");
   }
 
   function getApiCourseId(course: any) {
@@ -345,7 +353,7 @@ export default function QuickGame({
                       </div>
 
                       <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "GolfCourseAPI result"}
+                        {getApiCourseLocation(course) || "Country / County unavailable"}
                       </div>
 
                       <button
@@ -403,7 +411,7 @@ export default function QuickGame({
 
                       <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
                         {isApiCourse
-                          ? "Saved from GolfCourseAPI"
+                          ? selectedSavedCourse?.region || "Saved from GolfCourseAPI"
                           : `${course.region || ""}${
                               course.country ? ` • ${course.country}` : ""
                             }` || "Saved Course"}
