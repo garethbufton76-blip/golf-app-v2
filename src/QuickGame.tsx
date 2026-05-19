@@ -260,6 +260,26 @@ export default function QuickGame({
     );
   }
 
+  function selectedTeeSlope() {
+    const selectedTee = tees.find((t: any) => t.id === tee || t.label === tee);
+
+    return Number(
+      selectedTee?.slope ||
+        selectedTee?.slopeRating ||
+        selectedTee?.slope_rating ||
+        selectedTee?.menSlope ||
+        selectedTee?.mensSlope ||
+        113
+    );
+  }
+
+  function playingHandicap(rawHandicap: any) {
+    const slope = selectedTeeSlope();
+    const numeric = Number(rawHandicap || 0);
+
+    return Math.round((numeric * slope) / 113);
+  }
+
   function startQuickGame() {
     const selectedCourse = selectedSavedCourse || getCourseById("st-michaels");
 
@@ -267,12 +287,16 @@ export default function QuickGame({
       id: `quick-red-${i}`,
       name: p.name || `Red ${i + 1}`,
       nickname: p.name || `Red ${i + 1}`,
-      handicap: Number(p.handicap || 0),
+      handicap: playingHandicap(p.handicap),
       rawHandicap: Number(p.handicap || 0),
+      playingHandicap: playingHandicap(p.handicap),
       team: "red",
       teamId: "red",
       rosterIndex: i,
-      photo: "",
+      photo: p.photo || "",
+      image: p.photo || "",
+      photoUrl: p.photo || "",
+      avatar: p.photo || "",
       homeClub: "",
       preferredTee: tee,
       regular: false,
@@ -282,12 +306,16 @@ export default function QuickGame({
       id: `quick-blue-${i}`,
       name: p.name || `Blue ${i + 1}`,
       nickname: p.name || `Blue ${i + 1}`,
-      handicap: Number(p.handicap || 0),
+      handicap: playingHandicap(p.handicap),
       rawHandicap: Number(p.handicap || 0),
+      playingHandicap: playingHandicap(p.handicap),
       team: "blue",
       teamId: "blue",
       rosterIndex: i,
-      photo: "",
+      photo: p.photo || "",
+      image: p.photo || "",
+      photoUrl: p.photo || "",
+      avatar: p.photo || "",
       homeClub: "",
       preferredTee: tee,
       regular: false,
@@ -491,6 +519,8 @@ export default function QuickGame({
             players={redPlayers}
             count={playersPerTeam}
             updatePlayer={updatePlayer}
+            courseSlope={selectedTeeSlope()}
+            playingHandicap={playingHandicap}
           />
 
           <TeamSetupColumn
@@ -500,6 +530,8 @@ export default function QuickGame({
             players={bluePlayers}
             count={playersPerTeam}
             updatePlayer={updatePlayer}
+            courseSlope={selectedTeeSlope()}
+            playingHandicap={playingHandicap}
           />
         </div>
 
@@ -568,8 +600,22 @@ function TeamSetupColumn({
   players,
   count,
   updatePlayer,
+  courseSlope,
+  playingHandicap,
 }: any) {
   const isRed = tone === "red";
+
+  function readPlayerPhoto(file: File | undefined, index: number) {
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      updatePlayer(tone, index, "photo", String(reader.result || ""));
+    };
+
+    reader.readAsDataURL(file);
+  }
 
   return (
     <div
@@ -581,19 +627,10 @@ function TeamSetupColumn({
       )}
     >
       <div className="mb-3">
-        <div
-          className={cx(
-            "mb-1 text-[7px] font-black uppercase tracking-[0.24em]",
-            isRed ? "text-red-200/45" : "text-blue-100/45"
-          )}
-        >
-          Team
-        </div>
-
         <input
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
-          className="w-full border-0 bg-transparent p-0 text-[18px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
+          className="w-full border-0 bg-transparent p-0 text-[20px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
         />
 
         <div
@@ -605,31 +642,29 @@ function TeamSetupColumn({
       </div>
 
       <div className="space-y-2.5">
-        {players.slice(0, count).map((p: any, i: number) => (
-          <div
-            key={i}
-            className={cx(
-              "grid grid-cols-[1fr_72px] items-center gap-3 rounded-[22px] border bg-white/[0.035] px-4 py-4",
-              isRed ? "border-red-100/70" : "border-blue-100/70"
-            )}
-          >
-            <div className="min-w-0">
-              <div className="text-[8px] font-black uppercase tracking-[0.22em] text-white/55">
-                Player {i + 1}
+        {players.slice(0, count).map((p: any, i: number) => {
+          const playHcp = playingHandicap(p.handicap);
+
+          return (
+            <div
+              key={i}
+              className={cx(
+                "grid grid-cols-[1fr_68px_68px_54px] items-center gap-2 rounded-[22px] border bg-white/[0.035] px-4 py-3.5",
+                isRed ? "border-red-100/70" : "border-blue-100/70"
+              )}
+            >
+              <div className="min-w-0">
+                <input
+                  value={p.name}
+                  onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
+                  placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
+                  className="w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
+                />
               </div>
 
-              <input
-                value={p.name}
-                onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-                placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
-                className="mt-1 w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
-              />
-            </div>
-
-            <div className="flex items-center justify-end gap-2">
-              <div className="text-right">
-                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.16em] text-white/42">
-                  HCP
+              <div className="rounded-[16px] border border-white/10 bg-black/32 px-2 py-2 text-center">
+                <div className="text-[7px] font-black uppercase tracking-[0.14em] text-white/38">
+                  GWR
                 </div>
 
                 <input
@@ -638,12 +673,45 @@ function TeamSetupColumn({
                   onChange={(e) =>
                     updatePlayer(tone, i, "handicap", e.target.value)
                   }
-                  className="w-14 border-0 bg-transparent p-0 text-right text-[30px] font-black leading-none text-white outline-none"
+                  className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none text-white outline-none"
                 />
               </div>
+
+              <div className="rounded-[16px] border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-2 py-2 text-center">
+                <div className="text-[7px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/70">
+                  Play
+                </div>
+
+                <div className="mt-1 text-[22px] font-black leading-none text-white">
+                  {playHcp}
+                </div>
+              </div>
+
+              <label className="relative flex h-12 w-12 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
+                {p.photo ? (
+                  <img
+                    src={p.photo}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <span className="text-[24px] leading-none text-white/70">＋</span>
+                )}
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => readPlayerPhoto(e.target.files?.[0], i)}
+                />
+              </label>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
+        Playing handicap calculated from slope {courseSlope || 113}
       </div>
     </div>
   );
