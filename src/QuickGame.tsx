@@ -622,8 +622,8 @@ function TeamSetupColumn({
       className={cx(
         "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
         isRed
-          ? "border-[#7a2424]/55 bg-[#320611]/88"
-          : "border-[#33466c]/60 bg-[#0a142b]/88"
+          ? "border-[#7a2424]/65 bg-[#320611]"
+          : "border-[#33466c]/70 bg-[#0a142b]"
       )}
     >
       <div className="mb-3">
@@ -644,18 +644,20 @@ function TeamSetupColumn({
       <div className="space-y-2.5">
         {players.slice(0, count).map((p: any, i: number) => {
           const playHcp = playingHandicap(p.handicap);
+          const defaultName = isRed ? `Red ${i + 1}` : `Blue ${i + 1}`;
+          const hasRealName = String(p.name || "").trim() !== defaultName;
 
           return (
             <div
               key={i}
               className={cx(
-                "grid grid-cols-[58px_1fr_64px_64px] items-center gap-3 rounded-[24px] border px-4 py-3.5",
+                "relative grid grid-cols-[66px_1fr_68px] items-center gap-4 rounded-[24px] border px-4 py-4",
                 isRed
-                  ? "border-red-100/18 bg-[#250306]/82"
-                  : "border-blue-100/18 bg-[#050b18]/82"
+                  ? "border-red-100/72 bg-[#250306]"
+                  : "border-blue-100/72 bg-[#050b18]"
               )}
             >
-              <label className="relative flex h-[58px] w-[58px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
+              <label className="relative flex h-[66px] w-[66px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
                 {p.photo ? (
                   <img
                     src={p.photo}
@@ -663,7 +665,12 @@ function TeamSetupColumn({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-[28px] leading-none text-white/70">＋</span>
+                  <div className="flex h-full w-full flex-col items-center justify-center px-1 text-center">
+                    <div className="text-[20px] leading-none text-white/75">＋</div>
+                    <div className="mt-0.5 text-[6px] font-black uppercase leading-[1.05] tracking-[0.08em] text-white/45">
+                      Click to<br />add photo
+                    </div>
+                  </div>
                 )}
 
                 <input
@@ -674,17 +681,20 @@ function TeamSetupColumn({
                 />
               </label>
 
-              <div className="min-w-0">
+              <div className="min-w-0 pr-1">
                 <input
                   value={p.name}
                   onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-                  placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
-                  className="w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
+                  placeholder={defaultName}
+                  className={cx(
+                    "w-full border-0 bg-transparent p-0 text-[24px] font-black leading-none text-white outline-none placeholder:text-white/25",
+                    hasRealName ? "opacity-100" : "opacity-50"
+                  )}
                 />
               </div>
 
-              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/28 bg-black/26 px-2 text-center">
-                <div className="text-[7px] font-black uppercase tracking-[0.16em] text-white/38">
+              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/28 bg-black/28 px-2 text-center">
+                <div className="text-[7px] font-black uppercase tracking-[0.16em] text-white/42">
                   GWR
                 </div>
 
@@ -698,14 +708,13 @@ function TeamSetupColumn({
                 />
               </div>
 
-              <div className="flex h-[66px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/20 bg-black/55 px-2 text-center">
-                <div className="text-[7px] font-black uppercase tracking-[0.14em] text-[#d1c79f]/72">
+              <div className="absolute bottom-3 right-4 rounded-full border border-[#d1c79f]/18 bg-black/70 px-3 py-1.5 shadow-[0_8px_18px_rgba(0,0,0,0.28)]">
+                <span className="mr-1.5 text-[7px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/72">
                   Play
-                </div>
-
-                <div className="mt-1 text-[24px] font-black leading-none text-[#d1c79f]">
+                </span>
+                <span className="text-[14px] font-black leading-none text-[#d1c79f]">
                   {playHcp}
-                </div>
+                </span>
               </div>
             </div>
           );
