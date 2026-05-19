@@ -35,6 +35,7 @@ export default function PlayerCard({
   const currentName = String(player.name || "");
   const hasRealName = currentName.trim() !== defaultName;
   const playHcp = playingHandicap(player.handicap);
+  const gwrDisplay = Number(player.handicap || 0).toFixed(1);
 
   function readPlayerPhoto(file: File | undefined) {
     if (!file) return;
@@ -97,28 +98,29 @@ export default function PlayerCard({
         />
       </div>
 
-      <div className="flex flex-col items-stretch gap-1.5">
-        <div className="rounded-[16px] border border-[#d1c79f]/22 bg-black/30 px-2 py-2 text-center">
+      <div className="flex flex-col items-end gap-1.5">
+        <div className="flex h-[78px] w-[78px] flex-col items-center justify-center rounded-[16px] border border-[#d1c79f]/22 bg-black/30 px-2 text-center">
           <div className="text-[6px] font-black uppercase tracking-[0.14em] text-white/42">
             GWR
           </div>
 
           <input
             type="number"
-            value={player.handicap}
+            step="0.1"
+            value={gwrDisplay}
             onChange={(event) =>
               updatePlayer(tone, index, "handicap", event.target.value)
             }
-            className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[20px] font-black leading-none text-white outline-none"
+            className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[18px] font-black leading-none text-white outline-none"
           />
         </div>
 
-        <div className="rounded-full border border-[#d1c79f]/18 bg-black/72 px-2 py-1 text-center">
-          <span className="mr-1 text-[6px] font-black uppercase tracking-[0.1em] text-[#d1c79f]/72">
+        <div className="w-fit rounded-full border border-[#d1c79f]/18 bg-black/80 px-2.5 py-[4px] text-center">
+          <span className="mr-1 text-[5px] font-black uppercase tracking-[0.1em] text-[#d1c79f]/72">
             Play
           </span>
 
-          <span className="text-[12px] font-black leading-none text-[#d1c79f]">
+          <span className="text-[10px] font-black leading-none text-[#d1c79f]">
             {playHcp}
           </span>
         </div>
