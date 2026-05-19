@@ -573,65 +573,81 @@ function TeamSetupColumn({
   return (
     <div
       className={cx(
-        "rounded-[24px] border p-2.5 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+        "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
         isRed
           ? "border-[#7a2424]/45 bg-[#250305]/54"
           : "border-[#343957]/55 bg-[#060a16]/56"
       )}
     >
-      <div className="mb-2">
+      <div className="mb-3">
         <div
           className={cx(
-            "mb-0.5 text-[7px] font-black uppercase tracking-[0.24em]",
+            "mb-1 text-[7px] font-black uppercase tracking-[0.24em]",
             isRed ? "text-red-200/45" : "text-blue-100/45"
           )}
         >
           Team
         </div>
+
         <input
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
-          className="w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
+          className="w-full border-0 bg-transparent p-0 text-[18px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
         />
+
         <div
           className={cx(
-            "mt-1.5 h-[2px] w-full rounded-full",
+            "mt-3 h-[2px] w-full rounded-full",
             isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
           )}
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {players.slice(0, count).map((p: any, i: number) => (
-          <div key={i} className="rounded-[18px] border border-white/8 bg-black/34 p-2.5">
-            <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
+          <div
+            key={i}
+            className={cx(
+              "rounded-[22px] border bg-white/[0.035] p-3.5",
+              isRed ? "border-red-100/75" : "border-blue-100/75"
+            )}
+          >
+            <div className="mb-3 text-[8px] font-black uppercase tracking-[0.22em] text-white/78">
               Player {i + 1}
             </div>
+
             <input
               value={p.name}
               onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-              className="w-full border-0 bg-transparent p-0 text-[15px] font-black text-white outline-none placeholder:text-white/25"
+              placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
+              className="w-full border-0 bg-transparent p-0 text-[18px] font-black leading-none text-white outline-none placeholder:text-white/25"
             />
 
-            <div className="mt-2 grid grid-cols-[1fr_46px] items-end gap-2">
-              <div>
-                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
-                  Handicap
-                </div>
+            <div className="mt-4">
+              <div className="mb-1 text-[8px] font-black uppercase tracking-[0.22em] text-white/78">
+                Handicap
+              </div>
+
+              <div className="flex items-end justify-between gap-3">
                 <input
                   type="number"
                   value={p.handicap}
-                  onChange={(e) => updatePlayer(tone, i, "handicap", e.target.value)}
-                  className="w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none"
+                  onChange={(e) =>
+                    updatePlayer(tone, i, "handicap", e.target.value)
+                  }
+                  className="w-24 border-0 bg-transparent p-0 text-[34px] font-black leading-none text-white outline-none"
                 />
-              </div>
-              <div
-                className={cx(
-                  "rounded-full px-2 py-0.5 text-center text-[7px] font-black uppercase tracking-[0.12em]",
-                  isRed ? "bg-[#661716] text-red-100" : "bg-[#2a2e46] text-blue-100"
-                )}
-              >
-                HCP
+
+                <div
+                  className={cx(
+                    "mb-0.5 min-w-[62px] rounded-full px-3 py-1 text-center text-[8px] font-black uppercase tracking-[0.18em]",
+                    isRed
+                      ? "bg-[#661716] text-red-100"
+                      : "bg-[#2a2e46] text-blue-100"
+                  )}
+                >
+                  HCP
+                </div>
               </div>
             </div>
           </div>
