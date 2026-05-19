@@ -652,7 +652,7 @@ function TeamSetupColumn({
             <div
               key={i}
               className={cx(
-                "relative grid grid-cols-[58px_minmax(0,1fr)_58px] items-center gap-3 rounded-[24px] border px-3 py-3.5",
+                "grid grid-cols-[58px_minmax(0,1fr)_78px] items-center gap-3 rounded-[24px] border px-4 py-3",
                 isRed
                   ? "border-red-100/72 bg-[#250306]"
                   : "border-blue-100/72 bg-[#050b18]"
@@ -688,15 +688,15 @@ function TeamSetupColumn({
                   onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
                   placeholder={defaultName}
                   className={cx(
-                    "w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none placeholder:text-white/25",
+                    "w-full border-0 bg-transparent p-0 text-[19px] font-black leading-none text-white outline-none placeholder:text-white/25",
                     hasRealName ? "opacity-100" : "opacity-50"
                   )}
                 />
               </div>
 
-              <div className="relative flex flex-col items-center">
-                <div className="flex h-[58px] w-[58px] flex-col items-center justify-center rounded-full border border-[#d1c79f]/30 bg-black/26 px-1 text-center">
-                  <div className="text-[6px] font-black uppercase tracking-[0.13em] text-white/42">
+              <div className="flex flex-col items-stretch gap-1.5">
+                <div className="rounded-[16px] border border-[#d1c79f]/22 bg-black/30 px-2 py-2 text-center">
+                  <div className="text-[6px] font-black uppercase tracking-[0.14em] text-white/42">
                     GWR
                   </div>
 
@@ -706,11 +706,11 @@ function TeamSetupColumn({
                     onChange={(e) =>
                       updatePlayer(tone, i, "handicap", e.target.value)
                     }
-                    className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none text-white outline-none"
+                    className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[20px] font-black leading-none text-white outline-none"
                   />
                 </div>
 
-                <div className="absolute -bottom-4 right-0 rounded-full border border-[#d1c79f]/18 bg-black/78 px-2.5 py-1 shadow-[0_8px_18px_rgba(0,0,0,0.28)]">
+                <div className="rounded-full border border-[#d1c79f]/18 bg-black/72 px-2 py-1 text-center">
                   <span className="mr-1 text-[6px] font-black uppercase tracking-[0.1em] text-[#d1c79f]/72">
                     Play
                   </span>
@@ -724,7 +724,7 @@ function TeamSetupColumn({
         })}
       </div>
 
-      <div className="mt-5 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
+      <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
         Playing handicap calculated from slope {courseSlope || 113}
       </div>
     </div>
