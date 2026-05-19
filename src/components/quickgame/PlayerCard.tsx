@@ -123,18 +123,7 @@ export default function PlayerCard({
             )}
           />
 
-          <div className="mt-2 flex items-center gap-2">
-            <div
-              className={cx(
-                "h-1.5 w-1.5 rounded-full",
-                isRed ? "bg-red-400" : "bg-blue-400"
-              )}
-            />
 
-            <div className="text-[7px] font-black uppercase tracking-[0.2em] text-white/28">
-              Quick game roster
-            </div>
-          </div>
         </div>
 
         <div className="flex flex-col items-end gap-2">
@@ -150,16 +139,16 @@ export default function PlayerCard({
               onChange={(event) =>
                 updatePlayer(tone, index, "handicap", event.target.value)
               }
-              className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none text-white outline-none"
+              className="mt-0.5 w-full border-0 bg-transparent p-0 text-center text-[19px] font-black leading-none tracking-[-0.04em] text-white outline-none"
             />
           </div>
 
-          <div className="flex w-[74px] items-center justify-center gap-1 rounded-full border border-[#d1c79f]/18 bg-black/72 px-2 py-1.5">
+          <div className="flex w-[74px] items-center justify-center gap-1 rounded-full border border-[#d1c79f]/18 bg-white/[0.06] px-2 py-1.5">
             <span className="text-[6px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/70">
               Play
             </span>
 
-            <span className="text-[15px] font-black leading-none text-[#efe6bf]">
+            <span className="text-[15px] font-black leading-none text-[#d9cfaa]">
               {playHcp}
             </span>
           </div>
