@@ -483,7 +483,7 @@ export default function QuickGame({
           })}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">
           <TeamSetupColumn
             tone="red"
             teamName={redName}
@@ -492,6 +492,7 @@ export default function QuickGame({
             count={playersPerTeam}
             updatePlayer={updatePlayer}
           />
+
           <TeamSetupColumn
             tone="blue"
             teamName={blueName}
@@ -603,51 +604,42 @@ function TeamSetupColumn({
         />
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {players.slice(0, count).map((p: any, i: number) => (
           <div
             key={i}
             className={cx(
-              "rounded-[22px] border bg-white/[0.035] p-3.5",
-              isRed ? "border-red-100/75" : "border-blue-100/75"
+              "grid grid-cols-[1fr_72px] items-center gap-3 rounded-[22px] border bg-white/[0.035] px-4 py-4",
+              isRed ? "border-red-100/70" : "border-blue-100/70"
             )}
           >
-            <div className="mb-3 text-[8px] font-black uppercase tracking-[0.22em] text-white/78">
-              Player {i + 1}
-            </div>
-
-            <input
-              value={p.name}
-              onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
-              placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
-              className="w-full border-0 bg-transparent p-0 text-[18px] font-black leading-none text-white outline-none placeholder:text-white/25"
-            />
-
-            <div className="mt-4">
-              <div className="mb-1 text-[8px] font-black uppercase tracking-[0.22em] text-white/78">
-                Handicap
+            <div className="min-w-0">
+              <div className="text-[8px] font-black uppercase tracking-[0.22em] text-white/55">
+                Player {i + 1}
               </div>
 
-              <div className="flex items-end justify-between gap-3">
+              <input
+                value={p.name}
+                onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
+                placeholder={isRed ? `Red ${i + 1}` : `Blue ${i + 1}`}
+                className="mt-1 w-full border-0 bg-transparent p-0 text-[22px] font-black leading-none text-white outline-none placeholder:text-white/25"
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-2">
+              <div className="text-right">
+                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.16em] text-white/42">
+                  HCP
+                </div>
+
                 <input
                   type="number"
                   value={p.handicap}
                   onChange={(e) =>
                     updatePlayer(tone, i, "handicap", e.target.value)
                   }
-                  className="w-24 border-0 bg-transparent p-0 text-[34px] font-black leading-none text-white outline-none"
+                  className="w-14 border-0 bg-transparent p-0 text-right text-[30px] font-black leading-none text-white outline-none"
                 />
-
-                <div
-                  className={cx(
-                    "mb-0.5 min-w-[62px] rounded-full px-3 py-1 text-center text-[8px] font-black uppercase tracking-[0.18em]",
-                    isRed
-                      ? "bg-[#661716] text-red-100"
-                      : "bg-[#2a2e46] text-blue-100"
-                  )}
-                >
-                  HCP
-                </div>
               </div>
             </div>
           </div>
