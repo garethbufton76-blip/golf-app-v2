@@ -23,11 +23,6 @@ type PlayerCardProps = {
   ) => void;
 };
 
-function formatGwr(value: any) {
-  const numeric = Number(value || 0);
-  return Number.isFinite(numeric) ? numeric.toFixed(1) : "0.0";
-}
-
 export default function PlayerCard({
   tone,
   player,
@@ -40,7 +35,6 @@ export default function PlayerCard({
   const currentName = String(player.name || "");
   const hasRealName = currentName.trim() !== defaultName;
   const playHcp = playingHandicap(player.handicap);
-  const gwrDisplay = formatGwr(player.handicap);
 
   function readPlayerPhoto(file: File | undefined) {
     if (!file) return;
@@ -118,7 +112,7 @@ export default function PlayerCard({
             }
             placeholder={defaultName}
             className={cx(
-              "w-full border-0 bg-transparent p-0 text-[18px] font-black leading-none tracking-[-0.05em] text-white outline-none placeholder:text-white/25",
+              "w-full border-0 bg-transparent p-0 text-[14px] font-black leading-none tracking-[-0.04em] text-white outline-none placeholder:text-white/25",
               hasRealName ? "opacity-100" : "opacity-45"
             )}
           />
@@ -135,11 +129,11 @@ export default function PlayerCard({
             <input
               type="text"
               inputMode="decimal"
-              value={gwrDisplay}
+              value={player.handicap}
               onChange={(event) =>
                 updatePlayer(tone, index, "handicap", event.target.value)
               }
-              className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[14px] font-black leading-none tracking-[-0.04em] text-white outline-none"
+              className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[16px] font-black leading-none tracking-[-0.04em] text-white outline-none"
             />
           </div>
 
