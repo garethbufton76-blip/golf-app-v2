@@ -66,7 +66,7 @@ export default function PlayerCard({
         )}
       />
 
-      <div className="relative z-10 grid grid-cols-[58px_minmax(0,1fr)_78px] items-center gap-3">
+      <div className="relative z-10 grid grid-cols-[58px_minmax(0,1fr)_86px] items-center gap-3">
         <label className="group relative flex h-[58px] w-[58px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/14 bg-black/44 shadow-[0_10px_24px_rgba(0,0,0,0.42)]">
           {player.photo ? (
             <>
@@ -104,7 +104,7 @@ export default function PlayerCard({
             }
             placeholder={defaultName}
             className={cx(
-              "w-full border-0 bg-transparent p-0 text-[21px] font-black leading-none tracking-[-0.04em] text-white outline-none placeholder:text-white/25",
+              "w-full border-0 bg-transparent p-0 text-[15px] font-black leading-none tracking-[-0.04em] text-white outline-none placeholder:text-white/25",
               hasRealName ? "opacity-100" : "opacity-50"
             )}
           />
@@ -123,7 +123,8 @@ export default function PlayerCard({
               onChange={(event) =>
                 updatePlayer(tone, index, "handicap", event.target.value)
               }
-              className="w-[44px] border-0 bg-transparent p-0 text-right text-[18px] font-black leading-none tracking-[-0.04em] text-white outline-none"
+              placeholder="18.0"
+              className="w-[52px] border-0 bg-transparent p-0 text-right text-[18px] font-black leading-none tracking-[-0.04em] text-white outline-none"
             />
           </div>
 
@@ -133,7 +134,7 @@ export default function PlayerCard({
             </span>
 
             <span className="text-[11px] font-black leading-none text-[#d9cfaa]">
-              {playHcp}
+              {Number(playHcp).toFixed(1)}
             </span>
           </div>
         </div>
