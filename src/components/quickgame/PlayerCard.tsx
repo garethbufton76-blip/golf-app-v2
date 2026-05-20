@@ -42,7 +42,9 @@ export default function PlayerCard({
     currentName.trim() !== defaultName;
 
   const playHcp =
-    playingHandicap(player.handicap);
+    Math.round(
+      playingHandicap(player.handicap)
+    );
 
   function readPlayerPhoto(file: File | undefined) {
     if (!file) return;
@@ -175,7 +177,7 @@ export default function PlayerCard({
               </span>
 
               <span className="text-[11px] font-black leading-none text-[#efe6bf]">
-                {Number(playHcp).toFixed(1)}
+                {playHcp}
               </span>
             </div>
           </div>
