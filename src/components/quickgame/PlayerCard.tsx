@@ -118,7 +118,7 @@ export default function PlayerCard({
 
         {/* NAME */}
         <div className="min-w-0">
-          <input
+          <textarea
             value={player.name}
             onChange={(event) =>
               updatePlayer(
@@ -129,8 +129,9 @@ export default function PlayerCard({
               )
             }
             placeholder={defaultName}
+            rows={2}
             className={cx(
-              "w-full border-0 bg-transparent p-0 text-[15px] font-black leading-none tracking-[-0.05em] text-white outline-none placeholder:text-white/25",
+              "w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-[15px] font-black leading-[0.95] tracking-[-0.05em] text-white outline-none placeholder:text-white/25",
               hasRealName
                 ? "opacity-100"
                 : "opacity-45"
