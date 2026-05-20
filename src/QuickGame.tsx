@@ -1,10 +1,16 @@
-// src/QuickGame.tsx
+/// src/QuickGame.tsx
 
 import { useMemo, useState } from "react";
-import { cx } from "./data";
+
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
 import PlayerCard from "./components/quickgame/PlayerCard";
+
+function cx(...classes: (string | false | undefined | null)[]) {
+  return classes.filter(Boolean).join(" ");
+}
+
+
 
 const QUICK_FORMATS = [
   "Singles Match Play",
@@ -200,13 +206,7 @@ export default function QuickGame({
     setter((current: any[]) =>
       current.map((p, i) =>
         i === index
-          ? {
-              ...p,
-              [key]:
-                key === "handicap"
-                  ? String(value).replace(/[^0-9.]/g, "").replace(/(\\..*)\\./g, "$1")
-                  : value,
-            }
+          ? { ...p, [key]: key === "handicap" ? Number(value) : value }
           : p
       )
     );
@@ -523,50 +523,75 @@ function TeamSetupColumn({
   players,
   count,
   updatePlayer,
-  courseSlope,
-  playingHandicap,
 }: any) {
   const isRed = tone === "red";
 
   return (
     <div
       className={cx(
-        "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+        "rounded-[24px] border p-2.5 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
         isRed
-          ? "border-[#7a2424]/65 bg-[#320611]"
-          : "border-[#33466c]/70 bg-[#0a142b]"
+          ? "border-[#7a2424]/45 bg-[#250305]/54"
+          : "border-[#343957]/55 bg-[#060a16]/56"
       )}
     >
-      <div className="mb-3">
+      <div className="mb-2">
+        <div
+          className={cx(
+            "mb-0.5 text-[7px] font-black uppercase tracking-[0.24em]",
+            isRed ? "text-red-200/45" : "text-blue-100/45"
+          )}
+        >
+          Team
+        </div>
         <input
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
-          className="w-full border-0 bg-transparent p-0 text-[20px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
+          className="w-full border-0 bg-transparent p-0 text-[16px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
         />
-
         <div
           className={cx(
-            "mt-3 h-[2px] w-full rounded-full",
-            isRed ? "bg-[#781522]" : "bg-[#223a65]"
+            "mt-1.5 h-[2px] w-full rounded-full",
+            isRed ? "bg-[#661716]" : "bg-[#2a2e46]"
           )}
         />
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-2">
         {players.slice(0, count).map((p: any, i: number) => (
-          <PlayerCard
-            key={i}
-            tone={tone}
-            player={p}
-            index={i}
-            playingHandicap={playingHandicap}
-            updatePlayer={updatePlayer}
-          />
-        ))}
-      </div>
+          <div key={i} className="rounded-[18px] border border-white/8 bg-black/34 p-2.5">
+            <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
+              Player {i + 1}
+            </div>
+            <input
+              value={p.name}
+              onChange={(e) => updatePlayer(tone, i, "name", e.target.value)}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-black text-white outline-none placeholder:text-white/25"
+            />
 
-      <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
-        Playing handicap calculated from slope {courseSlope || 113}
+            <div className="mt-2 grid grid-cols-[1fr_46px] items-end gap-2">
+              <div>
+                <div className="mb-0.5 text-[7px] font-black uppercase tracking-[0.2em] text-white/32">
+                  Handicap
+                </div>
+                <input
+                  type="number"
+                  value={p.handicap}
+                  onChange={(e) => updatePlayer(tone, i, "handicap", e.target.value)}
+                  className="w-full border-0 bg-transparent p-0 text-[20px] font-black leading-none text-white outline-none"
+                />
+              </div>
+              <div
+                className={cx(
+                  "rounded-full px-2 py-0.5 text-center text-[7px] font-black uppercase tracking-[0.12em]",
+                  isRed ? "bg-[#661716] text-red-100" : "bg-[#2a2e46] text-blue-100"
+                )}
+              >
+                HCP
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
