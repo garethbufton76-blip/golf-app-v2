@@ -51,23 +51,23 @@ export default function PlayerCard({
   return (
     <div
       className={cx(
-        "relative overflow-hidden rounded-[26px] border px-3 py-3 shadow-[0_18px_34px_rgba(0,0,0,0.35)]",
+        "relative overflow-hidden rounded-[24px] border px-3.5 py-3 shadow-[0_16px_30px_rgba(0,0,0,0.38)]",
         isRed
-          ? "border-red-100/45 bg-gradient-to-r from-[#230205] via-[#33070d] to-[#140102]"
-          : "border-blue-100/45 bg-gradient-to-r from-[#040816] via-[#0a142b] to-[#02040a]"
+          ? "border-red-100/22 bg-[#250306]"
+          : "border-blue-100/22 bg-[#050b18]"
       )}
     >
       <div
         className={cx(
           "pointer-events-none absolute inset-0 opacity-70",
           isRed
-            ? "bg-[radial-gradient(circle_at_18%_18%,rgba(255,80,80,0.16),transparent_34%),linear-gradient(90deg,rgba(50,6,17,0.9),transparent_65%)]"
-            : "bg-[radial-gradient(circle_at_18%_18%,rgba(95,145,255,0.16),transparent_34%),linear-gradient(90deg,rgba(10,20,43,0.9),transparent_65%)]"
+            ? "bg-[linear-gradient(90deg,rgba(80,10,18,0.78),rgba(36,3,7,0.92)_58%,rgba(18,1,3,0.98))]"
+            : "bg-[linear-gradient(90deg,rgba(10,20,43,0.82),rgba(5,11,24,0.94)_58%,rgba(2,4,10,0.98))]"
         )}
       />
 
-      <div className="relative z-10 grid grid-cols-[64px_minmax(0,1fr)_68px] items-center gap-3">
-        <label className="group relative flex h-16 w-16 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/15 bg-black/45 shadow-[0_12px_26px_rgba(0,0,0,0.45)]">
+      <div className="relative z-10 grid grid-cols-[58px_minmax(0,1fr)_78px] items-center gap-3">
+        <label className="group relative flex h-[58px] w-[58px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/14 bg-black/44 shadow-[0_10px_24px_rgba(0,0,0,0.42)]">
           {player.photo ? (
             <>
               <img
@@ -75,20 +75,16 @@ export default function PlayerCard({
                 alt=""
                 className="h-full w-full object-cover"
               />
+
               <div className="absolute inset-0 flex items-end justify-center bg-black/0 pb-1 opacity-0 transition-all group-hover:bg-black/35 group-hover:opacity-100">
-                <span className="text-[4px] font-black uppercase tracking-[0.12em] text-white">
+                <span className="text-[6px] font-black uppercase tracking-[0.12em] text-white">
                   Edit
                 </span>
               </div>
             </>
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center px-1 text-center">
-              <div className="text-[11px] leading-none text-white/80">+</div>
-              <div className="mt-0.5 text-[4px] font-black uppercase leading-[1.08] tracking-[0.07em] text-white/45">
-                Tap to
-                <br />
-                add photo
-              </div>
+              <div className="text-[24px] leading-none text-white/78">＋</div>
             </div>
           )}
 
@@ -101,10 +97,6 @@ export default function PlayerCard({
         </label>
 
         <div className="min-w-0">
-          <div className="mb-1 text-[4px] font-black uppercase tracking-[0.22em] text-white/32">
-            Player {index + 1}
-          </div>
-
           <input
             value={player.name}
             onChange={(event) =>
@@ -112,19 +104,17 @@ export default function PlayerCard({
             }
             placeholder={defaultName}
             className={cx(
-              "w-full border-0 bg-transparent p-0 text-[14px] font-black leading-none tracking-[-0.04em] text-white outline-none placeholder:text-white/25",
-              hasRealName ? "opacity-100" : "opacity-45"
+              "w-full border-0 bg-transparent p-0 text-[21px] font-black leading-none tracking-[-0.04em] text-white outline-none placeholder:text-white/25",
+              hasRealName ? "opacity-100" : "opacity-50"
             )}
           />
-
-
         </div>
 
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex h-[68px] w-[68px] flex-col items-center justify-center rounded-[18px] border border-white/14 bg-black/36 px-2 text-center">
-            <div className="text-[4px] font-black uppercase tracking-[0.16em] text-white/42">
-              GWR
-            </div>
+        <div className="flex min-w-0 flex-col items-end justify-center">
+          <div className="flex items-baseline justify-end gap-1">
+            <span className="text-[7px] font-black uppercase tracking-[0.12em] text-white/42">
+              HCP
+            </span>
 
             <input
               type="text"
@@ -133,12 +123,12 @@ export default function PlayerCard({
               onChange={(event) =>
                 updatePlayer(tone, index, "handicap", event.target.value)
               }
-              className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[16px] font-black leading-none tracking-[-0.04em] text-white outline-none"
+              className="w-[44px] border-0 bg-transparent p-0 text-right text-[18px] font-black leading-none tracking-[-0.04em] text-white outline-none"
             />
           </div>
 
-          <div className="flex w-[68px] items-center justify-center gap-1 rounded-full bg-white/[0.06] px-2 py-1.5 shadow-[0_10px_22px_rgba(0,0,0,0.42)]">
-            <span className="text-[4px] font-black uppercase tracking-[0.12em] text-[#d1c79f]/70">
+          <div className="mt-1 flex items-center justify-end gap-1 rounded-full bg-white/[0.055] px-2 py-[3px] shadow-[0_8px_18px_rgba(0,0,0,0.28)]">
+            <span className="text-[6px] font-black uppercase tracking-[0.1em] text-[#d1c79f]/68">
               Play
             </span>
 
