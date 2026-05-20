@@ -1,4 +1,4 @@
-//// src/QuickGame.tsx
+// src/QuickGame.tsx
 
 import { useMemo, useState } from "react";
 import { searchCourses } from "./lib/golfCourseApi";
@@ -370,252 +370,6 @@ export default function QuickGame({
           </h1>
         </div>
 
-        <Section title="Course">
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setCourseMode("search")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "search"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Course Search
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCourseMode("saved")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "saved"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Saved
-            </button>
-          </div>
-
-          {courseMode === "search" ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="grid grid-cols-[1fr_78px] gap-2">
-                <input
-                  value={courseSearch}
-                  onChange={(e) => setCourseSearch(e.target.value)}
-                  placeholder="Search course"
-                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white outline-none placeholder:text-white/25"
-                />
-
-                <button
-                  type="button"
-                  onClick={handleCourseSearch}
-                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-2 py-2.5 text-[8px] font-black uppercase tracking-[0.08em] text-black"
-                >
-                  Search
-                </button>
-              </div>
-
-              {courseSearchStatus ? (
-                <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
-                  {courseSearchStatus}
-                </div>
-              ) : null}
-
-              {courseSearchResults.length ? (
-                <div className="mt-3 space-y-2">
-                  {courseSearchResults.slice(0, 3).map((course: any, index: number) => (
-                    <div
-                      key={`${getApiCourseId(course)}-${index}`}
-                      className="rounded-[16px] border border-white/10 bg-black/35 p-3"
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {getApiCourseName(course)}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "Course details unavailable"}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => importApiCourse(course)}
-                        className="mt-2 w-full rounded-full bg-[#d1c79f] py-2 text-[8px] font-black uppercase tracking-[0.14em] text-black"
-                      >
-                        Import & Save
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
-                Last 3 Saved Courses
-              </div>
-
-              <div className="space-y-2">
-                {recentSavedCourses.map((course: any) => {
-                  const active = courseId === course.id;
-                  const isApiCourse = course.source === "GolfCourseAPI";
-
-                  return (
-                    <button
-                      key={course.id}
-                      type="button"
-                      onClick={() => changeCourse(course.id)}
-                      className={cx(
-                        "w-full rounded-[16px] border p-3 text-left transition-all",
-                        active
-                          ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                          : "border-white/10 bg-black/35"
-                      )}
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {course.name}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {isApiCourse
-                          ? course.region || "Saved from GolfCourseAPI"
-                          : `${course.region || ""}${
-                              course.country ? ` • ${course.country}` : ""
-                            }` || "Saved Course"}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </Section>
-
-        <Section title="Course">
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setCourseMode("search")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "search"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Course Search
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCourseMode("saved")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "saved"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Saved
-            </button>
-          </div>
-
-          {courseMode === "search" ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="grid grid-cols-[1fr_78px] gap-2">
-                <input
-                  value={courseSearch}
-                  onChange={(e) => setCourseSearch(e.target.value)}
-                  placeholder="Search course"
-                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white outline-none placeholder:text-white/25"
-                />
-
-                <button
-                  type="button"
-                  onClick={handleCourseSearch}
-                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-2 py-2.5 text-[8px] font-black uppercase tracking-[0.08em] text-black"
-                >
-                  Search
-                </button>
-              </div>
-
-              {courseSearchStatus ? (
-                <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
-                  {courseSearchStatus}
-                </div>
-              ) : null}
-
-              {courseSearchResults.length ? (
-                <div className="mt-3 space-y-2">
-                  {courseSearchResults.slice(0, 3).map((course: any, index: number) => (
-                    <div
-                      key={`${getApiCourseId(course)}-${index}`}
-                      className="rounded-[16px] border border-white/10 bg-black/35 p-3"
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {getApiCourseName(course)}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "Course details unavailable"}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => importApiCourse(course)}
-                        className="mt-2 w-full rounded-full bg-[#d1c79f] py-2 text-[8px] font-black uppercase tracking-[0.14em] text-black"
-                      >
-                        Import & Save
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
-                Last 3 Saved Courses
-              </div>
-
-              <div className="space-y-2">
-                {recentSavedCourses.map((course: any) => {
-                  const active = courseId === course.id;
-                  const isApiCourse = course.source === "GolfCourseAPI";
-
-                  return (
-                    <button
-                      key={course.id}
-                      type="button"
-                      onClick={() => changeCourse(course.id)}
-                      className={cx(
-                        "w-full rounded-[16px] border p-3 text-left transition-all",
-                        active
-                          ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                          : "border-white/10 bg-black/35"
-                      )}
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {course.name}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {isApiCourse
-                          ? course.region || "Saved from GolfCourseAPI"
-                          : `${course.region || ""}${
-                              course.country ? ` • ${course.country}` : ""
-                            }` || "Saved Course"}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </Section>
-
         <div className="mb-3 mt-3 grid grid-cols-2 gap-3">
           {[1, 2].map((n) => {
             const active = playersPerTeam === n;
@@ -646,6 +400,129 @@ export default function QuickGame({
             );
           })}
         </div>
+
+        <Section title="Course">
+          <div className="mb-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setCourseMode("search")}
+              className={cx(
+                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                courseMode === "search"
+                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                  : "border-white/12 bg-black/42 text-white"
+              )}
+            >
+              Course Search
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCourseMode("saved")}
+              className={cx(
+                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                courseMode === "saved"
+                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                  : "border-white/12 bg-black/42 text-white"
+              )}
+            >
+              Saved
+            </button>
+          </div>
+
+          {courseMode === "search" ? (
+            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
+              <div className="grid grid-cols-[1fr_78px] gap-2">
+                <input
+                  value={courseSearch}
+                  onChange={(e) => setCourseSearch(e.target.value)}
+                  placeholder="Search course"
+                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white outline-none placeholder:text-white/25"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleCourseSearch}
+                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-2 py-2.5 text-[8px] font-black uppercase tracking-[0.08em] text-black"
+                >
+                  Search
+                </button>
+              </div>
+
+              {courseSearchStatus ? (
+                <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
+                  {courseSearchStatus}
+                </div>
+              ) : null}
+
+              {courseSearchResults.length ? (
+                <div className="mt-3 space-y-2">
+                  {courseSearchResults.slice(0, 3).map((course: any, index: number) => (
+                    <div
+                      key={`${getApiCourseId(course)}-${index}`}
+                      className="rounded-[16px] border border-white/10 bg-black/35 p-3"
+                    >
+                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                        {getApiCourseName(course)}
+                      </div>
+
+                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                        {getApiCourseLocation(course) || "Course details unavailable"}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => importApiCourse(course)}
+                        className="mt-2 w-full rounded-full bg-[#d1c79f] py-2 text-[8px] font-black uppercase tracking-[0.14em] text-black"
+                      >
+                        Import & Save
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
+              <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
+                Last 3 Saved Courses
+              </div>
+
+              <div className="space-y-2">
+                {recentSavedCourses.map((course: any) => {
+                  const active = courseId === course.id;
+                  const isApiCourse = course.source === "GolfCourseAPI";
+
+                  return (
+                    <button
+                      key={course.id}
+                      type="button"
+                      onClick={() => changeCourse(course.id)}
+                      className={cx(
+                        "w-full rounded-[16px] border p-3 text-left transition-all",
+                        active
+                          ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
+                          : "border-white/10 bg-black/35"
+                      )}
+                    >
+                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                        {course.name}
+                      </div>
+
+                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                        {isApiCourse
+                          ? course.region || "Saved from GolfCourseAPI"
+                          : `${course.region || ""}${
+                              course.country ? ` • ${course.country}` : ""
+                            }` || "Saved Course"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </Section>
 
         <Section title="Tee">
           <div className="grid grid-cols-4 gap-2">
