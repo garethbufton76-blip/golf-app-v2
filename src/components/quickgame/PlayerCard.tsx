@@ -79,9 +79,9 @@ export default function PlayerCard({
         )}
       />
 
-      <div className="relative z-10 grid grid-cols-[64px_minmax(0,1fr)_96px] items-center gap-4">
+      <div className="relative z-10 grid grid-cols-[64px_minmax(0,1fr)_92px] items-center gap-4">
         {/* PHOTO */}
-        <label className="group relative flex h-[64px] w-[64px] cursor-pointer items-center justify-center overflow-hidden rounded-full border border-white/14 bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.42)]">
+        <label className="group relative flex h-[64px] w-[64px] cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-white bg-black/45 shadow-[0_10px_24px_rgba(0,0,0,0.42)]">
           {player.photo ? (
             <>
               <img
@@ -98,7 +98,7 @@ export default function PlayerCard({
             </>
           ) : (
             <div className="flex items-center justify-center">
-              <div className="text-[32px] leading-none text-white/80">
+              <div className="text-[34px] leading-none text-white">
                 ＋
               </div>
             </div>
@@ -147,8 +147,8 @@ export default function PlayerCard({
             )}
           />
 
-          <div className="flex w-[86px] flex-col items-center justify-center">
-            <div className="text-[9px] font-black uppercase leading-none tracking-[0.36em] text-[#efe6bf]">
+          <div className="flex w-[72px] flex-col items-center justify-center">
+            <div className="text-[7px] font-black uppercase leading-none tracking-[0.32em] text-[#efe6bf]">
               HCP
             </div>
 
@@ -165,15 +165,15 @@ export default function PlayerCard({
                 )
               }
               placeholder="18.0"
-              className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[30px] font-black leading-none tracking-[-0.06em] text-white outline-none"
+              className="mt-1 w-full border-0 bg-transparent p-0 text-center text-[22px] font-black leading-none tracking-[-0.06em] text-white outline-none"
             />
 
-            <div className="mt-2 flex w-full items-center justify-center gap-1 rounded-full border border-white/10 bg-white/[0.055] px-2 py-[5px] shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
-              <span className="text-[7px] font-black uppercase tracking-[0.22em] text-[#d1c79f]/72">
-                Play
+            <div className="mt-2 flex items-center justify-center gap-1 rounded-full border border-white/10 bg-white/[0.055] px-2 py-[4px] shadow-[0_10px_24px_rgba(0,0,0,0.32)]">
+              <span className="text-[6px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/72">
+                PLAY
               </span>
 
-              <span className="text-[17px] font-black leading-none text-[#efe6bf]">
+              <span className="text-[13px] font-black leading-none text-[#efe6bf]">
                 {Number(playHcp).toFixed(1)}
               </span>
             </div>
