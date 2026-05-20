@@ -1,4 +1,4 @@
-/ src/QuickGame.tsx
+// src/QuickGame.tsx
 
 import { useMemo, useState } from "react";
 import { cx } from "./data";
