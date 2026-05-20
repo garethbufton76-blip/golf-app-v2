@@ -1,6 +1,8 @@
 // src/components/quickgame/PlayerCard.tsx
 
-import { cx } from "../../data";
+function cx(...classes: (string | false | undefined)[]) {
+  return classes.filter(Boolean).join(" ");
+}
 
 type TeamTone = "red" | "blue";
 
@@ -41,10 +43,9 @@ export default function PlayerCard({
   const hasRealName =
     currentName.trim() !== defaultName;
 
-  const playHcp =
-    Math.round(
-      playingHandicap(player.handicap)
-    );
+  const playHcp = Math.round(
+    playingHandicap(player.handicap)
+  );
 
   function readPlayerPhoto(file: File | undefined) {
     if (!file) return;
