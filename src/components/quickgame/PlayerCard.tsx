@@ -110,8 +110,8 @@ export default function PlayerCard({
           />
         </div>
 
-        <div className="flex min-w-0 flex-col items-end justify-center">
-          <div className="flex items-baseline justify-end gap-1">
+        <div className="flex h-full min-w-0 flex-col items-end justify-center gap-1">
+          <div className="flex items-center justify-end gap-1">
             <span className="text-[7px] font-black uppercase tracking-[0.12em] text-white/42">
               HCP
             </span>
@@ -142,3 +142,4 @@ export default function PlayerCard({
     </div>
   );
 }
+
