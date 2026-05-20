@@ -1,4 +1,4 @@
-// src/QuickGame.tsx
+/ src/QuickGame.tsx
 
 import { useMemo, useState } from "react";
 import { cx } from "./data";
@@ -36,7 +36,7 @@ export default function QuickGame({
     }
   });
 
-  const [courseMode, setCourseMode] = useState<"saved" | "search">("search");
+  const [courseMode, setCourseMode] = useState<"saved" | "search">("saved");
   const [courseId, setCourseId] = useState("st-michaels");
   const [courseSearch, setCourseSearch] = useState("");
   const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
@@ -45,11 +45,6 @@ export default function QuickGame({
   const savedCourses = useMemo(
     () => [...COURSES, ...savedApiCourses],
     [savedApiCourses]
-  );
-
-  const recentSavedCourses = useMemo(
-    () => savedCourses.slice(-3).reverse(),
-    [savedCourses]
   );
 
   const selectedSavedCourse = useMemo(
@@ -71,13 +66,13 @@ export default function QuickGame({
   const [blueName, setBlueName] = useState("Team Blue");
 
   const [redPlayers, setRedPlayers] = useState([
-    { name: "Red 1", handicap: 18 },
-    { name: "Red 2", handicap: 18 },
+    { name: "Red 1", handicap: "18.0" },
+    { name: "Red 2", handicap: "18.0" },
   ]);
 
   const [bluePlayers, setBluePlayers] = useState([
-    { name: "Blue 1", handicap: 18 },
-    { name: "Blue 2", handicap: 18 },
+    { name: "Blue 1", handicap: "18.0" },
+    { name: "Blue 2", handicap: "18.0" },
   ]);
 
   function changeCourse(nextCourseId: string) {
@@ -99,59 +94,14 @@ export default function QuickGame({
   }
 
   function getApiCourseLocation(course: any) {
-    const raw = course?.raw || course || {};
-
-    const country =
-      raw?.country ||
-      raw?.country_name ||
-      raw?.nation ||
-      raw?.location?.country ||
-      raw?.address?.country ||
-      "";
-
-    const state =
-      raw?.state ||
-      raw?.state_name ||
-      raw?.province ||
-      raw?.region ||
-      raw?.administrative_area ||
-      raw?.location?.state ||
-      raw?.location?.region ||
-      raw?.address?.state ||
-      raw?.address?.region ||
-      "";
-
-    const county =
-      raw?.county ||
-      raw?.county_name ||
-      raw?.district ||
-      raw?.municipality ||
-      raw?.location?.county ||
-      raw?.address?.county ||
-      "";
-
-    const city =
-      raw?.city ||
-      raw?.town ||
-      raw?.suburb ||
-      raw?.locality ||
-      raw?.location?.city ||
-      raw?.location?.town ||
-      raw?.address?.city ||
-      raw?.address?.suburb ||
-      "";
-
-    const postcode =
-      raw?.postcode ||
-      raw?.postal_code ||
-      raw?.zip ||
-      raw?.address?.postcode ||
-      raw?.address?.postal_code ||
-      "";
-
-    const parts = [country, state || county, city, postcode].filter(Boolean);
-
-    return parts.length ? parts.join(" • ") : "";
+    return [
+      course?.city,
+      course?.state,
+      course?.province,
+      course?.country,
+    ]
+      .filter(Boolean)
+      .join(", ");
   }
 
   function getApiCourseId(course: any) {
@@ -203,12 +153,7 @@ export default function QuickGame({
       name: getApiCourseName(apiCourse),
       shortName: getApiCourseName(apiCourse),
       region: getApiCourseLocation(apiCourse),
-      country:
-        apiCourse?.country ||
-        apiCourse?.country_name ||
-        apiCourse?.location?.country ||
-        apiCourse?.address?.country ||
-        "",
+      country: apiCourse?.country || "",
       source: "GolfCourseAPI",
       raw: apiCourse,
     };
@@ -255,30 +200,16 @@ export default function QuickGame({
     setter((current: any[]) =>
       current.map((p, i) =>
         i === index
-          ? { ...p, [key]: key === "handicap" ? Number(value) : value }
+          ? {
+              ...p,
+              [key]:
+                key === "handicap"
+                  ? String(value).replace(/[^0-9.]/g, "").replace(/(\\..*)\\./g, "$1")
+                  : value,
+            }
           : p
       )
     );
-  }
-
-  function selectedTeeSlope() {
-    const selectedTee = tees.find((t: any) => t.id === tee || t.label === tee);
-
-    return Number(
-      selectedTee?.slope ||
-        selectedTee?.slopeRating ||
-        selectedTee?.slope_rating ||
-        selectedTee?.menSlope ||
-        selectedTee?.mensSlope ||
-        113
-    );
-  }
-
-  function playingHandicap(rawHandicap: any) {
-    const slope = selectedTeeSlope();
-    const numeric = Number(rawHandicap || 0);
-
-    return Math.round((numeric * slope) / 113);
   }
 
   function startQuickGame() {
@@ -288,16 +219,12 @@ export default function QuickGame({
       id: `quick-red-${i}`,
       name: p.name || `Red ${i + 1}`,
       nickname: p.name || `Red ${i + 1}`,
-      handicap: playingHandicap(p.handicap),
+      handicap: Number(p.handicap || 0),
       rawHandicap: Number(p.handicap || 0),
-      playingHandicap: playingHandicap(p.handicap),
       team: "red",
       teamId: "red",
       rosterIndex: i,
-      photo: p.photo || "",
-      image: p.photo || "",
-      photoUrl: p.photo || "",
-      avatar: p.photo || "",
+      photo: "",
       homeClub: "",
       preferredTee: tee,
       regular: false,
@@ -307,16 +234,12 @@ export default function QuickGame({
       id: `quick-blue-${i}`,
       name: p.name || `Blue ${i + 1}`,
       nickname: p.name || `Blue ${i + 1}`,
-      handicap: playingHandicap(p.handicap),
+      handicap: Number(p.handicap || 0),
       rawHandicap: Number(p.handicap || 0),
-      playingHandicap: playingHandicap(p.handicap),
       team: "blue",
       teamId: "blue",
       rosterIndex: i,
-      photo: p.photo || "",
-      image: p.photo || "",
-      photoUrl: p.photo || "",
-      avatar: p.photo || "",
+      photo: "",
       homeClub: "",
       preferredTee: tee,
       regular: false,
@@ -331,7 +254,7 @@ export default function QuickGame({
         label: "Quick Game",
         teeTime: "",
         courseId,
-        course: selectedCourse.shortName || selectedCourse.name,
+        course: selectedCourse.shortName,
         tee,
         format,
       },
@@ -362,22 +285,9 @@ export default function QuickGame({
           <div className="mb-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setCourseMode("search")}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "search"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
-              )}
-            >
-              Course Search
-            </button>
-
-            <button
-              type="button"
               onClick={() => setCourseMode("saved")}
               className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
+                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all",
                 courseMode === "saved"
                   ? "border-[#d1c79f] bg-[#d1c79f] text-black"
                   : "border-white/12 bg-black/42 text-white"
@@ -385,22 +295,80 @@ export default function QuickGame({
             >
               Saved
             </button>
+
+            <button
+              type="button"
+              onClick={() => setCourseMode("search")}
+              className={cx(
+                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em] transition-all",
+                courseMode === "search"
+                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                  : "border-white/12 bg-black/42 text-white"
+              )}
+            >
+              Search API
+            </button>
           </div>
 
-          {courseMode === "search" ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="grid grid-cols-[1fr_78px] gap-2">
+          {courseMode === "saved" ? (
+            <div className="space-y-2">
+              {savedCourses.map((course: any) => {
+                const active = courseId === course.id;
+                const isApiCourse = course.source === "GolfCourseAPI";
+
+                return (
+                  <div
+                    key={course.id}
+                    className={cx(
+                      "rounded-[18px] border p-3 transition-all",
+                      active
+                        ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
+                        : "border-white/10 bg-black/35"
+                    )}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => changeCourse(course.id)}
+                      className="w-full text-left"
+                    >
+                      <div className="text-[12px] font-black uppercase tracking-[0.12em] text-white">
+                        {course.name}
+                      </div>
+
+                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                        {isApiCourse
+                          ? "Saved from GolfCourseAPI"
+                          : `${course.region || ""}${course.country ? ` • ${course.country}` : ""}` || "Saved Course"}
+                      </div>
+                    </button>
+
+                    {isApiCourse ? (
+                      <button
+                        type="button"
+                        onClick={() => removeSavedApiCourse(course.id)}
+                        className="mt-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/45"
+                      >
+                        Remove
+                      </button>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div>
+              <div className="grid grid-cols-[1fr_auto] gap-2">
                 <input
                   value={courseSearch}
                   onChange={(e) => setCourseSearch(e.target.value)}
                   placeholder="Search course"
-                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white outline-none placeholder:text-white/25"
+                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.12em] text-white outline-none placeholder:text-white/25"
                 />
 
                 <button
                   type="button"
                   onClick={handleCourseSearch}
-                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-2 py-2.5 text-[8px] font-black uppercase tracking-[0.08em] text-black"
+                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.14em] text-black"
                 >
                   Search
                 </button>
@@ -412,70 +380,29 @@ export default function QuickGame({
                 </div>
               ) : null}
 
-              {courseSearchResults.length ? (
-                <div className="mt-3 space-y-2">
-                  {courseSearchResults.slice(0, 3).map((course: any, index: number) => (
-                    <div
-                      key={`${getApiCourseId(course)}-${index}`}
-                      className="rounded-[16px] border border-white/10 bg-black/35 p-3"
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {getApiCourseName(course)}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "Course details unavailable"}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => importApiCourse(course)}
-                        className="mt-2 w-full rounded-full bg-[#d1c79f] py-2 text-[8px] font-black uppercase tracking-[0.14em] text-black"
-                      >
-                        Import & Save
-                      </button>
+              <div className="mt-3 max-h-[250px] space-y-2 overflow-y-auto pr-1">
+                {courseSearchResults.map((course: any, index: number) => (
+                  <div
+                    key={`${getApiCourseId(course)}-${index}`}
+                    className="rounded-[18px] border border-white/10 bg-black/35 p-3"
+                  >
+                    <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                      {getApiCourseName(course)}
                     </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-              <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
-                Last 3 Saved Courses
-              </div>
 
-              <div className="space-y-2">
-                {recentSavedCourses.map((course: any) => {
-                  const active = courseId === course.id;
-                  const isApiCourse = course.source === "GolfCourseAPI";
+                    <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                      {getApiCourseLocation(course) || "GolfCourseAPI result"}
+                    </div>
 
-                  return (
                     <button
-                      key={course.id}
                       type="button"
-                      onClick={() => changeCourse(course.id)}
-                      className={cx(
-                        "w-full rounded-[16px] border p-3 text-left transition-all",
-                        active
-                          ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                          : "border-white/10 bg-black/35"
-                      )}
+                      onClick={() => importApiCourse(course)}
+                      className="mt-3 w-full rounded-full bg-[#d1c79f] py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
                     >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {course.name}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {isApiCourse
-                          ? selectedSavedCourse?.region || "Saved from GolfCourseAPI"
-                          : `${course.region || ""}${
-                              course.country ? ` • ${course.country}` : ""
-                            }` || "Saved Course"}
-                      </div>
+                      Import & Save
                     </button>
-                  );
-                })}
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -512,7 +439,7 @@ export default function QuickGame({
           })}
         </div>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
           <TeamSetupColumn
             tone="red"
             teamName={redName}
@@ -520,10 +447,7 @@ export default function QuickGame({
             players={redPlayers}
             count={playersPerTeam}
             updatePlayer={updatePlayer}
-            courseSlope={selectedTeeSlope()}
-            playingHandicap={playingHandicap}
           />
-
           <TeamSetupColumn
             tone="blue"
             teamName={blueName}
@@ -531,8 +455,6 @@ export default function QuickGame({
             players={bluePlayers}
             count={playersPerTeam}
             updatePlayer={updatePlayer}
-            courseSlope={selectedTeeSlope()}
-            playingHandicap={playingHandicap}
           />
         </div>
 
