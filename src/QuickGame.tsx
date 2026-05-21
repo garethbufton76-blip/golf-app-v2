@@ -560,7 +560,12 @@ export default function QuickGame({
                     : "border-white/12 bg-black/42 text-white"
                 )}
               >
-                {t.label}
+                <div className="leading-none">
+                  <div>{t.label}</div>
+                  <div className="mt-1 text-[7px] opacity-45">
+                    {t.slope}
+                  </div>
+                </div>
               </button>
             ))}
           </div>
