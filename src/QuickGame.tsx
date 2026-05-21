@@ -75,12 +75,25 @@ export default function QuickGame({
     const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
     const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
 
-    // Quick Game defaults to men's tee data when the API separates tees by gender.
-    // This prevents women's combination tees, such as Red/Yellow, appearing in the men's setup flow.
+    const femaleRedOnly = femaleTees.filter((apiTee: any) => {
+      const teeName = String(apiTee?.tee_name || apiTee?.name || "").toLowerCase();
+
+      return teeName.includes("red") && !teeName.includes("yellow");
+    });
+
+    const maleHasRed = maleTees.some((apiTee: any) => {
+      const teeName = String(apiTee?.tee_name || apiTee?.name || "").toLowerCase();
+
+      return teeName.includes("red");
+    });
+
+    // Quick Game prefers men's tee data, but many Australian courses store the Red tee
+    // only in the female API set. Keep a single Red tee available and remove combo tees
+    // such as Red/Yellow.
     const flatTees = Array.isArray(rawTees)
       ? rawTees
       : maleTees.length
-      ? maleTees
+      ? [...maleTees, ...(maleHasRed ? [] : femaleRedOnly)]
       : femaleTees;
 
     if (flatTees.length) {
