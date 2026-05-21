@@ -677,8 +677,8 @@ export default function QuickGame({
             </button>
           </div>
 
-          {courseMode === "search" ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
+          {showCourseSearchPanel ? (
+            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3 transition-all duration-300">
               <div className="grid grid-cols-[1fr_78px] gap-2">
                 <input
                   value={courseSearch}
@@ -729,8 +729,10 @@ export default function QuickGame({
                 </div>
               ) : null}
             </div>
-          ) : (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3">
+          ) : null}
+
+          {showSavedCoursesPanel ? (
+            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3 transition-all duration-300">
               <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
                 Last 3 Saved Courses
               </div>
@@ -772,9 +774,8 @@ export default function QuickGame({
                 })}
               </div>
             </div>
-          )}
+          ) : null}
         </Section>
-
 
         {selectedCourseTouched ? (
           <div className="mt-3 rounded-[20px] border border-[#d1c79f]/45 bg-black/46 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.38)] backdrop-blur-xl">
