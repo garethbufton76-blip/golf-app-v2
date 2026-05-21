@@ -483,19 +483,41 @@ export default function QuickGame({
     );
   }
 
-  function playingHandicap(rawHandicap: any) {
+  function formatAllowance() {
+    const f = String(format || "").toLowerCase();
+
+    if (f.includes("ambrose")) {
+      return 0.25;
+    }
+
+    if (f.includes("better ball")) {
+      return 0.85;
+    }
+
+    if (f.includes("stableford")) {
+      return 0.95;
+    }
+
+    return 1;
+  }
+
+  function courseHandicap(rawHandicap: any) {
     const handicapIndex = Number(rawHandicap || 0);
     const slope = selectedTeeSlope();
     const courseRating = selectedTeeCourseRating();
     const par = selectedTeePar();
 
-    const courseHandicap =
+    const calculated =
       handicapIndex * (slope / 113) + (courseRating - par);
 
-    // DUEL displays the practical playing handicap as a whole number.
-    // For St Michaels White, this keeps HI 12.4 / 12.5 at PLAY 14,
-    // matching the official value you provided.
-    return Math.floor(courseHandicap);
+    return Math.round(calculated);
+  }
+
+  function playingHandicap(rawHandicap: any) {
+    const courseHcp = courseHandicap(rawHandicap);
+    const allowance = formatAllowance();
+
+    return Math.round(courseHcp * allowance);
   }
 
   function startQuickGame() {
@@ -507,7 +529,9 @@ export default function QuickGame({
       nickname: p.name || `Red ${i + 1}`,
       handicap: playingHandicap(p.handicap),
       rawHandicap: Number(p.handicap || 0),
+      courseHandicap: courseHandicap(p.handicap),
       playingHandicap: playingHandicap(p.handicap),
+      handicapAllowance: formatAllowance(),
       team: "red",
       teamId: "red",
       rosterIndex: i,
@@ -526,7 +550,9 @@ export default function QuickGame({
       nickname: p.name || `Blue ${i + 1}`,
       handicap: playingHandicap(p.handicap),
       rawHandicap: Number(p.handicap || 0),
+      courseHandicap: courseHandicap(p.handicap),
       playingHandicap: playingHandicap(p.handicap),
+      handicapAllowance: formatAllowance(),
       team: "blue",
       teamId: "blue",
       rosterIndex: i,
@@ -553,6 +579,7 @@ export default function QuickGame({
         teeSlope: selectedTeeSlope(),
         teeCourseRating: selectedTeeCourseRating(),
         teePar: selectedTeePar(),
+        handicapAllowance: formatAllowance(),
         format,
       },
     ]);
@@ -780,7 +807,30 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <div className="space-y-3">
+        <Section title="Format">
+          <div className="relative">
+            <select
+              value={format}
+              onChange={(e) => setFormat(e.target.value)}
+              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
+            >
+              {QUICK_FORMATS.map((f) => (
+                <option key={f} value={f} className="bg-black text-white">
+                  {f}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
+              ▾
+            </div>
+          </div>
+
+          <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
+            Playing handicap allowance: {Math.round(formatAllowance() * 100)}%
+          </div>
+        </Section>
+
+        <div className="mt-3 space-y-3">
           <TeamSetupColumn
             tone="red"
             teamName={redName}
@@ -803,25 +853,6 @@ export default function QuickGame({
             playingHandicap={playingHandicap}
           />
         </div>
-
-        <Section title="Format">
-          <div className="relative">
-            <select
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
-            >
-              {QUICK_FORMATS.map((f) => (
-                <option key={f} value={f} className="bg-black text-white">
-                  {f}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
-              ▾
-            </div>
-          </div>
-        </Section>
 
         <div className="mt-4 flex justify-center pb-6">
           <button
@@ -892,7 +923,7 @@ function TeamSetupColumn({
       </div>
 
       <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
-        Playing handicap calculated from slope {courseSlope || 113}
+        Playing handicap calculated from slope {courseSlope || 113} and format allowance
       </div>
     </div>
   );
