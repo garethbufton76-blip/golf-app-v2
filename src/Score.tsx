@@ -598,7 +598,7 @@ export default function Score({
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
                 <ScoreBox
                   team="red"
                   players={match.red}
@@ -607,6 +607,7 @@ export default function Score({
                     setDraft((d: any) => ({ ...d, red: v }))
                   }
                   par={selectedHole.par}
+                  splitSide="left"
                 />
 
                 <ScoreBox
@@ -617,6 +618,7 @@ export default function Score({
                     setDraft((d: any) => ({ ...d, blue: v }))
                   }
                   par={selectedHole.par}
+                  splitSide="right"
                 />
               </div>
             )}
@@ -740,115 +742,137 @@ function TeamPlayers({
 
 
 
-function ScoreBox({ team, players, score, setScore, par, compact = false }: any) {
+function ScoreBox({
+  team,
+  players,
+  score,
+  setScore,
+  par,
+  compact = false,
+  splitSide = "single",
+}: any) {
   const namesText =
     players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
 
   const points = stableford(score, par, 0);
   const isRed = team === "red";
+  const isSplit = splitSide !== "single";
+
+  const sideRadius =
+    splitSide === "left"
+      ? "rounded-l-[28px] rounded-r-none"
+      : splitSide === "right"
+      ? "rounded-r-[28px] rounded-l-none"
+      : compact
+      ? "rounded-[24px]"
+      : "rounded-[28px]";
 
   return (
     <div
       className={cx(
-        "relative overflow-hidden border shadow-[0_18px_45px_rgba(0,0,0,0.55)] backdrop-blur-xl",
-        compact
-          ? "min-h-[248px] rounded-[24px]"
-          : "min-h-[245px] rounded-[28px]",
+        "relative overflow-hidden border backdrop-blur-xl",
+        sideRadius,
+        isSplit
+          ? "min-h-[270px] border-y-0 border-l-0 border-r-0 shadow-none"
+          : compact
+          ? "min-h-[248px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
+          : "min-h-[245px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
         isRed
-          ? "border-[#c94a4d]/35 bg-gradient-to-br from-[#9e2b32] via-[#5b1519] to-[#170607]"
-          : "border-[#6f96c4]/35 bg-gradient-to-br from-[#35618d] via-[#17324e] to-[#06111f]"
+          ? "border-[#ff4d5e]/35 bg-gradient-to-b from-[#741923] via-[#35080d] to-[#130204]"
+          : "border-[#58a6ff]/35 bg-gradient-to-b from-[#183a63] via-[#09192d] to-[#020913]"
       )}
     >
-      <div
-        className={cx(
-          "absolute right-[-48px] top-[-44px] h-[150%] w-[48%] rotate-[14deg] opacity-20",
-          isRed ? "bg-white" : "bg-[#9fc2ff]"
-        )}
-      />
+      {isSplit && splitSide === "left" ? (
+        <div className="absolute bottom-0 right-0 top-0 w-px bg-gradient-to-b from-[#ff4d5e]/45 via-white/10 to-[#58a6ff]/30" />
+      ) : null}
 
       <div
         className={cx(
-          "absolute inset-0 opacity-45",
+          "pointer-events-none absolute inset-0 opacity-65",
           isRed
-            ? "bg-[radial-gradient(circle_at_30%_0%,rgba(255,255,255,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
-            : "bg-[radial-gradient(circle_at_30%_0%,rgba(160,194,255,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.35))]"
+            ? "bg-[radial-gradient(circle_at_28%_10%,rgba(255,93,103,0.28),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.38))]"
+            : "bg-[radial-gradient(circle_at_72%_10%,rgba(94,169,255,0.28),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.38))]"
         )}
       />
 
-      <div className={cx("relative z-10 flex h-full flex-col", compact ? "p-2.5" : "p-3")}>
-        <div className={cx("text-center", compact ? "mb-2" : "mb-2")}>
-          <div
-            className={cx(
-              "truncate font-black uppercase tracking-[0.12em] text-white",
-              compact ? "text-[13px]" : "text-[16px]"
-            )}
-          >
-            {namesText}
-          </div>
+      <div
+        className={cx(
+          "pointer-events-none absolute bottom-[-34px] h-[145%] w-[56%] rotate-[14deg] opacity-[0.08]",
+          isRed ? "right-[-42px] bg-white" : "left-[-42px] bg-[#9fc2ff]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "relative z-10 flex h-full flex-col items-center justify-between",
+          isSplit ? "px-3 py-5" : compact ? "p-2.5" : "p-3"
+        )}
+      >
+        <div
+          className={cx(
+            "max-w-full truncate text-center font-black uppercase text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]",
+            isSplit
+              ? "text-[18px] tracking-[0.14em]"
+              : compact
+              ? "text-[13px] tracking-[0.12em]"
+              : "text-[16px] tracking-[0.12em]"
+          )}
+        >
+          {isSplit ? TEAM[team].title : namesText}
         </div>
 
         <div
           className={cx(
-            "relative z-20 flex flex-1 flex-col items-center justify-center rounded-[24px] bg-[#020407]/95 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.12),0_10px_22px_rgba(0,0,0,0.35)]",
-            compact ? "min-h-[166px] px-2 py-2" : "min-h-[160px] px-3 py-2"
+            "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)]",
+            isSplit ? "text-[92px]" : compact ? "text-[88px]" : "text-[98px]"
           )}
         >
-          <div
-            className={cx(
-              "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_8px_22px_rgba(0,0,0,0.55)]",
-              compact ? "text-[88px]" : "text-[98px]"
-            )}
-          >
-            {score === par + 4 ? "P" : score}
-          </div>
-
-          <div
-            className={cx(
-              "mt-1 grid w-full grid-cols-2",
-              compact ? "gap-2" : "gap-3"
-            )}
-          >
-            <button
-              type="button"
-              onClick={() => setScore(Math.max(0, score - 1))}
-              className={cx(
-                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
-                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
-                isRed
-                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
-                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
-              )}
-            >
-              −
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setScore(Math.min(par + 4, score + 1))}
-              className={cx(
-                "flex items-center justify-center rounded-full border font-black text-white transition-all active:scale-95",
-                compact ? "h-[40px] text-[30px]" : "h-[44px] text-[34px]",
-                isRed
-                  ? "border-[#d65458] bg-[#4b1115]/62 shadow-[0_0_18px_rgba(180,53,58,0.32)]"
-                  : "border-[#6fa3df] bg-[#0d2943]/62 shadow-[0_0_18px_rgba(78,130,187,0.32)]"
-              )}
-            >
-              +
-            </button>
-          </div>
+          {score === par + 4 ? "P" : score}
         </div>
 
-        <div className={cx("text-center", compact ? "pt-2" : "pt-3")}>
-          <div
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setScore(Math.max(0, score - 1))}
             className={cx(
-              "font-black uppercase tracking-[0.1em] text-white",
-              compact ? "text-[12px]" : "text-[16px]"
+              "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[40px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isRed
+                ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
+                : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
             )}
           >
-            {points} {points === 1 ? "POINT" : "POINTS"}
-          </div>
+            −
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setScore(Math.min(par + 4, score + 1))}
+            className={cx(
+              "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[40px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isRed
+                ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
+                : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
+            )}
+          >
+            +
+          </button>
+        </div>
+
+        <div
+          className={cx(
+            "rounded-full border px-4 py-1.5 text-center font-black uppercase tracking-[0.08em]",
+            isSplit ? "text-[12px]" : compact ? "text-[12px]" : "text-[16px]",
+            isRed
+              ? "border-[#ff4d5e]/35 bg-[#3d0b12]/80 text-[#ff5f68]"
+              : "border-[#58a6ff]/35 bg-[#0c203a]/80 text-[#69b3ff]"
+          )}
+        >
+          {points} {points === 1 ? "POINT" : "POINTS"}
         </div>
       </div>
     </div>
   );
 }
+
