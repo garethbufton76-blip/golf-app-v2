@@ -42,6 +42,7 @@ export default function QuickGame({
 
   const [courseMode, setCourseMode] = useState<"saved" | "search">("search");
   const [courseId, setCourseId] = useState("st-michaels");
+  const [selectedCourseTouched, setSelectedCourseTouched] = useState(false);
   const [courseSearch, setCourseSearch] = useState("");
   const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
   const [courseSearchStatus, setCourseSearchStatus] = useState("");
@@ -86,6 +87,7 @@ export default function QuickGame({
 
   function changeCourse(nextCourseId: string) {
     setCourseId(nextCourseId);
+    setSelectedCourseTouched(true);
 
     const localCourse = COURSES.find((course) => course.id === nextCourseId);
 
@@ -229,6 +231,7 @@ export default function QuickGame({
     });
 
     setCourseId(importedCourse.id);
+    setSelectedCourseTouched(true);
     setTee(getDefaultTee("st-michaels"));
     setCourseMode("saved");
     setCourseSearchStatus(`Saved ${importedCourse.name}`);
@@ -524,6 +527,25 @@ export default function QuickGame({
           )}
         </Section>
 
+
+        {selectedCourseTouched ? (
+          <div className="mt-3 rounded-[20px] border border-[#d1c79f]/45 bg-black/46 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+            <div className="text-[7px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/70">
+              Selected Course
+            </div>
+
+            <div className="mt-1 text-[13px] font-black uppercase tracking-[0.1em] text-white">
+              {selectedSavedCourse?.name || "Course Selected"}
+            </div>
+
+            <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/42">
+              {selectedSavedCourse?.region ||
+                selectedSavedCourse?.country ||
+                "Ready for tee selection"}
+            </div>
+          </div>
+        ) : null}
+
         <Section title="Tee">
           <div className="grid grid-cols-4 gap-2">
             {tees.map((t) => (
@@ -544,7 +566,7 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <div className="mt-3 space-y-3">
+        <div className="space-y-3">
           <TeamSetupColumn
             tone="red"
             teamName={redName}
