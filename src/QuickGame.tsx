@@ -46,6 +46,7 @@ export default function QuickGame({
   const [courseSearch, setCourseSearch] = useState("");
   const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
   const [courseSearchStatus, setCourseSearchStatus] = useState("");
+  const [showCourseSearchPanel, setShowCourseSearchPanel] = useState(false);
 
   const savedCourses = useMemo(
     () => [...COURSES, ...savedApiCourses],
@@ -310,6 +311,7 @@ export default function QuickGame({
 
     setTee(firstApiTeeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
     setCourseMode("saved");
+    setShowCourseSearchPanel(false);
     setCourseSearchStatus(`Saved ${importedCourse.name}`);
   }
 
@@ -640,7 +642,10 @@ export default function QuickGame({
           <div className="mb-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setCourseMode("search")}
+              onClick={() => {
+                setCourseMode("search");
+                setShowCourseSearchPanel(true);
+              }}
               className={cx(
                 "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
                 courseMode === "search"
@@ -732,7 +737,10 @@ export default function QuickGame({
                     <button
                       key={course.id}
                       type="button"
-                      onClick={() => changeCourse(course.id)}
+                      onClick={() => {
+                        changeCourse(course.id);
+                        setShowCourseSearchPanel(false);
+                      }}
                       className={cx(
                         "w-full rounded-[16px] border p-3 text-left transition-all",
                         active
