@@ -544,7 +544,7 @@ export default function QuickGame({
           </div>
         </Section>
 
-        <div className="space-y-3">
+        <div className="mt-6 space-y-3">
           <TeamSetupColumn
             tone="red"
             teamName={redName}
