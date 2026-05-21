@@ -65,8 +65,51 @@ export default function QuickGame({
   const tees = useMemo(() => {
     const localCourse = COURSES.find((course) => course.id === courseId);
 
-    return localCourse ? getCourseTees(courseId) : getCourseTees("st-michaels");
-  }, [courseId]);
+    if (localCourse) {
+      return getCourseTees(courseId);
+    }
+
+    const rawCourse = selectedSavedCourse?.raw || selectedSavedCourse || {};
+    const rawTees = rawCourse?.tees || {};
+
+    const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
+    const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
+    const flatTees = Array.isArray(rawTees)
+      ? rawTees
+      : [...maleTees, ...femaleTees];
+
+    if (flatTees.length) {
+      return flatTees.map((apiTee: any, index: number) => {
+        const teeName = String(apiTee?.tee_name || apiTee?.name || `Tee ${index + 1}`);
+        const simpleLabel =
+          teeName
+            .split(",")
+            .map((part) => part.trim())
+            .find((part) =>
+              ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
+                part.toLowerCase()
+              )
+            ) || teeName;
+
+        return {
+          id: simpleLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+          label: simpleLabel,
+          name: simpleLabel,
+          fullName: teeName,
+          slope: Number(apiTee?.slope_rating || apiTee?.slope || 113),
+          slopeRating: Number(apiTee?.slope_rating || apiTee?.slope || 113),
+          courseRating: Number(apiTee?.course_rating || apiTee?.rating || 72),
+          course_rating: Number(apiTee?.course_rating || apiTee?.rating || 72),
+          par: Number(apiTee?.par_total || apiTee?.par || 72),
+          par_total: Number(apiTee?.par_total || apiTee?.par || 72),
+          holes: apiTee?.holes || [],
+          raw: apiTee,
+        };
+      });
+    }
+
+    return getCourseTees("st-michaels");
+  }, [courseId, selectedSavedCourse]);
 
   const [playersPerTeam, setPlayersPerTeam] = useState(1);
   const [format, setFormat] = useState("Singles Match Play");
@@ -232,7 +275,22 @@ export default function QuickGame({
 
     setCourseId(importedCourse.id);
     setSelectedCourseTouched(true);
-    setTee(getDefaultTee("st-michaels"));
+
+    const firstMaleTee = Array.isArray(apiCourse?.tees?.male)
+      ? apiCourse.tees.male[0]
+      : null;
+    const firstApiTeeName = String(firstMaleTee?.tee_name || "White");
+    const firstApiTeeLabel =
+      firstApiTeeName
+        .split(",")
+        .map((part) => part.trim())
+        .find((part) =>
+          ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
+            part.toLowerCase()
+          )
+        ) || "white";
+
+    setTee(firstApiTeeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
     setCourseMode("saved");
     setCourseSearchStatus(`Saved ${importedCourse.name}`);
   }
@@ -276,56 +334,72 @@ export default function QuickGame({
     );
   }
 
+  function getApiTeeLabel(apiTee: any) {
+    const teeName = String(
+      apiTee?.tee_name ||
+        apiTee?.name ||
+        apiTee?.label ||
+        apiTee?.colour ||
+        apiTee?.color ||
+        ""
+    );
+
+    const simpleLabel =
+      teeName
+        .split(",")
+        .map((part) => part.trim())
+        .find((part) =>
+          ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
+            part.toLowerCase()
+          )
+        ) || teeName;
+
+    return simpleLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  }
+
   function selectedTeeData() {
-    const selectedTee = tees.find(
-      (t: any) => t.id === tee || t.label === tee || t.name === tee
+    const localTee = tees.find(
+      (t: any) =>
+        String(t.id || "").toLowerCase() === String(tee || "").toLowerCase() ||
+        String(t.label || "").toLowerCase() === String(tee || "").toLowerCase() ||
+        String(t.name || "").toLowerCase() === String(tee || "").toLowerCase()
     );
 
     const rawCourse = selectedSavedCourse?.raw || selectedSavedCourse || {};
+    const rawTees = rawCourse?.tees || {};
 
-    const apiTees =
-      rawCourse?.tees ||
-      rawCourse?.tee_sets ||
-      rawCourse?.teeSets ||
-      rawCourse?.teeBoxes ||
-      rawCourse?.tee_boxes ||
-      rawCourse?.course?.tees ||
-      rawCourse?.course?.tee_sets ||
-      [];
+    const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
+    const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
+    const flatApiTees = Array.isArray(rawTees)
+      ? rawTees
+      : [...maleTees, ...femaleTees];
 
-    const apiTee = Array.isArray(apiTees)
-      ? apiTees.find((t: any) => {
-          const label =
-            t?.id ||
-            t?.label ||
-            t?.name ||
-            t?.tee_name ||
-            t?.teeName ||
-            t?.color ||
-            t?.colour ||
-            t?.tee;
-
-          return String(label || "").toLowerCase() === String(tee || "").toLowerCase();
-        })
-      : null;
+    const apiTee = flatApiTees.find(
+      (apiTee: any) => getApiTeeLabel(apiTee) === String(tee || "").toLowerCase()
+    );
 
     return {
-      ...(selectedTee || {}),
+      ...(localTee || {}),
       ...(apiTee || {}),
+      raw: apiTee || localTee?.raw || localTee || {},
     };
   }
 
   function teeNumberValue(teeData: any, keys: string[], fallback: number) {
-    for (const key of keys) {
-      const value = key
-        .split(".")
-        .reduce((source: any, part: string) => source?.[part], teeData);
+    const sources = [teeData, teeData?.raw].filter(Boolean);
 
-      if (value !== undefined && value !== null && value !== "") {
-        const numeric = Number(value);
+    for (const source of sources) {
+      for (const key of keys) {
+        const value = key
+          .split(".")
+          .reduce((current: any, part: string) => current?.[part], source);
 
-        if (Number.isFinite(numeric)) {
-          return numeric;
+        if (value !== undefined && value !== null && value !== "") {
+          const numeric = Number(value);
+
+          if (Number.isFinite(numeric)) {
+            return numeric;
+          }
         }
       }
     }
@@ -339,9 +413,9 @@ export default function QuickGame({
     return teeNumberValue(
       teeData,
       [
+        "slope_rating",
         "slope",
         "slopeRating",
-        "slope_rating",
         "menSlope",
         "mensSlope",
         "men.slope",
@@ -358,8 +432,8 @@ export default function QuickGame({
     return teeNumberValue(
       teeData,
       [
-        "courseRating",
         "course_rating",
+        "courseRating",
         "rating",
         "scratchRating",
         "scratch_rating",
@@ -370,7 +444,7 @@ export default function QuickGame({
         "ratings.men.rating",
         "ratings.men.course_rating",
       ],
-      72
+      selectedTeePar()
     );
   }
 
@@ -380,6 +454,7 @@ export default function QuickGame({
     return teeNumberValue(
       teeData,
       [
+        "par_total",
         "par",
         "mensPar",
         "menPar",
@@ -651,6 +726,10 @@ export default function QuickGame({
               {selectedSavedCourse?.region ||
                 selectedSavedCourse?.country ||
                 "Ready for tee selection"}
+            </div>
+
+            <div className="mt-2 text-[8px] font-black uppercase tracking-[0.14em] text-[#d1c79f]/70">
+              Par {selectedTeePar()} • Rating {selectedTeeCourseRating().toFixed(1)} • Slope {selectedTeeSlope()}
             </div>
           </div>
         ) : null}
