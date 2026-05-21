@@ -78,7 +78,18 @@ export default function Score({
   const nextHoleNumber =
     holes.find((h: any) => h.status === "pending")?.hole || 18;
 
-  const current = holesByTee[nextHoleNumber][day.tee];
+  const teeKey =
+    day.tee?.charAt(0).toUpperCase() + day.tee?.slice(1).toLowerCase();
+
+  const current =
+    holesByTee?.[nextHoleNumber]?.[teeKey] ||
+    holesByTee?.[nextHoleNumber]?.White ||
+    {
+      hole: nextHoleNumber,
+      par: 4,
+      si: nextHoleNumber,
+      metres: 0,
+    };
 
   const displayMain = (() => {
     if (!result.leader) return result.main;
@@ -118,7 +129,15 @@ export default function Score({
   }
 
   function openHole(holeNumber: number) {
-    const detail = holesByTee[holeNumber][day.tee];
+    const detail =
+      holesByTee?.[holeNumber]?.[teeKey] ||
+      holesByTee?.[holeNumber]?.White ||
+      {
+        hole: holeNumber,
+        par: 4,
+        si: holeNumber,
+        metres: 0,
+      };
 
     setSelectedHole(detail);
 
@@ -300,7 +319,16 @@ export default function Score({
   function playerScorecardRows(p: any, team: string, from: number, to: number) {
     return Array.from({ length: to - from + 1 }, (_, i) => {
       const holeNo = from + i;
-      const h = holesByTee[holeNo][day.tee];
+      const h =
+        holesByTee?.[holeNo]?.[teeKey] ||
+        holesByTee?.[holeNo]?.White ||
+        {
+          hole: holeNo,
+          par: 4,
+          si: holeNo,
+          metres: 0,
+        };
+
       const gross = grossFor(team, p, h.hole);
       const shotCount = shots(Number(p.handicap || 0), h.si);
       const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
@@ -316,7 +344,16 @@ export default function Score({
   }
 
   const Hole = ({ h }: any) => {
-    const detail = holesByTee[h.hole][day.tee];
+    const detail =
+      holesByTee?.[h.hole]?.[teeKey] ||
+      holesByTee?.[h.hole]?.White ||
+      {
+        hole: h.hole,
+        par: 4,
+        si: h.hole,
+        metres: 0,
+      };
+
     const status = h.status;
     const active = h.hole === nextHoleNumber;
 
@@ -815,4 +852,3 @@ function ScoreBox({ team, players, score, setScore, par, compact = false }: any)
     </div>
   );
 }
-
