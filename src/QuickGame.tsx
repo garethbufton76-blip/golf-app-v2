@@ -527,6 +527,15 @@ export default function QuickGame({
   function startQuickGame() {
     const selectedCourse = selectedSavedCourse || getCourseById("st-michaels");
 
+    // The current Score screen still expects a seeded/local course id so it can
+    // read hole-by-hole data safely. API courses are used here for course name,
+    // tee rating, slope and handicap calculations, but we fall back to the
+    // seeded St Michaels hole model until the Score screen is upgraded to read
+    // API hole arrays directly.
+    const localScoreCourse = COURSES.find((course: any) => course.id === courseId);
+    const scoreCourseId = localScoreCourse ? courseId : "st-michaels";
+    const scoreCourse = localScoreCourse || getCourseById("st-michaels");
+
     const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
       id: `quick-red-${i}`,
       name: p.name || `Red ${i + 1}`,
@@ -577,8 +586,10 @@ export default function QuickGame({
       {
         label: "Quick Game",
         teeTime: "",
-        courseId,
+        courseId: scoreCourseId,
+        displayCourseId: courseId,
         course: selectedCourse.shortName || selectedCourse.name,
+        scoringCourse: scoreCourse?.shortName || scoreCourse?.name || "St Michaels",
         tee,
         teeSlope: selectedTeeSlope(),
         teeCourseRating: selectedTeeCourseRating(),
