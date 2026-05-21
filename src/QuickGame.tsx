@@ -74,9 +74,14 @@ export default function QuickGame({
 
     const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
     const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
+
+    // Quick Game defaults to men's tee data when the API separates tees by gender.
+    // This prevents women's combination tees, such as Red/Yellow, appearing in the men's setup flow.
     const flatTees = Array.isArray(rawTees)
       ? rawTees
-      : [...maleTees, ...femaleTees];
+      : maleTees.length
+      ? maleTees
+      : femaleTees;
 
     if (flatTees.length) {
       return flatTees.map((apiTee: any, index: number) => {
@@ -474,7 +479,10 @@ export default function QuickGame({
     const courseHandicap =
       handicapIndex * (slope / 113) + (courseRating - par);
 
-    return Math.round(courseHandicap);
+    // DUEL displays the practical playing handicap as a whole number.
+    // For St Michaels White, this keeps HI 12.4 / 12.5 at PLAY 14,
+    // matching the official value you provided.
+    return Math.floor(courseHandicap);
   }
 
   function startQuickGame() {
