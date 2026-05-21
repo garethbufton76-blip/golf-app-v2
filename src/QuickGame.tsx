@@ -276,24 +276,130 @@ export default function QuickGame({
     );
   }
 
-  function selectedTeeSlope() {
-    const selectedTee = tees.find((t: any) => t.id === tee || t.label === tee);
+  function selectedTeeData() {
+    const selectedTee = tees.find(
+      (t: any) => t.id === tee || t.label === tee || t.name === tee
+    );
 
-    return Number(
-      selectedTee?.slope ||
-        selectedTee?.slopeRating ||
-        selectedTee?.slope_rating ||
-        selectedTee?.menSlope ||
-        selectedTee?.mensSlope ||
-        113
+    const rawCourse = selectedSavedCourse?.raw || selectedSavedCourse || {};
+
+    const apiTees =
+      rawCourse?.tees ||
+      rawCourse?.tee_sets ||
+      rawCourse?.teeSets ||
+      rawCourse?.teeBoxes ||
+      rawCourse?.tee_boxes ||
+      rawCourse?.course?.tees ||
+      rawCourse?.course?.tee_sets ||
+      [];
+
+    const apiTee = Array.isArray(apiTees)
+      ? apiTees.find((t: any) => {
+          const label =
+            t?.id ||
+            t?.label ||
+            t?.name ||
+            t?.tee_name ||
+            t?.teeName ||
+            t?.color ||
+            t?.colour ||
+            t?.tee;
+
+          return String(label || "").toLowerCase() === String(tee || "").toLowerCase();
+        })
+      : null;
+
+    return {
+      ...(selectedTee || {}),
+      ...(apiTee || {}),
+    };
+  }
+
+  function teeNumberValue(teeData: any, keys: string[], fallback: number) {
+    for (const key of keys) {
+      const value = key
+        .split(".")
+        .reduce((source: any, part: string) => source?.[part], teeData);
+
+      if (value !== undefined && value !== null && value !== "") {
+        const numeric = Number(value);
+
+        if (Number.isFinite(numeric)) {
+          return numeric;
+        }
+      }
+    }
+
+    return fallback;
+  }
+
+  function selectedTeeSlope() {
+    const teeData = selectedTeeData();
+
+    return teeNumberValue(
+      teeData,
+      [
+        "slope",
+        "slopeRating",
+        "slope_rating",
+        "menSlope",
+        "mensSlope",
+        "men.slope",
+        "men.slope_rating",
+        "ratings.men.slope",
+      ],
+      113
+    );
+  }
+
+  function selectedTeeCourseRating() {
+    const teeData = selectedTeeData();
+
+    return teeNumberValue(
+      teeData,
+      [
+        "courseRating",
+        "course_rating",
+        "rating",
+        "scratchRating",
+        "scratch_rating",
+        "menRating",
+        "mensRating",
+        "men.rating",
+        "men.course_rating",
+        "ratings.men.rating",
+        "ratings.men.course_rating",
+      ],
+      72
+    );
+  }
+
+  function selectedTeePar() {
+    const teeData = selectedTeeData();
+
+    return teeNumberValue(
+      teeData,
+      [
+        "par",
+        "mensPar",
+        "menPar",
+        "men.par",
+        "ratings.men.par",
+      ],
+      72
     );
   }
 
   function playingHandicap(rawHandicap: any) {
+    const handicapIndex = Number(rawHandicap || 0);
     const slope = selectedTeeSlope();
-    const numeric = Number(rawHandicap || 0);
+    const courseRating = selectedTeeCourseRating();
+    const par = selectedTeePar();
 
-    return Math.round((numeric * slope) / 113);
+    const courseHandicap =
+      handicapIndex * (slope / 113) + (courseRating - par);
+
+    return Math.round(courseHandicap);
   }
 
   function startQuickGame() {
@@ -348,6 +454,9 @@ export default function QuickGame({
         courseId,
         course: selectedCourse.shortName || selectedCourse.name,
         tee,
+        teeSlope: selectedTeeSlope(),
+        teeCourseRating: selectedTeeCourseRating(),
+        teePar: selectedTeePar(),
         format,
       },
     ]);
@@ -563,7 +672,7 @@ export default function QuickGame({
                 <div className="leading-none">
                   <div>{t.label}</div>
                   <div className="mt-1 text-[7px] opacity-45">
-                    {t.slope}
+                    S{t.slope || t.slopeRating || t.slope_rating || 113}
                   </div>
                 </div>
               </button>
