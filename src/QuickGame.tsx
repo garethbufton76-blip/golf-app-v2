@@ -47,6 +47,7 @@ export default function QuickGame({
   const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
   const [courseSearchStatus, setCourseSearchStatus] = useState("");
   const [showCourseSearchPanel, setShowCourseSearchPanel] = useState(false);
+  const [showSavedCoursesPanel, setShowSavedCoursesPanel] = useState(false);
 
   const savedCourses = useMemo(
     () => [...COURSES, ...savedApiCourses],
@@ -312,6 +313,7 @@ export default function QuickGame({
     setTee(firstApiTeeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
     setCourseMode("saved");
     setShowCourseSearchPanel(false);
+    setShowSavedCoursesPanel(false);
     setCourseSearchStatus(`Saved ${importedCourse.name}`);
   }
 
@@ -645,6 +647,7 @@ export default function QuickGame({
               onClick={() => {
                 setCourseMode("search");
                 setShowCourseSearchPanel(true);
+                setShowSavedCoursesPanel(false);
               }}
               className={cx(
                 "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
@@ -658,7 +661,11 @@ export default function QuickGame({
 
             <button
               type="button"
-              onClick={() => setCourseMode("saved")}
+              onClick={() => {
+                setCourseMode("saved");
+                setShowSavedCoursesPanel(true);
+                setShowCourseSearchPanel(false);
+              }}
               className={cx(
                 "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
                 courseMode === "saved"
@@ -740,6 +747,7 @@ export default function QuickGame({
                       onClick={() => {
                         changeCourse(course.id);
                         setShowCourseSearchPanel(false);
+                        setShowSavedCoursesPanel(false);
                       }}
                       className={cx(
                         "w-full rounded-[16px] border p-3 text-left transition-all",
