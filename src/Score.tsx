@@ -538,12 +538,40 @@ export default function Score({
       {selectedHole && (
         <div
           className={cx(
-            "absolute left-0 right-0 z-50 flex items-start justify-center overflow-y-auto bg-black/72 px-3 py-3",
+            "absolute left-0 right-0 z-50 flex items-stretch justify-center overflow-hidden px-4",
             isBetterBall ? "top-3 bottom-[78px]" : "top-[252px] bottom-[78px]"
           )}
         >
-          <div className="w-full max-w-full rounded-[30px] border border-[#d1c79f]/30 bg-black/92 p-3 shadow-2xl backdrop-blur-xl">
-            <div className="mb-2 flex items-start justify-between gap-3">
+          <div className="relative flex h-full w-full max-w-full flex-col overflow-hidden rounded-[26px] border border-white/10 bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-70"
+              style={{
+                background:
+                  "linear-gradient(90deg, rgba(92,12,19,0.58), rgba(20,25,34,0.82) 48%, rgba(8,20,38,0.84))",
+              }}
+            />
+
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.08]"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 22px 22px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.06) 11px, transparent 12px),
+                  radial-gradient(circle at 68px 68px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                `,
+                backgroundSize: "90px 90px",
+              }}
+            />
+
+            <img
+              src="/launch-logo.png"
+              alt="DUEL"
+              className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
+              style={{
+                filter: "brightness(0) invert(1)",
+              }}
+            />
+
+            <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
               <div>
                 <div className="text-[9px] tracking-[0.24em] text-white/50">
                   SCORE HOLE
@@ -564,7 +592,7 @@ export default function Score({
             </div>
 
             {isBetterBall ? (
-              <div className="grid grid-cols-2 gap-3 pb-1">
+              <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-y-auto pb-1">
                 <div className="space-y-3">
                   {scoringRedPlayers.map((p: any, i: number) => (
                     <ScoreBox
@@ -598,7 +626,7 @@ export default function Score({
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
+              <div className="relative z-10 grid flex-1 grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
                 <ScoreBox
                   team="red"
                   players={match.red}
@@ -773,7 +801,7 @@ function ScoreBox({
         "relative overflow-hidden border backdrop-blur-xl",
         sideRadius,
         isSplit
-          ? "min-h-[270px] border-y-0 border-l-0 border-r-0 shadow-none"
+          ? "h-full min-h-[270px] border-y-0 border-l-0 border-r-0 shadow-none"
           : compact
           ? "min-h-[248px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
           : "min-h-[245px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
