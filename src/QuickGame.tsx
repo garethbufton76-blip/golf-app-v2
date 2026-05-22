@@ -107,7 +107,17 @@ export default function QuickGame({
     });
 
     if (meaningful.length) {
-      return meaningful.join(" ").replace(/\s+/g, " ").toUpperCase();
+      const label = meaningful.join(" ").replace(/\s+/g, " ").toUpperCase();
+
+      // If this is just a duplicate WHITE tee, append slope to differentiate
+      if (label === "WHITE") {
+        const slope = Number(apiTee?.slope_rating || apiTee?.slope || 113);
+        const rating = Number(apiTee?.course_rating || apiTee?.rating || 72).toFixed(1);
+
+        return `WHITE ${rating}`;
+      }
+
+      return label;
     }
 
     return (cleaned[0] || rawName).toUpperCase();
