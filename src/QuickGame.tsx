@@ -109,14 +109,6 @@ export default function QuickGame({
     if (meaningful.length) {
       const label = meaningful.join(" ").replace(/\s+/g, " ").toUpperCase();
 
-      // If this is just a duplicate WHITE tee, append slope to differentiate
-      if (label === "WHITE") {
-        const slope = Number(apiTee?.slope_rating || apiTee?.slope || 113);
-        const rating = Number(apiTee?.course_rating || apiTee?.rating || 72).toFixed(1);
-
-        return `WHITE ${rating}`;
-      }
-
       return label;
     }
 
@@ -191,8 +183,8 @@ export default function QuickGame({
         };
       });
 
-      return mappedTees.filter((tee: any, index: number, arr: any[]) => {
-        return (
+      const exactDedupedTees = mappedTees.filter(
+        (tee: any, index: number, arr: any[]) =>
           arr.findIndex(
             (t: any) =>
               t.label === tee.label &&
@@ -201,7 +193,35 @@ export default function QuickGame({
                 Number(tee.courseRating).toFixed(1) &&
               t.par === tee.par
           ) === index
+      );
+
+      const seenStandardColours = new Set<string>();
+
+      return exactDedupedTees.filter((tee: any) => {
+        const label = String(tee.label || "").toUpperCase();
+        const fullName = String(tee.fullName || "").toUpperCase();
+
+        const isSpecialTee =
+          /CHALLENGE|CHAMPIONSHIP|COMPOSITE|TOURNAMENT/.test(label) ||
+          /CHALLENGE|CHAMPIONSHIP|COMPOSITE|TOURNAMENT/.test(fullName);
+
+        const colourMatch = label.match(
+          /\b(BLACK|BLUE|WHITE|GOLD|RED|YELLOW|GREEN)\b/
         );
+
+        if (!colourMatch || isSpecialTee || label.includes("/")) {
+          return true;
+        }
+
+        const colour = colourMatch[1];
+
+        if (seenStandardColours.has(colour)) {
+          return false;
+        }
+
+        seenStandardColours.add(colour);
+
+        return true;
       });
     }
 
