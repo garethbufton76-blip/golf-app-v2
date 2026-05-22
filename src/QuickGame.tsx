@@ -64,6 +64,49 @@ export default function QuickGame({
     [savedCourses, courseId]
   );
 
+  function cleanApiTeeLabel(apiTee: any, index = 0) {
+    const rawName = String(
+      apiTee?.tee_name ||
+        apiTee?.name ||
+        apiTee?.label ||
+        apiTee?.colour ||
+        apiTee?.color ||
+        `Tee ${index + 1}`
+    );
+
+    const parts = rawName
+      .split(",")
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .filter((part) => !/^\d+$/.test(part))
+      .filter((part) => !/^usga$/i.test(part))
+      .filter((part) => !/^men$/i.test(part))
+      .filter((part) => !/^women$/i.test(part));
+
+    const colourWords = ["black", "blue", "white", "gold", "red", "yellow", "green"];
+    const colourParts = parts.filter((part) =>
+      colourWords.some((colour) => part.toLowerCase().includes(colour))
+    );
+
+    if (colourParts.length) {
+      return colourParts.join(" / ").replace(/\s*\/\s*/g, "/").toUpperCase();
+    }
+
+    return (parts[0] || rawName).toUpperCase();
+  }
+
+  function apiTeeId(apiTee: any, index = 0) {
+    const label = cleanApiTeeLabel(apiTee, index);
+    const slope = Number(apiTee?.slope_rating || apiTee?.slope || 113);
+    const rating = Number(apiTee?.course_rating || apiTee?.rating || 72);
+    const par = Number(apiTee?.par_total || apiTee?.par || 72);
+
+    return `${label}-${slope}-${rating}-${par}-${index}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   const tees = useMemo(() => {
     const localCourse = COURSES.find((course) => course.id === courseId);
 
@@ -101,20 +144,13 @@ export default function QuickGame({
     if (flatTees.length) {
       return flatTees.map((apiTee: any, index: number) => {
         const teeName = String(apiTee?.tee_name || apiTee?.name || `Tee ${index + 1}`);
-        const simpleLabel =
-          teeName
-            .split(",")
-            .map((part) => part.trim())
-            .find((part) =>
-              ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
-                part.toLowerCase()
-              )
-            ) || teeName;
+        const cleanLabel = cleanApiTeeLabel(apiTee, index);
+        const uniqueId = apiTeeId(apiTee, index);
 
         return {
-          id: simpleLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-          label: simpleLabel,
-          name: simpleLabel,
+          id: uniqueId,
+          label: cleanLabel,
+          name: cleanLabel,
           fullName: teeName,
           slope: Number(apiTee?.slope_rating || apiTee?.slope || 113),
           slopeRating: Number(apiTee?.slope_rating || apiTee?.slope || 113),
@@ -299,18 +335,8 @@ export default function QuickGame({
     const firstMaleTee = Array.isArray(apiCourse?.tees?.male)
       ? apiCourse.tees.male[0]
       : null;
-    const firstApiTeeName = String(firstMaleTee?.tee_name || "White");
-    const firstApiTeeLabel =
-      firstApiTeeName
-        .split(",")
-        .map((part) => part.trim())
-        .find((part) =>
-          ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
-            part.toLowerCase()
-          )
-        ) || "white";
 
-    setTee(firstApiTeeLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-"));
+    setTee(firstMaleTee ? apiTeeId(firstMaleTee, 0) : "white");
     setCourseMode("saved");
     setShowCourseSearchPanel(false);
     setShowSavedCoursesPanel(false);
@@ -356,27 +382,8 @@ export default function QuickGame({
     );
   }
 
-  function getApiTeeLabel(apiTee: any) {
-    const teeName = String(
-      apiTee?.tee_name ||
-        apiTee?.name ||
-        apiTee?.label ||
-        apiTee?.colour ||
-        apiTee?.color ||
-        ""
-    );
-
-    const simpleLabel =
-      teeName
-        .split(",")
-        .map((part) => part.trim())
-        .find((part) =>
-          ["blue", "white", "gold", "red", "black", "yellow", "green"].includes(
-            part.toLowerCase()
-          )
-        ) || teeName;
-
-    return simpleLabel.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+  function getApiTeeLabel(apiTee: any, index = 0) {
+    return apiTeeId(apiTee, index);
   }
 
   function selectedTeeData() {
@@ -397,7 +404,8 @@ export default function QuickGame({
       : [...maleTees, ...femaleTees];
 
     const apiTee = flatApiTees.find(
-      (apiTee: any) => getApiTeeLabel(apiTee) === String(tee || "").toLowerCase()
+      (apiTee: any, index: number) =>
+        getApiTeeLabel(apiTee, index) === String(tee || "").toLowerCase()
     );
 
     return {
@@ -818,14 +826,14 @@ export default function QuickGame({
                 key={t.id}
                 onClick={() => setTee(t.id)}
                 className={cx(
-                  "rounded-2xl border px-2 py-2 text-[10px] font-black uppercase tracking-[0.08em] transition-all",
+                  "min-h-[58px] rounded-2xl border px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] transition-all",
                   tee === t.id
                     ? "border-[#d1c79f] bg-[#d1c79f] text-black"
                     : "border-white/12 bg-black/42 text-white"
                 )}
               >
-                <div className="leading-none">
-                  <div>{t.label}</div>
+                <div className="leading-[0.95]">
+                  <div className="break-words">{t.label}</div>
                   <div className="mt-1 text-[7px] opacity-45">
                     S{t.slope || t.slopeRating || t.slope_rating || 113}
                   </div>
