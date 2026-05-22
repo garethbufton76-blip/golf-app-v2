@@ -501,15 +501,15 @@ export default function Score({
           {selectedHole ? (
             <div
               className={cx(
-                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
-                isBetterBall ? "top-[-252px]" : "top-0"
+                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-[#05070c]/98 p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                isBetterBall ? "top-[-214px]" : "top-0"
               )}
             >
               <div
                 className="pointer-events-none absolute inset-0 opacity-70"
                 style={{
                   background:
-                    "linear-gradient(90deg, rgba(92,12,19,0.58), rgba(20,25,34,0.82) 48%, rgba(8,20,38,0.84))",
+                    "linear-gradient(90deg, rgba(64,6,12,0.96), rgba(12,15,22,0.985) 48%, rgba(4,13,27,0.985))",
                 }}
               />
 
@@ -523,6 +523,8 @@ export default function Score({
                   backgroundSize: "90px 90px",
                 }}
               />
+
+              <div className="pointer-events-none absolute left-0 right-0 top-0 h-[132px] bg-gradient-to-b from-[#05070c] via-[#05070c]/96 to-transparent" />
 
               <img
                 src="/launch-logo.png"
