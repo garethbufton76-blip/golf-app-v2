@@ -497,9 +497,14 @@ export default function Score({
           </div>
         </div>
 
-        <div className="relative mt-4 min-h-[calc(100vh-320px)] overflow-hidden rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+        <div className="relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
           {selectedHole ? (
-            <div className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl">
+            <div
+              className={cx(
+                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                isBetterBall ? "top-[-252px]" : "top-0"
+              )}
+            >
               <div
                 className="pointer-events-none absolute inset-0 opacity-70"
                 style={{
