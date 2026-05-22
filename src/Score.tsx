@@ -40,6 +40,7 @@ export default function Score({
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
   const [selectedHole, setSelectedHole] = useState<any>(null);
   const [cardPlayer, setCardPlayer] = useState<any>(null);
+  const [showResults, setShowResults] = useState(false);
 
   const [draft, setDraft] = useState<any>({
     red: 4,
@@ -74,6 +75,14 @@ export default function Score({
   const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
 
   const result = getResult(holes);
+
+  const isMatchFinished = holes.every(
+    (h: any) => h.status !== "pending"
+  );
+
+  const redWins = holes.filter((h: any) => h.status === "red").length;
+  const blueWins = holes.filter((h: any) => h.status === "blue").length;
+  const halved = holes.filter((h: any) => h.status === "as").length;
 
   const nextHoleNumber =
     holes.find((h: any) => h.status === "pending")?.hole || 18;
@@ -310,6 +319,14 @@ export default function Score({
 
     setScorecards(nextScorecards);
     setSelectedHole(null);
+
+    const finished = updated.every((h: any) => h.status !== "pending");
+
+    if (finished) {
+      setTimeout(() => {
+        setShowResults(true);
+      }, 400);
+    }
   }
 
   function grossFor(team: string, p: any, hole: number) {
@@ -493,6 +510,23 @@ export default function Score({
               <div className="mt-0.5 text-[10px] tracking-[0.16em] text-white/55">
                 {result.sub}
               </div>
+
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {[...match.red, ...match.blue].map((p: any, i: number) => (
+                  <button
+                    key={`${p.name}-${i}`}
+                    onClick={() =>
+                      setCardPlayer({
+                        team: i < match.red.length ? "red" : "blue",
+                        p,
+                      })
+                    }
+                    className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/75"
+                  >
+                    {first(p.name)}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -525,6 +559,15 @@ export default function Score({
               />
 
               <div className="pointer-events-none absolute left-0 right-0 top-0 h-[132px] bg-gradient-to-b from-[#05070c] via-[#05070c]/96 to-transparent" />
+
+              {isMatchFinished && (
+                <button
+                  onClick={() => setShowResults(true)}
+                  className="absolute bottom-20 left-1/2 z-20 -translate-x-1/2 rounded-full border border-[#d1c79f]/40 bg-[#d1c79f] px-6 py-3 text-[12px] font-black tracking-[0.18em] text-black shadow-[0_0_24px_rgba(209,199,159,0.35)]"
+                >
+                  FINISH MATCH
+                </button>
+              )}
 
               <img
                 src="/launch-logo.png"
@@ -705,6 +748,100 @@ export default function Score({
           )}
         </div>
       </div>
+
+      {showResults && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/92 p-5 backdrop-blur-xl">
+          <div className="relative w-full max-w-[430px] overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(180deg,#1a0a0d_0%,#060b14_100%)] p-6 shadow-[0_25px_80px_rgba(0,0,0,0.65)]">
+            <div
+              className="absolute inset-0 opacity-[0.08]"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.06) 11px, transparent 12px),
+                  radial-gradient(circle at 70px 70px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                `,
+                backgroundSize: "90px 90px",
+              }}
+            />
+
+            <div className="relative z-10 text-center">
+              <div className="text-[11px] tracking-[0.24em] text-white/45">
+                MATCH COMPLETE
+              </div>
+
+              <div className="mt-3 text-[38px] font-black uppercase leading-none text-white">
+                {displayMain}
+              </div>
+
+              <div className="mt-2 text-[12px] tracking-[0.18em] text-white/50">
+                {redWins} RED • {blueWins} BLUE • {halved} HALVED
+              </div>
+
+              <div className="mt-8 grid grid-cols-3 gap-3">
+                <div className="rounded-[22px] border border-red-500/20 bg-red-950/30 p-4">
+                  <div className="text-[10px] tracking-[0.16em] text-white/45">
+                    RED
+                  </div>
+                  <div className="mt-2 text-[34px] font-black text-white">
+                    {redWins}
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                  <div className="text-[10px] tracking-[0.16em] text-white/45">
+                    HALVED
+                  </div>
+                  <div className="mt-2 text-[34px] font-black text-white">
+                    {halved}
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-blue-500/20 bg-blue-950/30 p-4">
+                  <div className="text-[10px] tracking-[0.16em] text-white/45">
+                    BLUE
+                  </div>
+                  <div className="mt-2 text-[34px] font-black text-white">
+                    {blueWins}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-3">
+                <button
+                  onClick={() => {
+                    setShowResults(false);
+                    const firstPlayer =
+                      scoringRedPlayers[0] || scoringBluePlayers[0];
+
+                    if (firstPlayer) {
+                      setCardPlayer({
+                        team: scoringRedPlayers[0] ? "red" : "blue",
+                        p: firstPlayer,
+                      });
+                    }
+                  }}
+                  className="w-full rounded-full bg-[#d1c79f] px-5 py-4 text-[13px] font-black tracking-[0.16em] text-black"
+                >
+                  VIEW SCORECARDS
+                </button>
+
+                <button
+                  onClick={() => setShowResults(false)}
+                  className="w-full rounded-full border border-white/15 bg-white/[0.04] px-5 py-4 text-[13px] font-black tracking-[0.16em] text-white"
+                >
+                  BACK TO MATCH
+                </button>
+
+                <button
+                  onClick={() => setScreen("home")}
+                  className="w-full rounded-full border border-white/10 bg-black/30 px-5 py-4 text-[13px] font-black tracking-[0.16em] text-white/70"
+                >
+                  HOME
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {cardPlayer && (
         <PlayerScorecard
@@ -907,4 +1044,3 @@ function ScoreBox({
     </div>
   );
 }
-
