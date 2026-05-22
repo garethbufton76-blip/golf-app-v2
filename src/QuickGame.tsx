@@ -83,16 +83,34 @@ export default function QuickGame({
       .filter((part) => !/^men$/i.test(part))
       .filter((part) => !/^women$/i.test(part));
 
-    const colourWords = ["black", "blue", "white", "gold", "red", "yellow", "green"];
-    const colourParts = parts.filter((part) =>
-      colourWords.some((colour) => part.toLowerCase().includes(colour))
-    );
+    const cleaned = parts
+      .map((part) =>
+        part
+          .replace(/\s*\/\s*/g, "/")
+          .replace(/\btee\b/gi, "")
+          .trim()
+      )
+      .filter(Boolean);
 
-    if (colourParts.length) {
-      return colourParts.join(" / ").replace(/\s*\/\s*/g, "/").toUpperCase();
+    const colourWords = ["black", "blue", "white", "gold", "red", "yellow", "green"];
+
+    const meaningful = cleaned.filter((part) => {
+      const lower = part.toLowerCase();
+
+      return (
+        colourWords.some((colour) => lower.includes(colour)) ||
+        lower.includes("challenge") ||
+        lower.includes("championship") ||
+        lower.includes("composite") ||
+        lower.includes("social")
+      );
+    });
+
+    if (meaningful.length) {
+      return meaningful.join(" ").replace(/\s+/g, " ").toUpperCase();
     }
 
-    return (parts[0] || rawName).toUpperCase();
+    return (cleaned[0] || rawName).toUpperCase();
   }
 
   function apiTeeId(apiTee: any, index = 0) {
@@ -142,7 +160,7 @@ export default function QuickGame({
       : femaleTees;
 
     if (flatTees.length) {
-      return flatTees.map((apiTee: any, index: number) => {
+      const mappedTees = flatTees.map((apiTee: any, index: number) => {
         const teeName = String(apiTee?.tee_name || apiTee?.name || `Tee ${index + 1}`);
         const cleanLabel = cleanApiTeeLabel(apiTee, index);
         const uniqueId = apiTeeId(apiTee, index);
@@ -161,6 +179,19 @@ export default function QuickGame({
           holes: apiTee?.holes || [],
           raw: apiTee,
         };
+      });
+
+      return mappedTees.filter((tee: any, index: number, arr: any[]) => {
+        return (
+          arr.findIndex(
+            (t: any) =>
+              t.label === tee.label &&
+              t.slope === tee.slope &&
+              Number(t.courseRating).toFixed(1) ===
+                Number(tee.courseRating).toFixed(1) &&
+              t.par === tee.par
+          ) === index
+        );
       });
     }
 
