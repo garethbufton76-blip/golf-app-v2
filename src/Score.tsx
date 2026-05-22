@@ -497,31 +497,205 @@ export default function Score({
           </div>
         </div>
 
-        <div className="relative mt-4 min-h-[calc(100vh-320px)] rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
-          <img
-            src="/launch-logo.png"
-            alt="DUEL"
-            className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
-            style={{
-              filter: "brightness(0) invert(1)",
-            }}
-          />
+        <div className="relative mt-4 min-h-[calc(100vh-320px)] overflow-hidden rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+          {selectedHole ? (
+            <div className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl">
+              <div
+                className="pointer-events-none absolute inset-0 opacity-70"
+                style={{
+                  background:
+                    "linear-gradient(90deg, rgba(92,12,19,0.58), rgba(20,25,34,0.82) 48%, rgba(8,20,38,0.84))",
+                }}
+              />
 
-          <div className="mb-4">
-            <div className="text-[10px] tracking-[0.22em] text-white/60">
-              HOLE TRACKER
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                style={{
+                  backgroundImage: `
+                    radial-gradient(circle at 22px 22px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.06) 11px, transparent 12px),
+                    radial-gradient(circle at 68px 68px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                  `,
+                  backgroundSize: "90px 90px",
+                }}
+              />
+
+              <img
+                src="/launch-logo.png"
+                alt="DUEL"
+                className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
+                style={{
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
+
+              <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[9px] tracking-[0.24em] text-white/50">
+                    SCORE HOLE
+                  </div>
+
+                  <div className="mt-0.5 text-[20px] font-black tracking-[0.04em] text-white">
+                    Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
+                    {selectedHole.si}
+                  </div>
+                </div>
+
+                <button
+                  onClick={saveHole}
+                  className="rounded-full bg-[#d1c79f] px-5 py-2.5 text-[14px] font-black text-black"
+                >
+                  Save
+                </button>
+              </div>
+
+              {isBetterBall ? (
+                <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-y-auto pb-1">
+                  <div className="space-y-3">
+                    {scoringRedPlayers.map((p: any, i: number) => (
+                      <ScoreBox
+                        key={`red-${i}`}
+                        team="red"
+                        players={[p]}
+                        score={draft[`red_${i}`]}
+                        setScore={(v: number) =>
+                          setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
+                        }
+                        par={selectedHole.par}
+                        compact={scoringPlayerCount >= 4}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="space-y-3">
+                    {scoringBluePlayers.map((p: any, i: number) => (
+                      <ScoreBox
+                        key={`blue-${i}`}
+                        team="blue"
+                        players={[p]}
+                        score={draft[`blue_${i}`]}
+                        setScore={(v: number) =>
+                          setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
+                        }
+                        par={selectedHole.par}
+                        compact={scoringPlayerCount >= 4}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative z-10 grid flex-1 grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
+                  <ScoreBox
+                    team="red"
+                    players={match.red}
+                    score={draft.red}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, red: v }))
+                    }
+                    par={selectedHole.par}
+                    splitSide="left"
+                  />
+
+                  <ScoreBox
+                    team="blue"
+                    players={match.blue}
+                    score={draft.blue}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, blue: v }))
+                    }
+                    par={selectedHole.par}
+                    splitSide="right"
+                  />
+                </div>
+              )}
+
+              {isAmbrose && (
+                <div className="relative z-10 mt-3 max-h-[128px] overflow-y-auto rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
+                  <div className="mb-2 text-center text-[9px] font-bold tracking-[0.22em] text-white/45">
+                    TEE SHOT USED
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      {match.red.map((p: any) => {
+                        const selected =
+                          getSelectedTeePlayer(selectedHole.hole, "red") ===
+                          playerKey("red", p);
+
+                        return (
+                          <button
+                            key={`red-${p.name}`}
+                            onClick={() =>
+                              selectTeeShot(selectedHole.hole, "red", p)
+                            }
+                            className={cx(
+                              "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
+                              selected
+                                ? "border-red-300 bg-red-800 text-white shadow-[0_0_12px_rgba(255,109,109,0.45)]"
+                                : "border-red-400/25 bg-red-950/35 text-red-100"
+                            )}
+                          >
+                            {first(p.name)} • {getTeeShotCount("red", p)}/6
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="space-y-2">
+                      {match.blue.map((p: any) => {
+                        const selected =
+                          getSelectedTeePlayer(selectedHole.hole, "blue") ===
+                          playerKey("blue", p);
+
+                        return (
+                          <button
+                            key={`blue-${p.name}`}
+                            onClick={() =>
+                              selectTeeShot(selectedHole.hole, "blue", p)
+                            }
+                            className={cx(
+                              "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
+                              selected
+                                ? "border-blue-300 bg-blue-800 text-white shadow-[0_0_12px_rgba(103,166,255,0.45)]"
+                                : "border-blue-400/25 bg-blue-950/35 text-blue-100"
+                            )}
+                          >
+                            {first(p.name)} • {getTeeShotCount("blue", p)}/6
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
+          ) : (
+            <>
+              <img
+                src="/launch-logo.png"
+                alt="DUEL"
+                className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
+                style={{
+                  filter: "brightness(0) invert(1)",
+                }}
+              />
 
-            <div className="text-[14px] font-bold tracking-[0.16em]">
-              Hole {current.hole} • SI {current.si} • {current.metres}m
-            </div>
-          </div>
+              <div className="mb-4">
+                <div className="text-[10px] tracking-[0.22em] text-white/60">
+                  HOLE TRACKER
+                </div>
 
-          <div className="grid grid-cols-6 gap-2.5">
-            {holes.map((h: any) => (
-              <Hole key={h.hole} h={h} />
-            ))}
-          </div>
+                <div className="text-[14px] font-bold tracking-[0.16em]">
+                  Hole {current.hole} • SI {current.si} • {current.metres}m
+                </div>
+              </div>
+
+              <div className="grid grid-cols-6 gap-2.5">
+                {holes.map((h: any) => (
+                  <Hole key={h.hole} h={h} />
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -535,184 +709,7 @@ export default function Score({
         />
       )}
 
-      {selectedHole && (
-        <div
-          className={cx(
-            "absolute left-0 right-0 z-50 flex items-stretch justify-center overflow-hidden px-4",
-            isBetterBall ? "top-3 bottom-[78px]" : "top-[252px] bottom-[78px]"
-          )}
-        >
-          <div className="relative flex h-full w-full max-w-full flex-col overflow-hidden rounded-[26px] border border-white/10 bg-black/88 p-4 pb-[82px] shadow-2xl backdrop-blur-xl">
-            <div
-              className="pointer-events-none absolute inset-0 opacity-70"
-              style={{
-                background:
-                  "linear-gradient(90deg, rgba(92,12,19,0.58), rgba(20,25,34,0.82) 48%, rgba(8,20,38,0.84))",
-              }}
-            />
 
-            <div
-              className="pointer-events-none absolute inset-0 opacity-[0.08]"
-              style={{
-                backgroundImage: `
-                  radial-gradient(circle at 22px 22px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.06) 11px, transparent 12px),
-                  radial-gradient(circle at 68px 68px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
-                `,
-                backgroundSize: "90px 90px",
-              }}
-            />
-
-            <img
-              src="/launch-logo.png"
-              alt="DUEL"
-              className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
-              style={{
-                filter: "brightness(0) invert(1)",
-              }}
-            />
-
-            <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
-              <div>
-                <div className="text-[9px] tracking-[0.24em] text-white/50">
-                  SCORE HOLE
-                </div>
-
-                <div className="mt-0.5 text-[20px] font-black tracking-[0.04em] text-white">
-                  Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
-                  {selectedHole.si}
-                </div>
-              </div>
-
-              <button
-                onClick={saveHole}
-                className="rounded-full bg-[#d1c79f] px-5 py-2.5 text-[14px] font-black text-black"
-              >
-                Save
-              </button>
-            </div>
-
-            {isBetterBall ? (
-              <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-y-auto pb-1">
-                <div className="space-y-3">
-                  {scoringRedPlayers.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`red-${i}`}
-                      team="red"
-                      players={[p]}
-                      score={draft[`red_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                      compact={scoringPlayerCount >= 4}
-                    />
-                  ))}
-                </div>
-
-                <div className="space-y-3">
-                  {scoringBluePlayers.map((p: any, i: number) => (
-                    <ScoreBox
-                      key={`blue-${i}`}
-                      team="blue"
-                      players={[p]}
-                      score={draft[`blue_${i}`]}
-                      setScore={(v: number) =>
-                        setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
-                      }
-                      par={selectedHole.par}
-                      compact={scoringPlayerCount >= 4}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="relative z-10 grid flex-1 grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
-                <ScoreBox
-                  team="red"
-                  players={match.red}
-                  score={draft.red}
-                  setScore={(v: number) =>
-                    setDraft((d: any) => ({ ...d, red: v }))
-                  }
-                  par={selectedHole.par}
-                  splitSide="left"
-                />
-
-                <ScoreBox
-                  team="blue"
-                  players={match.blue}
-                  score={draft.blue}
-                  setScore={(v: number) =>
-                    setDraft((d: any) => ({ ...d, blue: v }))
-                  }
-                  par={selectedHole.par}
-                  splitSide="right"
-                />
-              </div>
-            )}
-
-            {isAmbrose && (
-              <div className="mt-4 rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
-                <div className="mb-2 text-center text-[9px] font-bold tracking-[0.22em] text-white/45">
-                  TEE SHOT USED
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    {match.red.map((p: any) => {
-                      const selected =
-                        getSelectedTeePlayer(selectedHole.hole, "red") ===
-                        playerKey("red", p);
-
-                      return (
-                        <button
-                          key={`red-${p.name}`}
-                          onClick={() =>
-                            selectTeeShot(selectedHole.hole, "red", p)
-                          }
-                          className={cx(
-                            "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
-                            selected
-                              ? "border-red-300 bg-red-800 text-white shadow-[0_0_12px_rgba(255,109,109,0.45)]"
-                              : "border-red-400/25 bg-red-950/35 text-red-100"
-                          )}
-                        >
-                          {first(p.name)} • {getTeeShotCount("red", p)}/6
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="space-y-2">
-                    {match.blue.map((p: any) => {
-                      const selected =
-                        getSelectedTeePlayer(selectedHole.hole, "blue") ===
-                        playerKey("blue", p);
-
-                      return (
-                        <button
-                          key={`blue-${p.name}`}
-                          onClick={() =>
-                            selectTeeShot(selectedHole.hole, "blue", p)
-                          }
-                          className={cx(
-                            "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
-                            selected
-                              ? "border-blue-300 bg-blue-800 text-white shadow-[0_0_12px_rgba(103,166,255,0.45)]"
-                              : "border-blue-400/25 bg-blue-950/35 text-blue-100"
-                          )}
-                        >
-                          {first(p.name)} • {getTeeShotCount("blue", p)}/6
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
     </>
   );
