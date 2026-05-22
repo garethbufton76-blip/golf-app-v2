@@ -502,7 +502,7 @@ export default function Score({
             <div
               className={cx(
                 "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-[#05070c]/98 p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
-                isBetterBall ? "top-[-214px]" : "top-0"
+                isBetterBall ? "top-[-232px]" : "top-0"
               )}
             >
               <div
@@ -556,8 +556,8 @@ export default function Score({
               </div>
 
               {isBetterBall ? (
-                <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-y-auto pb-1">
-                  <div className="space-y-3">
+                <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-hidden pb-1">
+                  <div className="grid h-full grid-rows-2 gap-3">
                     {scoringRedPlayers.map((p: any, i: number) => (
                       <ScoreBox
                         key={`red-${i}`}
@@ -573,7 +573,7 @@ export default function Score({
                     ))}
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="grid h-full grid-rows-2 gap-3">
                     {scoringBluePlayers.map((p: any, i: number) => (
                       <ScoreBox
                         key={`blue-${i}`}
@@ -807,7 +807,7 @@ function ScoreBox({
         isSplit
           ? "h-full min-h-[270px] border-y-0 border-l-0 border-r-0 shadow-none"
           : compact
-          ? "min-h-[248px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
+          ? "h-full min-h-0 shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
           : "min-h-[245px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
         isRed
           ? "border-[#ff4d5e]/35 bg-gradient-to-b from-[#741923] via-[#35080d] to-[#130204]"
@@ -837,7 +837,7 @@ function ScoreBox({
       <div
         className={cx(
           "relative z-10 flex h-full flex-col items-center justify-between",
-          isSplit ? "px-3 py-5" : compact ? "p-2.5" : "p-3"
+          isSplit ? "px-3 py-5" : compact ? "px-3 py-4" : "p-3"
         )}
       >
         <div
@@ -856,7 +856,7 @@ function ScoreBox({
         <div
           className={cx(
             "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)]",
-            isSplit ? "text-[92px]" : compact ? "text-[88px]" : "text-[98px]"
+            isSplit ? "text-[92px]" : compact ? "text-[74px]" : "text-[98px]"
           )}
         >
           {score === par + 4 ? "P" : score}
@@ -868,7 +868,7 @@ function ScoreBox({
             onClick={() => setScore(Math.max(0, score - 1))}
             className={cx(
               "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
-              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[40px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[42px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
               isRed
                 ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
                 : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
@@ -882,7 +882,7 @@ function ScoreBox({
             onClick={() => setScore(Math.min(par + 4, score + 1))}
             className={cx(
               "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
-              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[40px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[42px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
               isRed
                 ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
                 : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
@@ -895,7 +895,7 @@ function ScoreBox({
         <div
           className={cx(
             "rounded-full border px-4 py-1.5 text-center font-black uppercase tracking-[0.08em]",
-            isSplit ? "text-[12px]" : compact ? "text-[12px]" : "text-[16px]",
+            isSplit ? "text-[12px]" : compact ? "text-[11px]" : "text-[16px]",
             isRed
               ? "border-[#ff4d5e]/35 bg-[#3d0b12]/80 text-[#ff5f68]"
               : "border-[#58a6ff]/35 bg-[#0c203a]/80 text-[#69b3ff]"
