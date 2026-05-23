@@ -666,49 +666,41 @@ export default function Score({
             </div>
           </div>
         ) : finishStep === "overview" ? (
-          <div
-            className={cx(
-              "fixed inset-0 z-[120] overflow-y-auto px-4 py-5 text-white backdrop-blur-2xl",
-              result.leader === "red"
-                ? "bg-[#070104]"
-                : result.leader === "blue"
-                ? "bg-[#010713]"
-                : "bg-black"
-            )}
-          >
-            <div
-              className={cx(
-                "pointer-events-none fixed inset-0 opacity-95",
-                result.leader === "red"
-                  ? "bg-[radial-gradient(circle_at_16%_18%,rgba(255,48,66,0.42),transparent_34%),radial-gradient(circle_at_86%_22%,rgba(72,145,255,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.62)_48%,rgba(0,0,0,0.92))]"
-                  : result.leader === "blue"
-                  ? "bg-[radial-gradient(circle_at_84%_18%,rgba(72,145,255,0.42),transparent_34%),radial-gradient(circle_at_16%_22%,rgba(255,48,66,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.62)_48%,rgba(0,0,0,0.92))]"
-                  : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.25),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.72)_48%,rgba(0,0,0,0.94))]"
-              )}
-            />
-
-            <div
-              className="pointer-events-none fixed inset-0 opacity-[0.14] mix-blend-screen"
-              style={{
-                backgroundImage: `
-                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.05) 11px, transparent 12px),
-                  radial-gradient(circle at 64px 64px, rgba(255,255,255,0.11) 0px, rgba(255,255,255,0.04) 11px, transparent 12px)
-                `,
-                backgroundSize: "86px 86px",
-              }}
-            />
-
+          <div className="fixed inset-0 z-[120] overflow-y-auto px-4 py-5 text-white">
             <div className="relative z-10 mx-auto flex min-h-full max-w-[430px] flex-col">
               <div
                 className={cx(
-                  "flex-1 overflow-hidden rounded-[34px] border p-5 shadow-[0_30px_90px_rgba(0,0,0,0.75)] backdrop-blur-2xl",
+                  "relative flex-1 overflow-hidden rounded-[34px] border p-5 shadow-[0_30px_90px_rgba(0,0,0,0.75)] backdrop-blur-2xl",
                   result.leader === "red"
-                    ? "border-[#ff4154]/45 bg-[#090305]/72 shadow-[#ff2d44]/10"
+                    ? "border-[#ff4154]/45 bg-[#090305]/68 shadow-[#ff2d44]/10"
                     : result.leader === "blue"
-                    ? "border-[#58a6ff]/45 bg-[#020815]/72 shadow-[#58a6ff]/10"
-                    : "border-white/18 bg-black/72"
+                    ? "border-[#58a6ff]/45 bg-[#020815]/68 shadow-[#58a6ff]/10"
+                    : "border-white/18 bg-black/66"
                 )}
               >
+                <div
+                  className={cx(
+                    "pointer-events-none absolute inset-0 opacity-85",
+                    result.leader === "red"
+                      ? "bg-[radial-gradient(circle_at_12%_18%,rgba(255,48,66,0.44),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(72,145,255,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.42)_48%,rgba(0,0,0,0.72))]"
+                      : result.leader === "blue"
+                      ? "bg-[radial-gradient(circle_at_88%_18%,rgba(72,145,255,0.44),transparent_34%),radial-gradient(circle_at_12%_22%,rgba(255,48,66,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.42)_48%,rgba(0,0,0,0.72))]"
+                      : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.26),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.48)_48%,rgba(0,0,0,0.76))]"
+                  )}
+                />
+
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.13] mix-blend-screen"
+                  style={{
+                    backgroundImage: `
+                      radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.05) 11px, transparent 12px),
+                      radial-gradient(circle at 64px 64px, rgba(255,255,255,0.11) 0px, rgba(255,255,255,0.04) 11px, transparent 12px)
+                    `,
+                    backgroundSize: "86px 86px",
+                  }}
+                />
+
+                <div className="relative z-10">
                 <div className="text-center">
                   <img
                     src="/launch-logo.png"
@@ -865,6 +857,7 @@ export default function Score({
                 >
                   New Game
                 </button>
+                </div>
               </div>
             </div>
           </div>
