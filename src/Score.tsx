@@ -27,6 +27,7 @@ export default function Score({
   startMatch,
   teamLogos,
   teamNames,
+  setMode,
 }: any) {
   const day = dayConfigs[activeDay];
 
@@ -683,7 +684,10 @@ export default function Score({
                   setSignedCards({});
                   setSelectedHole(null);
                   setCardPlayer(null);
-                  setScreen("launch");
+                  if (setMode) {
+                    setMode("launch");
+                  }
+                  setScreen("home");
                 }}
                 className="mt-5 w-full rounded-[22px] border border-[#d1c79f]/35 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black"
               >
