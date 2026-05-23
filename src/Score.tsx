@@ -666,7 +666,7 @@ export default function Score({
             </div>
           </div>
         ) : finishStep === "overview" ? (
-          <div className="fixed inset-0 z-[120] overflow-hidden text-white">
+          <div className="fixed inset-y-0 left-1/2 z-[120] w-full max-w-[430px] -translate-x-1/2 overflow-hidden text-white">
             <div className="absolute inset-0 bg-black/18 backdrop-blur-[7px]" />
 
             <div
@@ -680,7 +680,7 @@ export default function Score({
               )}
             />
 
-            <div className="relative flex h-[100dvh] flex-col px-4 pb-[max(18px,env(safe-area-inset-bottom))] pt-[max(18px,env(safe-area-inset-top))]">
+            <div className="relative flex h-[100dvh] flex-col px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))]">
               <div
                 className={cx(
                   "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-5 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
