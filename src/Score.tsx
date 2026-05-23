@@ -963,7 +963,7 @@ export default function Score({
               {isMatchFinished && showFinishActions && finishStep === "playing" ? (
                 <div
                   className={cx(
-                    "absolute -bottom-[108px] left-4 right-4 z-20 rounded-[24px] border p-3 shadow-[0_18px_40px_rgba(0,0,0,0.62)] backdrop-blur-xl",
+                    "absolute -bottom-[84px] left-4 right-4 z-20 rounded-[24px] border p-3 shadow-[0_18px_40px_rgba(0,0,0,0.62)] backdrop-blur-xl",
                     result.leader === "red"
                       ? "border-[#ff4d5e]/25 bg-[#250207]/95"
                       : result.leader === "blue"
@@ -971,45 +971,17 @@ export default function Score({
                       : "border-white/10 bg-black/95"
                   )}
                 >
-                  <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
+                  <div className="mb-3 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
                     Round complete
                   </div>
 
-                  <div className="mb-3 flex items-center justify-center gap-3">
-                    <div className="rounded-full border border-[#ff4d5e]/20 bg-[#ff4d5e]/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-white">
-                      Red
-                    </div>
-
-                    <div className="rounded-full border border-[#58a6ff]/20 bg-[#58a6ff]/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-white">
-                      Blue
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setFinishStep("signoff")}
-                      className="rounded-full bg-[#d1c79f] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-black"
-                    >
-                      Finish Game
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowFinishActions(false)}
-                      className="rounded-full border border-white/15 bg-white/[0.04] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white"
-                    >
-                      Edit Scores
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setShowFinishActions(false)}
-                      className="rounded-full border border-white/10 bg-black/25 px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white/65"
-                    >
-                      Return
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFinishStep("signoff")}
+                    className="mx-auto block rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[0_0_22px_rgba(209,199,159,0.24)]"
+                  >
+                    Finish Game
+                  </button>
                 </div>
               ) : null}
 
