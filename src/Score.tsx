@@ -1243,7 +1243,7 @@ function StatRow({
   blue: number;
 }) {
   return (
-    <div className="grid grid-cols-[120px_1fr_120px] items-center py-4">
+    <div className="grid grid-cols-[120px_1fr_120px] items-center py-2">
       <div className="flex justify-center">
         <div className="text-[28px] font-black leading-none text-[#d1c79f]">
           {red}
@@ -1251,7 +1251,7 @@ function StatRow({
       </div>
 
       <div className="flex items-center justify-center">
-        <div className="text-center text-[12px] font-black uppercase leading-[1.5] tracking-[0.24em] text-[#d1c79f]">
+        <div className="text-center text-[12px] font-black uppercase leading-[1.15] tracking-[0.24em] text-white">
           {label}
         </div>
       </div>
