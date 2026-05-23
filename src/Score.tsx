@@ -691,7 +691,7 @@ export default function Score({
             <div className="relative flex h-[100dvh] flex-col px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))]">
               <div
                 className={cx(
-                  "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
+                  "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-3 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
                   result.leader === "red"
                     ? "border-[#ff4154]/45 bg-[#090305]/58 shadow-[#ff2d44]/10"
                     : result.leader === "blue"
@@ -726,19 +726,19 @@ export default function Score({
                     <img
                       src="/launch-logo.png"
                       alt="DUEL"
-                      className="mx-auto h-[44px] object-contain opacity-95"
+                      className="mx-auto h-[38px] object-contain opacity-95"
                       style={{
                         filter: "brightness(0) invert(1)",
                       }}
                     />
 
-                    <div className="mt-4 text-[10px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/78">
+                    <div className="mt-3 text-[9px] font-black uppercase tracking-[0.30em] text-[#d1c79f]/78">
                       Match Complete
                     </div>
 
                     <div
                       className={cx(
-                        "mt-2 text-[34px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
+                        "mt-2 text-[30px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
                         result.leader === "red"
                           ? "text-[#ff4355]"
                           : result.leader === "blue"
@@ -749,7 +749,7 @@ export default function Score({
                       {displayMain}
                     </div>
 
-                    <div className="mx-auto mt-4 flex max-w-[250px] items-center gap-4">
+                    <div className="mx-auto mt-3 flex max-w-[230px] items-center gap-4">
                       <div className="h-px flex-1 bg-[#d1c79f]/40" />
                       <div className="text-[15px] font-black uppercase tracking-[0.26em] text-[#d1c79f]">
                         Final
@@ -757,12 +757,12 @@ export default function Score({
                       <div className="h-px flex-1 bg-[#d1c79f]/40" />
                     </div>
 
-                    <div className="mt-3 text-[10px] font-black uppercase tracking-[0.18em] text-white/58">
+                    <div className="mt-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/58">
                       {redWins} Red • {blueWins} Blue • {halved} Halved
                     </div>
                   </div>
 
-                  <div className="mt-5 grid grid-cols-[1fr_44px_1fr] items-center gap-3">
+                  <div className="mt-4 grid grid-cols-[1fr_40px_1fr] items-center gap-2">
                     <div className="flex justify-center gap-2">
                       {scoringRedPlayers.map((p: any, i: number) => (
                         <button
@@ -773,7 +773,7 @@ export default function Score({
                         >
                           <Logo
                             team="red"
-                            size="h-[58px] w-[58px]"
+                            size="h-[48px] w-[48px]"
                             src={p.photo || teamLogos?.Red}
                           />
                           <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
@@ -783,7 +783,7 @@ export default function Score({
                       ))}
                     </div>
 
-                    <div className="text-center text-[22px] font-black text-white/48">VS</div>
+                    <div className="text-center text-[19px] font-black text-white/48">VS</div>
 
                     <div className="flex justify-center gap-2">
                       {scoringBluePlayers.map((p: any, i: number) => (
@@ -795,7 +795,7 @@ export default function Score({
                         >
                           <Logo
                             team="blue"
-                            size="h-[58px] w-[58px]"
+                            size="h-[48px] w-[48px]"
                             src={p.photo || teamLogos?.Blue}
                           />
                           <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
@@ -806,7 +806,7 @@ export default function Score({
                     </div>
                   </div>
 
-                  <div className="mt-3 rounded-[20px] border border-white/12 bg-black/22 p-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <div className="mt-3 rounded-[18px] border border-white/12 bg-black/22 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
                     <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-[#d1c79f]/70">
                       Match Stats
                     </div>
@@ -817,22 +817,22 @@ export default function Score({
                     <StatRow label="Bogeys" red={redRoundStats.bogeys} blue={blueRoundStats.bogeys} />
                   </div>
 
-                  <div className="mt-3 rounded-[20px] border border-white/10 bg-black/22 p-3">
+                  <div className="mt-2 rounded-[18px] border border-white/10 bg-black/22 p-2.5">
                     <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/42">
                       {day.course || "Course"}
                     </div>
 
-                    <div className="mt-1 text-[16px] font-black uppercase tracking-[0.08em] text-white">
+                    <div className="mt-1 text-[14px] font-black uppercase tracking-[0.08em] text-white">
                       {day.format}
                     </div>
 
-                    <div className="mt-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/42">
+                    <div className="mt-1 text-[9px] font-black uppercase tracking-[0.16em] text-white/42">
                       {day.label} • {String(day.tee || "").toUpperCase()}
                     </div>
                   </div>
 
-                  <div className="mt-auto pt-3">
-                    <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white/48">
+                  <div className="mt-auto pt-2">
+                    <div className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-center text-[8px] font-black uppercase tracking-[0.14em] text-white/48">
                       Tap a player crest to review their scorecard
                     </div>
 
@@ -1186,7 +1186,7 @@ function StatRow({ label, red, blue }: any) {
         {label}
       </div>
 
-      <div className="text-right text-[15px] font-black text-[#67a6ff]">
+      <div className="text-right text-[14px] font-black text-[#67a6ff]">
         {blue}
       </div>
     </div>
