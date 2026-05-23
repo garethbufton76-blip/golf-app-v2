@@ -1233,21 +1233,31 @@ export default function Score({
   );
 }
 
-function StatRow({ label, red, blue }: any) {
+function StatRow({
+  label,
+  red,
+  blue,
+}: {
+  label: string;
+  red: number;
+  blue: number;
+}) {
   return (
-    <div className="grid grid-cols-[1fr_40px_1fr] items-center py-2">
+    <div className="grid grid-cols-[120px_1fr_120px] items-center py-4">
       <div className="flex justify-center">
-        <div className="w-[72px] text-center text-[16px] font-black text-[#ff4355]">
+        <div className="text-[28px] font-black leading-none text-[#d1c79f]">
           {red}
         </div>
       </div>
 
-      <div className="text-center text-[10px] font-black uppercase tracking-[0.18em] text-white">
-        {label}
+      <div className="flex items-center justify-center">
+        <div className="text-center text-[12px] font-black uppercase leading-[1.5] tracking-[0.24em] text-[#d1c79f]">
+          {label}
+        </div>
       </div>
 
       <div className="flex justify-center">
-        <div className="w-[72px] text-center text-[16px] font-black text-[#67a6ff]">
+        <div className="text-[28px] font-black leading-none text-[#d1c79f]">
           {blue}
         </div>
       </div>
