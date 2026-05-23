@@ -759,7 +759,7 @@ export default function Score({
 
                   </div>
 
-                  <div className="mt-4 grid grid-cols-[1fr_40px_1fr] items-center gap-2">
+                  <div className="mt-5 grid grid-cols-[1fr_40px_1fr] items-center gap-2">
                     <div className="flex justify-center gap-2">
                       {scoringRedPlayers.map((p: any, i: number) => (
                         <button
@@ -770,7 +770,7 @@ export default function Score({
                         >
                           <Logo
                             team="red"
-                            size="h-[48px] w-[48px]"
+                            size="h-[72px] w-[72px]"
                             src={p.photo || teamLogos?.Red}
                           />
                           <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
@@ -792,7 +792,7 @@ export default function Score({
                         >
                           <Logo
                             team="blue"
-                            size="h-[48px] w-[48px]"
+                            size="h-[72px] w-[72px]"
                             src={p.photo || teamLogos?.Blue}
                           />
                           <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
