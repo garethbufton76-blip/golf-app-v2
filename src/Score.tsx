@@ -141,6 +141,19 @@ export default function Score({
     return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
   })();
 
+  const winningTeamName = result.leader
+    ? teamNames[result.leader === "red" ? "Red" : "Blue"] ||
+      result.leader.toUpperCase()
+    : "";
+
+  const finalScoreMain = result.leader
+    ? displayMain.replace(winningTeamName.toUpperCase(), "").trim()
+    : "AS";
+
+  const finalScoreSub = result.leader
+    ? `${winningTeamName.toUpperCase()} WON MATCH`
+    : "MATCH HALVED";
+
   const playerKey = (team: string, p: any) =>
     `${team}-${p.rosterIndex}-${p.name}`;
 
@@ -738,7 +751,7 @@ export default function Score({
 
                     <div
                       className={cx(
-                        "mt-2 text-[30px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
+                        "mt-2 text-[58px] font-black uppercase leading-[0.86] tracking-[-0.08em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
                         result.leader === "red"
                           ? "text-[#ff4355]"
                           : result.leader === "blue"
@@ -746,10 +759,14 @@ export default function Score({
                           : "text-white"
                       )}
                     >
-                      {displayMain}
+                      {finalScoreMain}
                     </div>
 
-                    <div className="mx-auto mt-3 flex max-w-[230px] items-center gap-4">
+                    <div className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-white">
+                      {finalScoreSub}
+                    </div>
+
+                    <div className="mx-auto mt-4 flex max-w-[230px] items-center gap-4">
                       <div className="h-px flex-1 bg-[#d1c79f]/40" />
                       <div className="text-[15px] font-black uppercase tracking-[0.26em] text-[#d1c79f]">
                         Final
