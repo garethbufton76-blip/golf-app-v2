@@ -40,8 +40,9 @@ export default function Score({
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
   const [selectedHole, setSelectedHole] = useState<any>(null);
   const [cardPlayer, setCardPlayer] = useState<any>(null);
-  const [showResults, setShowResults] = useState(false);
+  const [finishStep, setFinishStep] = useState<"playing" | "signoff" | "overview">("playing");
   const [showFinishActions, setShowFinishActions] = useState(false);
+  const [signedCards, setSignedCards] = useState<Record<string, boolean>>({});
 
   const [draft, setDraft] = useState<any>({
     red: 4,
@@ -79,6 +80,29 @@ export default function Score({
     ...scoringRedPlayers.map((p: any) => ({ team: "red", p })),
     ...scoringBluePlayers.map((p: any) => ({ team: "blue", p })),
   ];
+
+  const scorecardKey = (team: string, p: any) =>
+    `${team}-${p.rosterIndex}-${p.name}`;
+
+  const allScorecardsSigned =
+    matchScorecardPlayers.length > 0 &&
+    matchScorecardPlayers.every(({ team, p }: any) => signedCards[scorecardKey(team, p)]);
+
+  function toggleScorecardSigned(team: string, p: any) {
+    const key = scorecardKey(team, p);
+
+    setSignedCards((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  }
+
+  function editSignedScores() {
+    setFinishStep("playing");
+    setShowFinishActions(false);
+    setSelectedHole(null);
+    setCardPlayer(null);
+  }
 
   const result = getResult(holes);
 
@@ -450,8 +474,152 @@ export default function Score({
   return (
     <>
       <div className="relative flex-1 overflow-y-auto pb-[220px]">
-        {showResults ? (
+        {finishStep === "signoff" ? (
           <div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
+            <div
+              className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
+                  radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                `,
+                backgroundSize: "80px 80px",
+              }}
+            />
+
+            <div className="relative z-10">
+              <div className="text-center">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d1c79f]/65">
+                  Sign Off Scorecards
+                </div>
+
+                <div className="mt-2 text-[24px] font-black uppercase leading-none tracking-[-0.02em] text-white">
+                  Check Every Card
+                </div>
+
+                <div className="mt-2 text-[9px] font-black uppercase tracking-[0.18em] text-white/42">
+                  Review • Edit if needed • Sign off
+                </div>
+              </div>
+
+              <div className="mt-5 grid grid-cols-1 gap-2">
+                {matchScorecardPlayers.map(({ team, p }: any, index: number) => {
+                  const key = scorecardKey(team, p);
+                  const signed = !!signedCards[key];
+                  const isRed = team === "red";
+
+                  return (
+                    <div
+                      key={`signoff-card-${key}`}
+                      className={cx(
+                        "rounded-[20px] border p-3",
+                        signed
+                          ? "border-[#d1c79f]/45 bg-[#d1c79f]/12"
+                          : "border-white/10 bg-black/28"
+                      )}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Logo
+                            team={team}
+                            size="h-[42px] w-[42px]"
+                            src={p.photo || teamLogos?.[isRed ? "Red" : "Blue"]}
+                          />
+
+                          <div className="min-w-0">
+                            <div className="truncate text-[12px] font-black uppercase tracking-[0.12em] text-white">
+                              Scorecard {index + 1}
+                            </div>
+                            <div className="mt-0.5 truncate text-[10px] font-bold text-white/55">
+                              {p.name}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          className={cx(
+                            "rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em]",
+                            signed
+                              ? "bg-[#d1c79f] text-black"
+                              : "border border-white/10 bg-white/[0.04] text-white/45"
+                          )}
+                        >
+                          {signed ? "Signed" : "Open"}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCardPlayer({ team, p })}
+                          className="rounded-full border border-white/12 bg-white/[0.04] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white"
+                        >
+                          Review
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={editSignedScores}
+                          className="rounded-full border border-white/12 bg-black/30 px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white/70"
+                        >
+                          Edit Scores
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleScorecardSigned(team, p)}
+                          className={cx(
+                            "rounded-full px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em]",
+                            signed
+                              ? "border border-[#d1c79f]/35 bg-black/30 text-[#d1c79f]"
+                              : "bg-[#d1c79f] text-black"
+                          )}
+                        >
+                          {signed ? "Undo" : "Sign"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={editSignedScores}
+                  className="rounded-[18px] border border-white/10 bg-black/28 px-2 py-3"
+                >
+                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/40">
+                    Return
+                  </div>
+                  <div className="mt-1 text-[12px] font-black uppercase text-white">
+                    Match
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={!allScorecardsSigned}
+                  onClick={() => setFinishStep("overview")}
+                  className={cx(
+                    "rounded-[18px] px-2 py-3",
+                    allScorecardsSigned
+                      ? "border border-[#d1c79f]/35 bg-[#d1c79f] text-black"
+                      : "border border-white/10 bg-white/[0.04] text-white/30"
+                  )}
+                >
+                  <div className="text-[8px] font-black uppercase tracking-[0.16em] opacity-55">
+                    Scorecards
+                  </div>
+                  <div className="mt-1 text-[12px] font-black uppercase">
+                    Signed Off
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : finishStep === "overview" ? (
+<div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
             <div
               className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
               style={{
@@ -537,21 +705,22 @@ export default function Score({
 
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => setScreen("home")}
+                  onClick={() => setFinishStep("playing")}
                   className="rounded-[18px] border border-white/10 bg-black/28 px-2 py-3"
                 >
                   <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/40">
                     Return
                   </div>
                   <div className="mt-1 text-[12px] font-black uppercase text-white">
-                    Home
+                    Match
                   </div>
                 </button>
 
                 <button
                   onClick={() => {
-                    setShowResults(false);
+                    setFinishStep("playing");
                     setShowFinishActions(false);
+                    setSignedCards({});
                     setSelectedHole(null);
                     setScreen("quickGame");
                   }}
@@ -568,6 +737,7 @@ export default function Score({
             </div>
           </div>
         ) : (
+
           <div
             className={cx(
               "relative mt-6 overflow-hidden rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
@@ -831,7 +1001,7 @@ export default function Score({
             </div>
           ) : (
             <>
-              {isMatchFinished && showFinishActions && !showResults ? (
+              {isMatchFinished && showFinishActions && finishStep === "playing" ? (
                 <div className="absolute -bottom-[108px] left-4 right-4 z-20 rounded-[24px] border border-white/10 bg-black/72 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                   <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
                     Round complete
@@ -840,7 +1010,7 @@ export default function Score({
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
-                      onClick={() => setShowResults(true)}
+                      onClick={() => setFinishStep("signoff")
                       className="rounded-full bg-[#d1c79f] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-black"
                     >
                       Finish Game
