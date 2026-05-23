@@ -820,9 +820,13 @@ export default function Score({
                     </div>
                   </div>
 
-                  <div className="mt-3 rounded-[18px] border border-white/12 bg-black/22 p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                    <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-[#d1c79f]/70">
-                      Match Stats
+                  <div className="mt-5 px-1">
+                    <div className="mx-auto mb-3 flex max-w-[260px] items-center gap-4">
+                      <div className="h-px flex-1 bg-[#d1c79f]/40" />
+                      <div className="text-[12px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/82">
+                        Match Stats
+                      </div>
+                      <div className="h-px flex-1 bg-[#d1c79f]/40" />
                     </div>
 
                     <StatRow label="Holes Won" red={redWins} blue={blueWins} />
@@ -1200,7 +1204,7 @@ function StatRow({ label, red, blue }: any) {
         {label}
       </div>
 
-      <div className="text-center text-[14px] font-black text-[#67a6ff]">
+      <div className="flex justify-center text-[14px] font-black text-[#67a6ff]">
         {blue}
       </div>
     </div>
