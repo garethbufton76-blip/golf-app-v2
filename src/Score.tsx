@@ -985,6 +985,16 @@ export default function Score({
                     Round complete
                   </div>
 
+                  <div className="mb-3 flex items-center justify-center gap-3">
+                    <div className="rounded-full border border-[#ff4d5e]/20 bg-[#ff4d5e]/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-white">
+                      Red
+                    </div>
+
+                    <div className="rounded-full border border-[#58a6ff]/20 bg-[#58a6ff]/10 px-5 py-2 text-[11px] font-black uppercase tracking-[0.14em] text-white">
+                      Blue
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
