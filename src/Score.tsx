@@ -141,16 +141,56 @@ export default function Score({
     return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
   })();
 
-  const winningTeamName = result.leader
-    ? teamNames[result.leader === "red" ? "Red" : "Blue"] ||
-      result.leader.toUpperCase()
+  function matchClosedResult() {
+    let lead = 0;
+
+    const orderedHoles = [...holes].sort(
+      (a: any, b: any) => Number(a.hole) - Number(b.hole)
+    );
+
+    for (const h of orderedHoles) {
+      if (h.status === "red") lead += 1;
+      if (h.status === "blue") lead -= 1;
+
+      const holeNo = Number(h.hole || 0);
+      const remaining = Math.max(0, 18 - holeNo);
+      const margin = Math.abs(lead);
+
+      if (margin > remaining) {
+        return {
+          leader: lead > 0 ? "red" : "blue",
+          main: `${margin}&${remaining}`,
+          wonHole: holeNo,
+        };
+      }
+    }
+
+    if (lead === 0) {
+      return {
+        leader: null,
+        main: "AS",
+        wonHole: 18,
+      };
+    }
+
+    return {
+      leader: lead > 0 ? "red" : "blue",
+      main: `${Math.abs(lead)}UP`,
+      wonHole: 18,
+    };
+  }
+
+  const closedResult = matchClosedResult();
+  const completedLeader = closedResult.leader || result.leader;
+
+  const winningTeamName = completedLeader
+    ? teamNames[completedLeader === "red" ? "Red" : "Blue"] ||
+      completedLeader.toUpperCase()
     : "";
 
-  const finalScoreMain = result.leader
-    ? displayMain.replace(winningTeamName.toUpperCase(), "").trim()
-    : "AS";
+  const finalScoreMain = closedResult.main;
 
-  const finalScoreSub = result.leader
+  const finalScoreSub = completedLeader
     ? `${winningTeamName.toUpperCase()} WON MATCH`
     : "MATCH HALVED";
 
@@ -679,7 +719,7 @@ export default function Score({
             </div>
           </div>
         ) : finishStep === "overview" ? (
-          <div className="fixed inset-y-0 left-1/2 z-[120] w-full max-w-[430px] -translate-x-1/2 overflow-hidden text-white">
+          <div className="fixed inset-y-0 left-1/2 z-[55] w-full max-w-[430px] -translate-x-1/2 overflow-hidden text-white">
             <div className="absolute inset-0">
               <img
                 src="/admin-home-bg.jpg"
@@ -692,9 +732,9 @@ export default function Score({
               <div
                 className={cx(
                   "absolute inset-0",
-                  result.leader === "red"
+                  completedLeader === "red"
                     ? "bg-[radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.24),transparent_40%)]"
-                    : result.leader === "blue"
+                    : completedLeader === "blue"
                     ? "bg-[radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.24),transparent_40%)]"
                     : "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_40%)]"
                 )}
@@ -705,9 +745,9 @@ export default function Score({
               <div
                 className={cx(
                   "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-3 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
-                  result.leader === "red"
+                  completedLeader === "red"
                     ? "border-[#ff4154]/45 bg-[#090305]/58 shadow-[#ff2d44]/10"
-                    : result.leader === "blue"
+                    : completedLeader === "blue"
                     ? "border-[#58a6ff]/45 bg-[#020815]/58 shadow-[#58a6ff]/10"
                     : "border-white/18 bg-black/58"
                 )}
@@ -715,9 +755,9 @@ export default function Score({
                 <div
                   className={cx(
                     "pointer-events-none absolute inset-0 opacity-85",
-                    result.leader === "red"
+                    completedLeader === "red"
                       ? "bg-[radial-gradient(circle_at_12%_18%,rgba(255,48,66,0.42),transparent_34%),radial-gradient(circle_at_88%_22%,rgba(72,145,255,0.16),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.38)_48%,rgba(0,0,0,0.70))]"
-                      : result.leader === "blue"
+                      : completedLeader === "blue"
                       ? "bg-[radial-gradient(circle_at_88%_18%,rgba(72,145,255,0.42),transparent_34%),radial-gradient(circle_at_12%_22%,rgba(255,48,66,0.16),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.38)_48%,rgba(0,0,0,0.70))]"
                       : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.24),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),rgba(0,0,0,0.42)_48%,rgba(0,0,0,0.72))]"
                   )}
@@ -752,9 +792,9 @@ export default function Score({
                     <div
                       className={cx(
                         "mt-2 text-[58px] font-black uppercase leading-[0.86] tracking-[-0.08em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
-                        result.leader === "red"
+                        completedLeader === "red"
                           ? "text-[#ff4355]"
-                          : result.leader === "blue"
+                          : completedLeader === "blue"
                           ? "text-[#67a6ff]"
                           : "text-white"
                       )}
@@ -783,7 +823,7 @@ export default function Score({
                           key={`complete-red-${p.name}-${i}`}
                           type="button"
                           onClick={() => setCardPlayer({ team: "red", p })}
-                          className="group flex w-[68px] flex-col items-center"
+                          className="group flex w-[82px] flex-col items-center active:scale-95"
                         >
                           <Logo
                             team="red"
@@ -805,7 +845,7 @@ export default function Score({
                           key={`complete-blue-${p.name}-${i}`}
                           type="button"
                           onClick={() => setCardPlayer({ team: "blue", p })}
-                          className="group flex w-[68px] flex-col items-center"
+                          className="group flex w-[82px] flex-col items-center active:scale-95"
                         >
                           <Logo
                             team="blue"
@@ -869,9 +909,9 @@ export default function Score({
                       }}
                       className={cx(
                         "mt-3 w-full rounded-full border px-4 py-3.5 text-[13px] font-black uppercase tracking-[0.16em] shadow-[0_0_26px_rgba(255,255,255,0.08)]",
-                        result.leader === "red"
+                        completedLeader === "red"
                           ? "border-[#ff4355]/55 bg-[#ff4355] text-white"
-                          : result.leader === "blue"
+                          : completedLeader === "blue"
                           ? "border-[#67a6ff]/55 bg-[#67a6ff] text-black"
                           : "border-[#d1c79f]/45 bg-[#d1c79f] text-black"
                       )}
