@@ -705,7 +705,6 @@ export default function Score({
               </button>
               </div>
             </div>
-          </div>
         ) : (
 
           <div
