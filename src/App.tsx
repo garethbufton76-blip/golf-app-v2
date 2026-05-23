@@ -381,6 +381,7 @@ export default function App() {
           {mode !== "quick" && screen === "home" && eventStarted && (
             <Home
               setScreen={setScreen}
+              setMode={setMode}
               dayConfigs={dayConfigs}
               days={days}
               players={players}
@@ -436,6 +437,7 @@ export default function App() {
           {mode !== "quick" && screen === "score" && eventStarted && (
             <Score
               setScreen={setScreen}
+              setMode={setMode}
               dayConfigs={dayConfigs}
               players={players}
               activeDay={activeDay}
