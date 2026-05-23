@@ -115,6 +115,12 @@ export default function Score({
   const blueWins = holes.filter((h: any) => h.status === "blue").length;
   const halved = holes.filter((h: any) => h.status === "as").length;
 
+  const nextHoleNumber =
+    holes.find((h: any) => h.status === "pending")?.hole || 18;
+
+  const teeKey =
+    day.tee?.charAt(0).toUpperCase() + day.tee?.slice(1).toLowerCase();
+
   function teamRoundStats(team: "red" | "blue", teamPlayers: any[]) {
     return teamPlayers.reduce(
       (totals: any, p: any) => {
@@ -155,11 +161,6 @@ export default function Score({
   const redRoundStats = teamRoundStats("red", scoringRedPlayers);
   const blueRoundStats = teamRoundStats("blue", scoringBluePlayers);
 
-  const nextHoleNumber =
-    holes.find((h: any) => h.status === "pending")?.hole || 18;
-
-  const teeKey =
-    day.tee?.charAt(0).toUpperCase() + day.tee?.slice(1).toLowerCase();
 
   const current =
     holesByTee?.[nextHoleNumber]?.[teeKey] ||
