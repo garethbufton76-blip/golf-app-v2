@@ -449,7 +449,7 @@ export default function Score({
 
   return (
     <>
-      <div className="relative flex-1 overflow-y-auto pb-[96px]">
+      <div className="relative flex-1 overflow-y-auto pb-[220px]">
         {showResults ? (
           <div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
             <div
@@ -518,37 +518,24 @@ export default function Score({
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-3 gap-2">
-                <button
-                  onClick={() => setShowResults(false)}
-                  className="rounded-[18px] border border-white/10 bg-white/[0.04] px-2 py-3"
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/40">
-                    Edit
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase text-white">
-                    Scores
-                  </div>
-                </button>
+              <div className="mt-5 grid grid-cols-2 gap-2">
+                {matchScorecardPlayers.map(({ team, p }: any, index: number) => (
+                  <button
+                    key={`scorecard-launch-${index}`}
+                    onClick={() => setCardPlayer({ team, p })}
+                    className="rounded-[18px] border border-[#d1c79f]/25 bg-[#d1c79f]/10 px-2 py-3 text-white"
+                  >
+                    <div className="text-[8px] font-black uppercase tracking-[0.16em] text-[#d1c79f]/60">
+                      View
+                    </div>
+                    <div className="mt-1 text-[12px] font-black uppercase">
+                      Scorecard {index + 1}
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-                <button
-                  onClick={() => {
-                    const firstPlayer = matchScorecardPlayers[0];
-
-                    if (firstPlayer) {
-                      setCardPlayer(firstPlayer);
-                    }
-                  }}
-                  className="rounded-[18px] border border-[#d1c79f]/35 bg-[#d1c79f] px-2 py-3 text-black"
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-black/45">
-                    View
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase">
-                    Cards
-                  </div>
-                </button>
-
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setScreen("home")}
                   className="rounded-[18px] border border-white/10 bg-black/28 px-2 py-3"
@@ -558,6 +545,23 @@ export default function Score({
                   </div>
                   <div className="mt-1 text-[12px] font-black uppercase text-white">
                     Home
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setShowResults(false);
+                    setShowFinishActions(false);
+                    setSelectedHole(null);
+                    setScreen("quickGame");
+                  }}
+                  className="rounded-[18px] border border-[#d1c79f]/35 bg-[#d1c79f] px-2 py-3 text-black"
+                >
+                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-black/45">
+                    Start
+                  </div>
+                  <div className="mt-1 text-[12px] font-black uppercase">
+                    New Game
                   </div>
                 </button>
               </div>
@@ -828,7 +832,7 @@ export default function Score({
           ) : (
             <>
               {isMatchFinished && showFinishActions && !showResults ? (
-                <div className="absolute bottom-16 left-4 right-4 z-20 rounded-[24px] border border-white/10 bg-black/72 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <div className="absolute -bottom-[108px] left-4 right-4 z-20 rounded-[24px] border border-white/10 bg-black/72 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                   <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
                     Round complete
                   </div>
