@@ -1195,21 +1195,26 @@ export default function Score({
 
 function StatRow({ label, red, blue }: any) {
   return (
-    <div className="grid grid-cols-[58px_1fr_58px] items-center border-t border-white/8 py-2 first:border-t-0">
-      <div className="text-left text-[18px] font-black text-[#ff4355]">
-        {red}
+    <div className="grid grid-cols-[1fr_40px_1fr] items-center py-2">
+      <div className="flex justify-center">
+        <div className="w-[72px] text-center text-[16px] font-black text-[#ff4355]">
+          {red}
+        </div>
       </div>
 
-      <div className="text-center text-[10px] font-black uppercase tracking-[0.16em] text-white/62">
+      <div className="text-center text-[10px] font-black uppercase tracking-[0.18em] text-white">
         {label}
       </div>
 
-      <div className="flex justify-center text-[14px] font-black text-[#67a6ff]">
-        {blue}
+      <div className="flex justify-center">
+        <div className="w-[72px] text-center text-[16px] font-black text-[#67a6ff]">
+          {blue}
+        </div>
       </div>
     </div>
   );
 }
+
 
 
 function TeamPlayers({
