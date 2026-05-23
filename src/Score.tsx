@@ -774,17 +774,7 @@ export default function Score({
                   {result.sub}
                 </div>
 
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {matchScorecardPlayers.map(({ team, p }: any, i: number) => (
-                    <button
-                      key={`${p.name}-${i}`}
-                      onClick={() => setCardPlayer({ team, p })}
-                      className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white/75"
-                    >
-                      {first(p.name)}
-                    </button>
-                  ))}
-                </div>
+
               </div>
             </div>
           </div>
