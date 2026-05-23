@@ -121,6 +121,29 @@ export default function Score({
   const teeKey =
     day.tee?.charAt(0).toUpperCase() + day.tee?.slice(1).toLowerCase();
 
+  const current =
+    holesByTee?.[nextHoleNumber]?.[teeKey] ||
+    holesByTee?.[nextHoleNumber]?.White ||
+    {
+      hole: nextHoleNumber,
+      par: 4,
+      si: nextHoleNumber,
+      metres: 0,
+    };
+
+  const displayMain = (() => {
+    if (!result.leader) return result.main;
+
+    const name =
+      teamNames[result.leader === "red" ? "Red" : "Blue"] ||
+      result.leader.toUpperCase();
+
+    return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
+  })();
+
+  const playerKey = (team: string, p: any) =>
+    `${team}-${p.rosterIndex}-${p.name}`;
+
   function teamRoundStats(team: "red" | "blue", teamPlayers: any[]) {
     return teamPlayers.reduce(
       (totals: any, p: any) => {
@@ -162,28 +185,6 @@ export default function Score({
   const blueRoundStats = teamRoundStats("blue", scoringBluePlayers);
 
 
-  const current =
-    holesByTee?.[nextHoleNumber]?.[teeKey] ||
-    holesByTee?.[nextHoleNumber]?.White ||
-    {
-      hole: nextHoleNumber,
-      par: 4,
-      si: nextHoleNumber,
-      metres: 0,
-    };
-
-  const displayMain = (() => {
-    if (!result.leader) return result.main;
-
-    const name =
-      teamNames[result.leader === "red" ? "Red" : "Blue"] ||
-      result.leader.toUpperCase();
-
-    return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
-  })();
-
-  const playerKey = (team: string, p: any) =>
-    `${team}-${p.rosterIndex}-${p.name}`;
 
   function teeSelectionKey(hole: number, team: string) {
     return `${stateKey}-hole-${hole}-${team}`;
