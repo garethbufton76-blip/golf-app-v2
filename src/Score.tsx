@@ -1010,7 +1010,7 @@ export default function Score({
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
-                      onClick={() => setFinishStep("signoff")
+                      onClick={() => setFinishStep("signoff")}
                       className="rounded-full bg-[#d1c79f] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-black"
                     >
                       Finish Game
