@@ -686,53 +686,23 @@ export default function Score({
                 </div>
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-2">
-                {matchScorecardPlayers.map(({ team, p }: any, index: number) => (
-                  <button
-                    key={`scorecard-launch-${index}`}
-                    onClick={() => setCardPlayer({ team, p })}
-                    className="rounded-[18px] border border-[#d1c79f]/25 bg-[#d1c79f]/10 px-2 py-3 text-white"
-                  >
-                    <div className="text-[8px] font-black uppercase tracking-[0.16em] text-[#d1c79f]/60">
-                      View
-                    </div>
-                    <div className="mt-1 text-[12px] font-black uppercase">
-                      Scorecard {index + 1}
-                    </div>
-                  </button>
-                ))}
+              <div className="mt-5 text-[9px] font-black uppercase tracking-[0.18em] text-white/38">
+                Tap a player crest above to review their scorecard
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setFinishStep("playing")}
-                  className="rounded-[18px] border border-white/10 bg-black/28 px-2 py-3"
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/40">
-                    Return
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase text-white">
-                    Match
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setFinishStep("playing");
-                    setShowFinishActions(false);
-                    setSignedCards({});
-                    setSelectedHole(null);
-                    setScreen("quickGame");
-                  }}
-                  className="rounded-[18px] border border-[#d1c79f]/35 bg-[#d1c79f] px-2 py-3 text-black"
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-black/45">
-                    Start
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase">
-                    New Game
-                  </div>
-                </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFinishStep("playing");
+                  setShowFinishActions(false);
+                  setSignedCards({});
+                  setSelectedHole(null);
+                  setScreen("quick");
+                }}
+                className="mt-5 w-full rounded-[22px] border border-[#d1c79f]/35 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black"
+              >
+                New Game
+              </button>
               </div>
             </div>
           </div>
@@ -1002,7 +972,16 @@ export default function Score({
           ) : (
             <>
               {isMatchFinished && showFinishActions && finishStep === "playing" ? (
-                <div className="absolute -bottom-[108px] left-4 right-4 z-20 rounded-[24px] border border-white/10 bg-black/72 p-3 shadow-[0_18px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                <div
+                  className={cx(
+                    "absolute -bottom-[108px] left-4 right-4 z-20 rounded-[24px] border p-3 shadow-[0_18px_40px_rgba(0,0,0,0.62)] backdrop-blur-xl",
+                    result.leader === "red"
+                      ? "border-[#ff4d5e]/25 bg-[#250207]/95"
+                      : result.leader === "blue"
+                      ? "border-[#58a6ff]/25 bg-[#030b18]/95"
+                      : "border-white/10 bg-black/95"
+                  )}
+                >
                   <div className="mb-2 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
                     Round complete
                   </div>
