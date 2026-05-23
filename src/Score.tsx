@@ -179,16 +179,35 @@ export default function Score({
         metres: 0,
       };
 
-    setSelectedHole(detail);
+    const redTeamScore =
+      match.red.length > 0
+        ? grossFor("red", match.red[0], detail.hole)
+        : null;
 
-    setDraft({
-      red: detail.par,
-      blue: detail.par,
+    const blueTeamScore =
+      match.blue.length > 0
+        ? grossFor("blue", match.blue[0], detail.hole)
+        : null;
+
+    const nextDraft: any = {
+      red: redTeamScore ?? detail.par,
+      blue: blueTeamScore ?? detail.par,
       red_0: detail.par,
       red_1: detail.par,
       blue_0: detail.par,
       blue_1: detail.par,
+    };
+
+    scoringRedPlayers.forEach((p: any, i: number) => {
+      nextDraft[`red_${i}`] = grossFor("red", p, detail.hole) ?? detail.par;
     });
+
+    scoringBluePlayers.forEach((p: any, i: number) => {
+      nextDraft[`blue_${i}`] = grossFor("blue", p, detail.hole) ?? detail.par;
+    });
+
+    setSelectedHole(detail);
+    setDraft(nextDraft);
   }
 
   function teamHandicap(side: any[]) {
