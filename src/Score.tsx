@@ -757,9 +757,6 @@ export default function Score({
                       <div className="h-px flex-1 bg-[#d1c79f]/40" />
                     </div>
 
-                    <div className="mt-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/58">
-                      {redWins} Red • {blueWins} Blue • {halved} Halved
-                    </div>
                   </div>
 
                   <div className="mt-4 grid grid-cols-[1fr_40px_1fr] items-center gap-2">
@@ -1186,7 +1183,7 @@ function StatRow({ label, red, blue }: any) {
         {label}
       </div>
 
-      <div className="text-right text-[14px] font-black text-[#67a6ff]">
+      <div className="text-center text-[14px] font-black text-[#67a6ff]">
         {blue}
       </div>
     </div>
