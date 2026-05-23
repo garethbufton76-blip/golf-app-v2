@@ -682,7 +682,8 @@ export default function Score({
                   setShowFinishActions(false);
                   setSignedCards({});
                   setSelectedHole(null);
-                  setScreen("quick");
+                  setCardPlayer(null);
+                  setScreen("launch");
                 }}
                 className="mt-5 w-full rounded-[22px] border border-[#d1c79f]/35 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black"
               >
