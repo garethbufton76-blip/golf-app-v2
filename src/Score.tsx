@@ -583,39 +583,24 @@ export default function Score({
                 })}
               </div>
 
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={editSignedScores}
-                  className="rounded-[18px] border border-white/10 bg-black/28 px-2 py-3"
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/40">
-                    Return
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase text-white">
-                    Match
-                  </div>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={!allScorecardsSigned}
-                  onClick={() => setFinishStep("overview")}
-                  className={cx(
-                    "rounded-[18px] px-2 py-3",
-                    allScorecardsSigned
-                      ? "border border-[#d1c79f]/35 bg-[#d1c79f] text-black"
-                      : "border border-white/10 bg-white/[0.04] text-white/30"
-                  )}
-                >
-                  <div className="text-[8px] font-black uppercase tracking-[0.16em] opacity-55">
-                    Scorecards
-                  </div>
-                  <div className="mt-1 text-[12px] font-black uppercase">
-                    Signed Off
-                  </div>
-                </button>
-              </div>
+              <button
+                type="button"
+                disabled={!allScorecardsSigned}
+                onClick={() => setFinishStep("overview")}
+                className={cx(
+                  "mt-4 w-full rounded-[22px] px-4 py-4",
+                  allScorecardsSigned
+                    ? "border border-[#d1c79f]/35 bg-[#d1c79f] text-black"
+                    : "border border-white/10 bg-white/[0.04] text-white/30"
+                )}
+              >
+                <div className="text-[8px] font-black uppercase tracking-[0.16em] opacity-55">
+                  Scorecards
+                </div>
+                <div className="mt-1 text-[13px] font-black uppercase">
+                  Signed Off
+                </div>
+              </button>
             </div>
           </div>
         ) : finishStep === "overview" ? (
@@ -703,8 +688,8 @@ export default function Score({
               >
                 New Game
               </button>
-              </div>
             </div>
+          </div>
         ) : (
 
           <div
@@ -961,38 +946,23 @@ export default function Score({
           ) : (
             <>
               {isMatchFinished && showFinishActions && finishStep === "playing" ? (
-                <div
-                  className={cx(
-                    "absolute -bottom-[84px] left-4 right-4 z-20 rounded-[24px] border p-3 shadow-[0_18px_40px_rgba(0,0,0,0.62)] backdrop-blur-xl",
-                    result.leader === "red"
-                      ? "border-[#ff4d5e]/25 bg-[#250207]/95"
-                      : result.leader === "blue"
-                      ? "border-[#58a6ff]/25 bg-[#030b18]/95"
-                      : "border-white/10 bg-black/95"
-                  )}
+                <button
+                  type="button"
+                  onClick={() => setFinishStep("signoff")}
+                  className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-black shadow-[0_0_22px_rgba(209,199,159,0.28)]"
                 >
-                  <div className="mb-3 text-center text-[9px] font-black uppercase tracking-[0.22em] text-white/45">
-                    Round complete
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setFinishStep("signoff")}
-                    className="mx-auto block rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.12em] text-black shadow-[0_0_22px_rgba(209,199,159,0.24)]"
-                  >
-                    Finish Game
-                  </button>
-                </div>
-              ) : null}
-
-              <img
-                src="/launch-logo.png"
-                alt="DUEL"
-                className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
-                style={{
-                  filter: "brightness(0) invert(1)",
-                }}
-              />
+                  Finish Game
+                </button>
+              ) : (
+                <img
+                  src="/launch-logo.png"
+                  alt="DUEL"
+                  className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
+                  style={{
+                    filter: "brightness(0) invert(1)",
+                  }}
+                />
+              )}
 
               <div className="mb-4">
                 <div className="text-[10px] tracking-[0.22em] text-white/60">
