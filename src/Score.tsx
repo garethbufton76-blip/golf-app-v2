@@ -624,66 +624,111 @@ export default function Score({
             </div>
           </div>
         ) : finishStep === "overview" ? (
-<div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
+          <div className="relative mt-6 overflow-hidden rounded-[34px] border border-white/15 bg-black/55 p-4 shadow-[0_28px_80px_rgba(0,0,0,0.68)] backdrop-blur-2xl">
             <div
-              className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
+              className="pointer-events-none absolute inset-0 opacity-90"
               style={{
-                backgroundImage: `
-                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
-                  radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
-                `,
-                backgroundSize: "80px 80px",
+                background:
+                  "radial-gradient(circle at 12% 18%, rgba(255,55,70,0.24), transparent 30%), radial-gradient(circle at 88% 18%, rgba(74,158,255,0.28), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.34) 46%, rgba(0,0,0,0.72))",
               }}
             />
 
-            <div className="relative z-10 text-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d1c79f]/65">
+            <div
+              className="pointer-events-none absolute inset-0 opacity-[0.10] mix-blend-soft-light"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
+                  radial-gradient(circle at 64px 64px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                `,
+                backgroundSize: "84px 84px",
+              }}
+            />
+
+            <div className="pointer-events-none absolute left-0 top-0 h-[40%] w-[42%] rounded-full bg-[#ff384b]/16 blur-3xl" />
+            <div className="pointer-events-none absolute right-0 top-0 h-[42%] w-[42%] rounded-full bg-[#4fa3ff]/18 blur-3xl" />
+
+            <div className="relative z-10 mx-auto max-w-[390px] rounded-[28px] border border-white/12 bg-[#061019]/78 px-5 py-6 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_rgba(0,0,0,0.52)] backdrop-blur-2xl">
+              <div className="mx-auto flex h-[58px] w-[128px] items-center justify-center rounded-full border border-[#d1c79f]/22 bg-black/28">
+                <img
+                  src="/launch-logo.png"
+                  alt="DUEL"
+                  className="h-[34px] object-contain opacity-95"
+                  style={{
+                    filter: "brightness(0) invert(1)",
+                  }}
+                />
+              </div>
+
+              <div className="mt-4 text-[9px] font-black uppercase tracking-[0.3em] text-[#d1c79f]/70">
                 Match Complete
               </div>
 
-              <div className="mt-2 text-[34px] font-black uppercase leading-none tracking-[-0.04em] text-white">
+              <div
+                className={cx(
+                  "mt-2 text-[34px] font-black uppercase leading-none tracking-[-0.04em]",
+                  result.leader === "red"
+                    ? "text-[#ff4455]"
+                    : result.leader === "blue"
+                    ? "text-[#67a6ff]"
+                    : "text-white"
+                )}
+              >
                 {displayMain}
               </div>
 
-              <div className="mt-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/45">
+              <div className="mt-2 text-[26px] font-black uppercase tracking-[0.02em] text-white">
+                {redWins > blueWins
+                  ? `${redWins} & ${Math.max(0, 18 - redWins - blueWins)}`
+                  : blueWins > redWins
+                  ? `${blueWins} & ${Math.max(0, 18 - redWins - blueWins)}`
+                  : "All Square"}
+              </div>
+
+              <div className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-white/58">
                 {redWins} Red • {blueWins} Blue • {halved} Halved
               </div>
 
-              <div className="mt-5 grid grid-cols-[1fr_42px_1fr] items-center gap-2">
+              <div className="mt-6 grid grid-cols-[1fr_42px_1fr] items-center gap-3">
                 <div className="flex justify-center gap-2">
                   {scoringRedPlayers.map((p: any, i: number) => (
                     <button
                       key={`complete-red-${p.name}-${i}`}
+                      type="button"
                       onClick={() => setCardPlayer({ team: "red", p })}
-                      className="flex w-[58px] flex-col items-center"
+                      className="group flex w-[62px] flex-col items-center"
                     >
-                      <Logo
-                        team="red"
-                        size="h-[52px] w-[52px]"
-                        src={p.photo || teamLogos?.Red}
-                      />
-                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75">
+                      <div className="rounded-full border border-[#ff4d5e]/35 bg-[#ff4d5e]/10 p-1 shadow-[0_0_22px_rgba(255,68,85,0.18)]">
+                        <Logo
+                          team="red"
+                          size="h-[52px] w-[52px]"
+                          src={p.photo || teamLogos?.Red}
+                        />
+                      </div>
+                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75 group-active:text-[#d1c79f]">
                         {first(p.name)}
                       </div>
                     </button>
                   ))}
                 </div>
 
-                <div className="text-[22px] font-black text-white/55">VS</div>
+                <div className="text-[22px] font-black text-white/48">VS</div>
 
                 <div className="flex justify-center gap-2">
                   {scoringBluePlayers.map((p: any, i: number) => (
                     <button
                       key={`complete-blue-${p.name}-${i}`}
+                      type="button"
                       onClick={() => setCardPlayer({ team: "blue", p })}
-                      className="flex w-[58px] flex-col items-center"
+                      className="group flex w-[62px] flex-col items-center"
                     >
-                      <Logo
-                        team="blue"
-                        size="h-[52px] w-[52px]"
-                        src={p.photo || teamLogos?.Blue}
-                      />
-                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75">
+                      <div className="rounded-full border border-[#58a6ff]/35 bg-[#58a6ff]/10 p-1 shadow-[0_0_22px_rgba(88,166,255,0.18)]">
+                        <Logo
+                          team="blue"
+                          size="h-[52px] w-[52px]"
+                          src={p.photo || teamLogos?.Blue}
+                        />
+                      </div>
+                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75 group-active:text-[#d1c79f]">
                         {first(p.name)}
                       </div>
                     </button>
@@ -691,8 +736,8 @@ export default function Score({
                 </div>
               </div>
 
-              <div className="mt-5 text-[9px] font-black uppercase tracking-[0.18em] text-white/38">
-                Tap a player crest above to review their scorecard
+              <div className="mt-5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/48">
+                Tap a player crest to review their scorecard
               </div>
 
               <button
@@ -708,7 +753,7 @@ export default function Score({
                   }
                   setScreen("home");
                 }}
-                className="mt-5 w-full rounded-[22px] border border-[#d1c79f]/35 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black"
+                className="mt-5 w-full rounded-full border border-[#d1c79f]/45 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black shadow-[0_0_24px_rgba(209,199,159,0.22)]"
               >
                 New Game
               </button>
