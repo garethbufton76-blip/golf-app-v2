@@ -667,28 +667,36 @@ export default function Score({
           </div>
         ) : finishStep === "overview" ? (
           <div className="fixed inset-y-0 left-1/2 z-[120] w-full max-w-[430px] -translate-x-1/2 overflow-hidden text-white">
-            <div className="absolute inset-0 bg-black/18 backdrop-blur-[7px]" />
+            <div className="absolute inset-0">
+              <img
+                src="/admin-home-bg.jpg"
+                alt=""
+                className="h-full w-full object-cover"
+              />
 
-            <div
-              className={cx(
-                "absolute inset-0 opacity-80",
-                result.leader === "red"
-                  ? "bg-[radial-gradient(circle_at_15%_20%,rgba(255,60,80,0.30),transparent_38%),linear-gradient(180deg,rgba(60,0,10,0.28),rgba(0,0,0,0.58))]"
-                  : result.leader === "blue"
-                  ? "bg-[radial-gradient(circle_at_85%_20%,rgba(90,160,255,0.30),transparent_38%),linear-gradient(180deg,rgba(0,20,50,0.28),rgba(0,0,0,0.58))]"
-                  : "bg-[linear-gradient(180deg,rgba(0,0,0,0.25),rgba(0,0,0,0.62))]"
-              )}
-            />
+              <div className="absolute inset-0 bg-black/32 backdrop-blur-[6px]" />
+
+              <div
+                className={cx(
+                  "absolute inset-0",
+                  result.leader === "red"
+                    ? "bg-[radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.24),transparent_40%)]"
+                    : result.leader === "blue"
+                    ? "bg-[radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.24),transparent_40%)]"
+                    : "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_40%)]"
+                )}
+              />
+            </div>
 
             <div className="relative flex h-[100dvh] flex-col px-3 pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(16px,env(safe-area-inset-top))]">
               <div
                 className={cx(
-                  "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-5 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
+                  "relative flex h-full flex-col overflow-hidden rounded-[30px] border p-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
                   result.leader === "red"
-                    ? "border-[#ff4154]/45 bg-[#090305]/66 shadow-[#ff2d44]/10"
+                    ? "border-[#ff4154]/45 bg-[#090305]/58 shadow-[#ff2d44]/10"
                     : result.leader === "blue"
-                    ? "border-[#58a6ff]/45 bg-[#020815]/66 shadow-[#58a6ff]/10"
-                    : "border-white/18 bg-black/64"
+                    ? "border-[#58a6ff]/45 bg-[#020815]/58 shadow-[#58a6ff]/10"
+                    : "border-white/18 bg-black/58"
                 )}
               >
                 <div
@@ -713,24 +721,24 @@ export default function Score({
                   }}
                 />
 
-                <div className="relative z-10 flex h-full flex-col">
+                <div className="relative z-10 flex h-full min-h-0 flex-col">
                   <div className="text-center">
                     <img
                       src="/launch-logo.png"
                       alt="DUEL"
-                      className="mx-auto h-[50px] object-contain opacity-95"
+                      className="mx-auto h-[44px] object-contain opacity-95"
                       style={{
                         filter: "brightness(0) invert(1)",
                       }}
                     />
 
-                    <div className="mt-5 text-[10px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/78">
+                    <div className="mt-4 text-[10px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/78">
                       Match Complete
                     </div>
 
                     <div
                       className={cx(
-                        "mt-3 text-[36px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
+                        "mt-2 text-[34px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
                         result.leader === "red"
                           ? "text-[#ff4355]"
                           : result.leader === "blue"
@@ -754,7 +762,7 @@ export default function Score({
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-[1fr_44px_1fr] items-center gap-3">
+                  <div className="mt-5 grid grid-cols-[1fr_44px_1fr] items-center gap-3">
                     <div className="flex justify-center gap-2">
                       {scoringRedPlayers.map((p: any, i: number) => (
                         <button
@@ -798,7 +806,7 @@ export default function Score({
                     </div>
                   </div>
 
-                  <div className="mt-6 rounded-[24px] border border-white/12 bg-black/24 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <div className="mt-4 rounded-[22px] border border-white/12 bg-black/24 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
                     <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/70">
                       Match Stats
                     </div>
@@ -809,7 +817,7 @@ export default function Score({
                     <StatRow label="Bogeys" red={redRoundStats.bogeys} blue={blueRoundStats.bogeys} />
                   </div>
 
-                  <div className="mt-4 rounded-[20px] border border-white/10 bg-black/22 p-4">
+                  <div className="mt-3 rounded-[20px] border border-white/10 bg-black/22 p-3">
                     <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/42">
                       {day.course || "Course"}
                     </div>
@@ -823,7 +831,7 @@ export default function Score({
                     </div>
                   </div>
 
-                  <div className="mt-auto pt-4">
+                  <div className="mt-auto pt-3">
                     <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white/48">
                       Tap a player crest to review their scorecard
                     </div>
@@ -842,7 +850,7 @@ export default function Score({
                         setScreen("home");
                       }}
                       className={cx(
-                        "mt-4 w-full rounded-full border px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] shadow-[0_0_26px_rgba(255,255,255,0.08)]",
+                        "mt-3 w-full rounded-full border px-4 py-3.5 text-[13px] font-black uppercase tracking-[0.16em] shadow-[0_0_26px_rgba(255,255,255,0.08)]",
                         result.leader === "red"
                           ? "border-[#ff4355]/55 bg-[#ff4355] text-white"
                           : result.leader === "blue"
