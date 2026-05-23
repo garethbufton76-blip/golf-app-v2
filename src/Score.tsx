@@ -115,6 +115,46 @@ export default function Score({
   const blueWins = holes.filter((h: any) => h.status === "blue").length;
   const halved = holes.filter((h: any) => h.status === "as").length;
 
+  function teamRoundStats(team: "red" | "blue", teamPlayers: any[]) {
+    return teamPlayers.reduce(
+      (totals: any, p: any) => {
+        for (let holeNo = 1; holeNo <= 18; holeNo += 1) {
+          const detail =
+            holesByTee?.[holeNo]?.[teeKey] ||
+            holesByTee?.[holeNo]?.White ||
+            {
+              hole: holeNo,
+              par: 4,
+              si: holeNo,
+              metres: 0,
+            };
+
+          const gross = grossFor(team, p, holeNo);
+
+          if (gross == null) continue;
+
+          if (Number(gross) < Number(detail.par)) {
+            totals.birdies += 1;
+          } else if (Number(gross) === Number(detail.par)) {
+            totals.pars += 1;
+          } else {
+            totals.bogeys += 1;
+          }
+        }
+
+        return totals;
+      },
+      {
+        birdies: 0,
+        pars: 0,
+        bogeys: 0,
+      }
+    );
+  }
+
+  const redRoundStats = teamRoundStats("red", scoringRedPlayers);
+  const blueRoundStats = teamRoundStats("blue", scoringBluePlayers);
+
   const nextHoleNumber =
     holes.find((h: any) => h.status === "pending")?.hole || 18;
 
@@ -624,139 +664,206 @@ export default function Score({
             </div>
           </div>
         ) : finishStep === "overview" ? (
-          <div className="relative mt-6 overflow-hidden rounded-[34px] border border-white/15 bg-black/55 p-4 shadow-[0_28px_80px_rgba(0,0,0,0.68)] backdrop-blur-2xl">
+          <div
+            className={cx(
+              "fixed inset-0 z-[120] overflow-y-auto px-4 py-5 text-white backdrop-blur-2xl",
+              result.leader === "red"
+                ? "bg-[#070104]"
+                : result.leader === "blue"
+                ? "bg-[#010713]"
+                : "bg-black"
+            )}
+          >
             <div
-              className="pointer-events-none absolute inset-0 opacity-90"
-              style={{
-                background:
-                  "radial-gradient(circle at 12% 18%, rgba(255,55,70,0.24), transparent 30%), radial-gradient(circle at 88% 18%, rgba(74,158,255,0.28), transparent 32%), linear-gradient(180deg, rgba(255,255,255,0.08), rgba(0,0,0,0.34) 46%, rgba(0,0,0,0.72))",
-              }}
+              className={cx(
+                "pointer-events-none fixed inset-0 opacity-95",
+                result.leader === "red"
+                  ? "bg-[radial-gradient(circle_at_16%_18%,rgba(255,48,66,0.42),transparent_34%),radial-gradient(circle_at_86%_22%,rgba(72,145,255,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.62)_48%,rgba(0,0,0,0.92))]"
+                  : result.leader === "blue"
+                  ? "bg-[radial-gradient(circle_at_84%_18%,rgba(72,145,255,0.42),transparent_34%),radial-gradient(circle_at_16%_22%,rgba(255,48,66,0.18),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.62)_48%,rgba(0,0,0,0.92))]"
+                  : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.25),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.06),rgba(0,0,0,0.72)_48%,rgba(0,0,0,0.94))]"
+              )}
             />
 
             <div
-              className="pointer-events-none absolute inset-0 opacity-[0.10] mix-blend-soft-light"
+              className="pointer-events-none fixed inset-0 opacity-[0.14] mix-blend-screen"
               style={{
                 backgroundImage: `
-                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
-                  radial-gradient(circle at 64px 64px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.05) 11px, transparent 12px),
+                  radial-gradient(circle at 64px 64px, rgba(255,255,255,0.11) 0px, rgba(255,255,255,0.04) 11px, transparent 12px)
                 `,
-                backgroundSize: "84px 84px",
+                backgroundSize: "86px 86px",
               }}
             />
 
-            <div className="pointer-events-none absolute left-0 top-0 h-[40%] w-[42%] rounded-full bg-[#ff384b]/16 blur-3xl" />
-            <div className="pointer-events-none absolute right-0 top-0 h-[42%] w-[42%] rounded-full bg-[#4fa3ff]/18 blur-3xl" />
-
-            <div className="relative z-10 mx-auto max-w-[390px] rounded-[28px] border border-white/12 bg-[#061019]/78 px-5 py-6 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_24px_60px_rgba(0,0,0,0.52)] backdrop-blur-2xl">
-              <div className="mx-auto flex h-[58px] w-[128px] items-center justify-center rounded-full border border-[#d1c79f]/22 bg-black/28">
-                <img
-                  src="/launch-logo.png"
-                  alt="DUEL"
-                  className="h-[34px] object-contain opacity-95"
-                  style={{
-                    filter: "brightness(0) invert(1)",
-                  }}
-                />
-              </div>
-
-              <div className="mt-4 text-[9px] font-black uppercase tracking-[0.3em] text-[#d1c79f]/70">
-                Match Complete
-              </div>
-
+            <div className="relative z-10 mx-auto flex min-h-full max-w-[430px] flex-col">
               <div
                 className={cx(
-                  "mt-2 text-[34px] font-black uppercase leading-none tracking-[-0.04em]",
+                  "flex-1 overflow-hidden rounded-[34px] border p-5 shadow-[0_30px_90px_rgba(0,0,0,0.75)] backdrop-blur-2xl",
                   result.leader === "red"
-                    ? "text-[#ff4455]"
+                    ? "border-[#ff4154]/45 bg-[#090305]/72 shadow-[#ff2d44]/10"
                     : result.leader === "blue"
-                    ? "text-[#67a6ff]"
-                    : "text-white"
+                    ? "border-[#58a6ff]/45 bg-[#020815]/72 shadow-[#58a6ff]/10"
+                    : "border-white/18 bg-black/72"
                 )}
               >
-                {displayMain}
-              </div>
+                <div className="text-center">
+                  <img
+                    src="/launch-logo.png"
+                    alt="DUEL"
+                    className="mx-auto h-[54px] object-contain opacity-95"
+                    style={{
+                      filter: "brightness(0) invert(1)",
+                    }}
+                  />
 
-              <div className="mt-2 text-[26px] font-black uppercase tracking-[0.02em] text-white">
-                {redWins > blueWins
-                  ? `${redWins} & ${Math.max(0, 18 - redWins - blueWins)}`
-                  : blueWins > redWins
-                  ? `${blueWins} & ${Math.max(0, 18 - redWins - blueWins)}`
-                  : "All Square"}
-              </div>
+                  <div className="mt-6 text-[10px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/72">
+                    Match Complete
+                  </div>
 
-              <div className="mt-1 text-[10px] font-black uppercase tracking-[0.16em] text-white/58">
-                {redWins} Red • {blueWins} Blue • {halved} Halved
-              </div>
+                  <div
+                    className={cx(
+                      "mt-3 text-[42px] font-black uppercase leading-none tracking-[-0.06em] drop-shadow-[0_12px_30px_rgba(0,0,0,0.65)]",
+                      result.leader === "red"
+                        ? "text-[#ff4355]"
+                        : result.leader === "blue"
+                        ? "text-[#67a6ff]"
+                        : "text-white"
+                    )}
+                  >
+                    {displayMain}
+                  </div>
 
-              <div className="mt-6 grid grid-cols-[1fr_42px_1fr] items-center gap-3">
-                <div className="flex justify-center gap-2">
-                  {scoringRedPlayers.map((p: any, i: number) => (
-                    <button
-                      key={`complete-red-${p.name}-${i}`}
-                      type="button"
-                      onClick={() => setCardPlayer({ team: "red", p })}
-                      className="group flex w-[62px] flex-col items-center"
-                    >
-                      <div className="rounded-full border border-[#ff4d5e]/35 bg-[#ff4d5e]/10 p-1 shadow-[0_0_22px_rgba(255,68,85,0.18)]">
+                  <div className="mx-auto mt-4 flex max-w-[250px] items-center gap-4">
+                    <div className="h-px flex-1 bg-[#d1c79f]/40" />
+                    <div className="text-[16px] font-black uppercase tracking-[0.26em] text-[#d1c79f]">
+                      Final
+                    </div>
+                    <div className="h-px flex-1 bg-[#d1c79f]/40" />
+                  </div>
+
+                  <div className="mt-3 text-[11px] font-black uppercase tracking-[0.18em] text-white/52">
+                    {redWins} Red • {blueWins} Blue • {halved} Halved
+                  </div>
+                </div>
+
+                <div className="mt-7 grid grid-cols-[1fr_44px_1fr] items-center gap-3">
+                  <div className="flex justify-center gap-2">
+                    {scoringRedPlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-red-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "red", p })}
+                        className="group flex w-[68px] flex-col items-center"
+                      >
                         <Logo
                           team="red"
-                          size="h-[52px] w-[52px]"
+                          size="h-[58px] w-[58px]"
                           src={p.photo || teamLogos?.Red}
                         />
-                      </div>
-                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75 group-active:text-[#d1c79f]">
-                        {first(p.name)}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                        <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
 
-                <div className="text-[22px] font-black text-white/48">VS</div>
+                  <div className="text-center text-[22px] font-black text-white/48">VS</div>
 
-                <div className="flex justify-center gap-2">
-                  {scoringBluePlayers.map((p: any, i: number) => (
-                    <button
-                      key={`complete-blue-${p.name}-${i}`}
-                      type="button"
-                      onClick={() => setCardPlayer({ team: "blue", p })}
-                      className="group flex w-[62px] flex-col items-center"
-                    >
-                      <div className="rounded-full border border-[#58a6ff]/35 bg-[#58a6ff]/10 p-1 shadow-[0_0_22px_rgba(88,166,255,0.18)]">
+                  <div className="flex justify-center gap-2">
+                    {scoringBluePlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-blue-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "blue", p })}
+                        className="group flex w-[68px] flex-col items-center"
+                      >
                         <Logo
                           team="blue"
-                          size="h-[52px] w-[52px]"
+                          size="h-[58px] w-[58px]"
                           src={p.photo || teamLogos?.Blue}
                         />
-                      </div>
-                      <div className="mt-1 w-full truncate text-[10px] font-bold text-white/75 group-active:text-[#d1c79f]">
-                        {first(p.name)}
-                      </div>
-                    </button>
-                  ))}
+                        <div className="mt-2 w-full truncate text-[10px] font-bold text-white/78 group-active:text-[#d1c79f]">
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="mt-5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-white/48">
-                Tap a player crest to review their scorecard
-              </div>
+                <div className="mt-7 rounded-[26px] border border-white/12 bg-white/[0.045] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <div className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/70">
+                    Match Stats
+                  </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setFinishStep("playing");
-                  setShowFinishActions(false);
-                  setSignedCards({});
-                  setSelectedHole(null);
-                  setCardPlayer(null);
-                  if (setMode) {
-                    setMode("launch");
-                  }
-                  setScreen("home");
-                }}
-                className="mt-5 w-full rounded-full border border-[#d1c79f]/45 bg-[#d1c79f] px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] text-black shadow-[0_0_24px_rgba(209,199,159,0.22)]"
-              >
-                New Game
-              </button>
+                  <StatRow
+                    label="Holes Won"
+                    red={redWins}
+                    blue={blueWins}
+                  />
+
+                  <StatRow
+                    label="Birdies"
+                    red={redRoundStats.birdies}
+                    blue={blueRoundStats.birdies}
+                  />
+
+                  <StatRow
+                    label="Pars"
+                    red={redRoundStats.pars}
+                    blue={blueRoundStats.pars}
+                  />
+
+                  <StatRow
+                    label="Bogeys"
+                    red={redRoundStats.bogeys}
+                    blue={blueRoundStats.bogeys}
+                  />
+                </div>
+
+                <div className="mt-5 rounded-[22px] border border-white/10 bg-black/24 p-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/42">
+                    {day.course || "Course"}
+                  </div>
+
+                  <div className="mt-1 text-[17px] font-black uppercase tracking-[0.08em] text-white">
+                    {day.format}
+                  </div>
+
+                  <div className="mt-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/42">
+                    {day.label} • {String(day.tee || "").toUpperCase()}
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-center text-[9px] font-black uppercase tracking-[0.16em] text-white/48">
+                  Tap a player crest to review their scorecard
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFinishStep("playing");
+                    setShowFinishActions(false);
+                    setSignedCards({});
+                    setSelectedHole(null);
+                    setCardPlayer(null);
+                    if (setMode) {
+                      setMode("launch");
+                    }
+                    setScreen("home");
+                  }}
+                  className={cx(
+                    "mt-5 w-full rounded-full border px-4 py-4 text-[13px] font-black uppercase tracking-[0.16em] shadow-[0_0_26px_rgba(255,255,255,0.08)]",
+                    result.leader === "red"
+                      ? "border-[#ff4355]/55 bg-[#ff4355] text-white"
+                      : result.leader === "blue"
+                      ? "border-[#67a6ff]/55 bg-[#67a6ff] text-black"
+                      : "border-[#d1c79f]/45 bg-[#d1c79f] text-black"
+                  )}
+                >
+                  New Game
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -1068,6 +1175,25 @@ export default function Score({
     </>
   );
 }
+
+function StatRow({ label, red, blue }: any) {
+  return (
+    <div className="grid grid-cols-[58px_1fr_58px] items-center border-t border-white/8 py-2 first:border-t-0">
+      <div className="text-left text-[18px] font-black text-[#ff4355]">
+        {red}
+      </div>
+
+      <div className="text-center text-[10px] font-black uppercase tracking-[0.16em] text-white/62">
+        {label}
+      </div>
+
+      <div className="text-right text-[18px] font-black text-[#67a6ff]">
+        {blue}
+      </div>
+    </div>
+  );
+}
+
 
 function TeamPlayers({
   team,
