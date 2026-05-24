@@ -237,7 +237,7 @@ export default function Home({
               <button
                 type="button"
                 onClick={() => setLiveExpanded((value) => !value)}
-                className=cx("mt-4 flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-95", theme.panelSoft, theme.textGold)
+                className={cx("mt-4 flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-95", theme.panelSoft, theme.textGold)}
                 aria-label="Show live matches"
               >
                 <span className="translate-y-[-1px] text-[22px] leading-none">
@@ -397,7 +397,7 @@ export default function Home({
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className=cx("rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.14em] shadow-[0_8px_18px_rgba(0,0,0,0.35)]", theme.goldButton)>
+                      <div className={cx("rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.14em] shadow-[0_8px_18px_rgba(0,0,0,0.35)]", theme.goldButton)}>
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
@@ -460,3 +460,4 @@ export default function Home({
     </div>
   );
 }
+
