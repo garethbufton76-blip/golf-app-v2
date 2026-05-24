@@ -957,29 +957,50 @@ export default function Score({
           >
             <div
               className={cx(
-                "absolute inset-0",
-                isDayTheme
-                  ? "opacity-[0.16]"
-                  : "opacity-[0.08] mix-blend-soft-light"
+                "pointer-events-none absolute inset-0 rounded-[26px]",
+                isDayTheme ? "opacity-[0.42]" : "opacity-[0.14]"
               )}
               style={{
-                backgroundImage: isDayTheme
-                  ? `
-                    linear-gradient(
-                      115deg,
-                      rgba(255,255,255,0.62) 0%,
-                      transparent 18%,
-                      rgba(255,255,255,0.34) 34%,
-                      transparent 52%,
-                      rgba(255,255,255,0.24) 72%,
-                      transparent 100%
-                    )
-                  `
-                  : `
-                    radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
-                    radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
-                  `,
-                backgroundSize: isDayTheme ? "280px 280px" : "80px 80px",
+                background: `
+                  linear-gradient(
+                    112deg,
+                    transparent 0%,
+                    rgba(255,255,255,0.74) 12%,
+                    transparent 24%,
+                    transparent 34%,
+                    rgba(255,255,255,0.44) 46%,
+                    transparent 58%,
+                    transparent 66%,
+                    rgba(255,255,255,0.30) 78%,
+                    transparent 90%
+                  )
+                `,
+                backgroundSize: "420px 420px",
+              }}
+            />
+
+            <div
+              className={cx(
+                "pointer-events-none absolute inset-0 rounded-[26px]",
+                isDayTheme ? "opacity-[0.20]" : "opacity-[0.08]"
+              )}
+              style={{
+                background: `
+                  linear-gradient(
+                    112deg,
+                    transparent 0%,
+                    transparent 18%,
+                    rgba(0,0,0,0.08) 24%,
+                    transparent 32%,
+                    transparent 52%,
+                    rgba(0,0,0,0.06) 58%,
+                    transparent 66%,
+                    transparent 82%,
+                    rgba(0,0,0,0.05) 86%,
+                    transparent 100%
+                  )
+                `,
+                backgroundSize: "420px 420px",
               }}
             />
             {isDayTheme && (
@@ -1074,14 +1095,101 @@ export default function Score({
           </div>
         )}
 
-        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl" : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
-            {isDayTheme && (
-              <>
-                <div className="pointer-events-none absolute inset-0 opacity-[0.42] bg-[linear-gradient(112deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.48)_10%,transparent_22%,rgba(255,255,255,0.58)_36%,transparent_50%,rgba(255,255,255,0.48)_66%,transparent_82%)]" />
-                <div className="pointer-events-none absolute inset-0 opacity-[0.35] bg-[linear-gradient(112deg,transparent_0%,transparent_30%,rgba(0,0,0,0.055)_39%,transparent_48%,transparent_67%,rgba(0,0,0,0.045)_74%,transparent_84%)]" />
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_42%)]" />
-              </>
+        <div
+          className={cx(
+            "relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4",
+            isDayTheme
+              ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl"
+              : "border border-white/10 bg-black/45 backdrop-blur-xl"
+          )}
+        >
+          {/* GOLD LIGHT */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme
+                ? "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_42%)]"
+                : "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.10),transparent_42%)]"
             )}
+          />
+
+          {/* MASSIVE DIAGONAL GLASS BANDS */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme ? "opacity-[0.52]" : "opacity-[0.16]"
+            )}
+            style={{
+              background: `
+                linear-gradient(
+                  112deg,
+                  transparent 0%,
+                  rgba(255,255,255,0.88) 10%,
+                  rgba(255,255,255,0.32) 16%,
+                  transparent 24%,
+
+                  transparent 34%,
+                  rgba(255,255,255,0.58) 42%,
+                  rgba(255,255,255,0.18) 48%,
+                  transparent 56%,
+
+                  transparent 66%,
+                  rgba(255,255,255,0.42) 74%,
+                  rgba(255,255,255,0.12) 79%,
+                  transparent 86%
+                )
+              `,
+              backgroundSize: "460px 460px",
+            }}
+          />
+
+          {/* GLASS SHADOW CUTS */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme ? "opacity-[0.28]" : "opacity-[0.10]"
+            )}
+            style={{
+              background: `
+                linear-gradient(
+                  112deg,
+                  transparent 0%,
+                  transparent 14%,
+                  rgba(0,0,0,0.08) 18%,
+                  transparent 24%,
+
+                  transparent 44%,
+                  rgba(0,0,0,0.06) 48%,
+                  transparent 54%,
+
+                  transparent 74%,
+                  rgba(0,0,0,0.05) 78%,
+                  transparent 84%
+                )
+              `,
+              backgroundSize: "460px 460px",
+            }}
+          />
+
+          {/* TOP REFLECTION */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-x-0 top-0 h-[140px] rounded-t-[26px]",
+              isDayTheme
+                ? "bg-gradient-to-b from-white/60 via-white/20 to-transparent"
+                : "bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent"
+            )}
+          />
+
+          {/* SIDE VIGNETTE */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme
+                ? "bg-[radial-gradient(circle_at_0%_50%,rgba(0,0,0,0.06),transparent_28%),radial-gradient(circle_at_100%_50%,rgba(0,0,0,0.05),transparent_28%)]"
+                : "bg-[radial-gradient(circle_at_0%_50%,rgba(255,255,255,0.03),transparent_28%),radial-gradient(circle_at_100%_50%,rgba(255,255,255,0.03),transparent_28%)]"
+            )}
+          />
 
           {selectedHole ? (
             <div
@@ -1102,6 +1210,55 @@ export default function Score({
                   background: isDayTheme
                     ? "linear-gradient(135deg, rgba(255,255,255,0.35), rgba(244,244,242,0.18) 48%, rgba(255,255,255,0.20))"
                     : "linear-gradient(90deg, rgba(64,6,12,0.96), rgba(12,15,22,0.985) 48%, rgba(4,13,27,0.985))",
+                }}
+              />
+
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0 rounded-[26px]",
+                  isDayTheme ? "opacity-[0.42]" : "opacity-[0.12]"
+                )}
+                style={{
+                  background: `
+                    linear-gradient(
+                      112deg,
+                      transparent 0%,
+                      rgba(255,255,255,0.72) 12%,
+                      transparent 24%,
+                      transparent 34%,
+                      rgba(255,255,255,0.42) 46%,
+                      transparent 58%,
+                      transparent 66%,
+                      rgba(255,255,255,0.28) 78%,
+                      transparent 90%
+                    )
+                  `,
+                  backgroundSize: "420px 420px",
+                }}
+              />
+
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0 rounded-[26px]",
+                  isDayTheme ? "opacity-[0.22]" : "opacity-[0.08]"
+                )}
+                style={{
+                  background: `
+                    linear-gradient(
+                      112deg,
+                      transparent 0%,
+                      transparent 18%,
+                      rgba(0,0,0,0.08) 24%,
+                      transparent 32%,
+                      transparent 52%,
+                      rgba(0,0,0,0.06) 58%,
+                      transparent 66%,
+                      transparent 82%,
+                      rgba(0,0,0,0.05) 86%,
+                      transparent 100%
+                    )
+                  `,
+                  backgroundSize: "420px 420px",
                 }}
               />
 
