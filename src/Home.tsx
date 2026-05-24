@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useDuelTheme } from "../useDuelTheme";
+import { useDuelTheme } from "./useDuelTheme";
 import {
   Logo,
   Button,
