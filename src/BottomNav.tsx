@@ -31,113 +31,103 @@ export default function BottomNav({
     <>
       {/* SETTINGS OVERLAY */}
       {settingsOpen && (
-        <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] flex items-end bg-black/18 backdrop-blur-[2px]">
-          <div className="relative w-full overflow-hidden rounded-t-[34px] border border-white/14 shadow-[0_-24px_70px_rgba(0,0,0,0.68)] backdrop-blur-2xl">
+        <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
+          {/* background blur */}
+          <div className="absolute inset-0 bg-black/26 backdrop-blur-[3px]" />
 
-            {/* background */}
-            <div
-              className={cx(
-                "absolute inset-0",
-                isDay
-                  ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(238,238,236,0.82))]"
-                  : "bg-[linear-gradient(180deg,rgba(10,10,12,0.94),rgba(15,15,18,0.92))]"
-              )}
-            />
-
-            {/* duel glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(209,199,159,0.12),transparent_48%)]" />
-
-            {/* content */}
-            <div className="relative z-10 px-5 pb-8 pt-5">
-              {/* header */}
-              <div className="mb-5 text-center">
-                <div
-                  className={cx(
-                    "text-[10px] font-black uppercase tracking-[0.28em]",
-                    isDay ? "text-[#b9962f]" : "text-[#d1c79f]"
-                  )}
-                >
-                  Duel Settings
-                </div>
-
-                <div
-                  className={cx(
-                    "mt-1 text-[26px] font-black uppercase",
-                    isDay ? "text-[#242424]" : "text-white"
-                  )}
-                >
-                  Control Centre
-                </div>
-
-                <div
-                  className={cx(
-                    "mx-auto mt-3 h-px w-[140px] bg-gradient-to-r from-transparent to-transparent",
-                    isDay
-                      ? "via-[#b9962f]/40"
-                      : "via-[#d1c79f]/40"
-                  )}
-                />
+          {/* content */}
+          <div className="relative z-10 px-4 pt-5 pb-10">
+            {/* heading */}
+            <div className="mb-4 text-center">
+              <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/55">
+                Duel Settings
               </div>
 
-              {/* buttons */}
-              <div className="space-y-3">
-                <SettingsButton
-                  label={isDay ? "Night Mode" : "Day Mode"}
-                  sub="Switch DUEL interface theme"
-                  onClick={toggleTheme}
-                  isDay={isDay}
-                />
-
-                <SettingsButton
-                  label="Finish Game"
-                  sub="Complete current match"
-                  onClick={onFinishGame}
-                  isDay={isDay}
-                />
-
-                <SettingsButton
-                  label="Change Handicaps"
-                  sub="Edit player handicaps"
-                  onClick={onChangeHandicaps}
-                  isDay={isDay}
-                />
-
-                <SettingsButton
-                  label="Change Format"
-                  sub="Singles, Better Ball, Ambrose"
-                  onClick={onChangeGameType}
-                  isDay={isDay}
-                />
-
-                <SettingsButton
-                  label="Change Tee"
-                  sub="Select another tee"
-                  onClick={onChangeTee}
-                  isDay={isDay}
-                />
-
-                <SettingsButton
-                  label="New Game"
-                  sub="Return to setup"
-                  gold
-                  onClick={onNewGame}
-                  isDay={isDay}
-                />
+              <div className="mt-1 text-[28px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
+                Control Centre
               </div>
+            </div>
 
-              {/* close */}
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(false)}
-                className={cx(
-                  "mt-5 w-full rounded-full border py-4 text-[11px] font-black uppercase tracking-[0.22em] transition-all",
-                  isDay
-                    ? "border-black/10 bg-black/[0.03] text-black/55"
-                    : "border-white/10 bg-white/[0.04] text-white/60"
-                )}
-              >
-                Close
-              </button>
+            {/* SETTINGS PANEL */}
+            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/42 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+
+              {/* split ambient */}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#64111a]/72 via-[#15181f]/82 to-[#13294c]/72" />
+
+              {/* diagonal glass */}
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.16]"
+                style={{
+                  background: `
+                    linear-gradient(
+                      112deg,
+                      transparent 0%,
+                      rgba(255,255,255,0.26) 12%,
+                      transparent 24%,
+                      transparent 34%,
+                      rgba(255,255,255,0.14) 46%,
+                      transparent 58%,
+                      transparent 66%,
+                      rgba(255,255,255,0.10) 78%,
+                      transparent 90%
+                    )
+                  `,
+                  backgroundSize: "420px 420px",
+                }}
+              />
+
+              {/* content */}
+              <div className="relative z-10 p-4">
+                <div className="space-y-4">
+
+                  <SettingsButton
+                    label={isDay ? "Night Mode" : "Day Mode"}
+                    sub="Switch DUEL interface theme"
+                    onClick={toggleTheme}
+                  />
+
+                  <SettingsButton
+                    label="Finish Game"
+                    sub="Complete current match"
+                    danger
+                    onClick={onFinishGame}
+                  />
+
+                  <SettingsButton
+                    label="Change Handicaps"
+                    sub="Edit player handicaps"
+                    onClick={onChangeHandicaps}
+                  />
+
+                  <SettingsButton
+                    label="Change Format"
+                    sub="Singles, Better Ball, Ambrose"
+                    onClick={onChangeGameType}
+                  />
+
+                  <SettingsButton
+                    label="Change Tee"
+                    sub="Select another tee"
+                    onClick={onChangeTee}
+                  />
+
+                  <SettingsButton
+                    label="New Game"
+                    sub="Return to setup"
+                    gold
+                    onClick={onNewGame}
+                  />
+                </div>
+
+                {/* CLOSE */}
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(false)}
+                  className="mt-5 w-full rounded-[24px] border border-white/10 bg-black/42 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-[0.99]"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -219,36 +209,61 @@ function SettingsButton({
   sub,
   onClick,
   gold = false,
-  isDay = false,
+  danger = false,
 }: any) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cx(
-        "w-full rounded-[24px] border px-4 py-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-xl transition-all active:scale-[0.99]",
+        "relative w-full overflow-hidden rounded-[24px] border px-5 py-5 text-left shadow-[0_18px_40px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
         gold
           ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-          : isDay
-          ? "border-black/10 bg-white/60 text-[#202020]"
-          : "border-white/10 bg-white/[0.05] text-white"
+          : danger
+          ? "border-[#7a2424]/55 bg-[linear-gradient(135deg,rgba(85,0,12,0.88),rgba(28,0,8,0.92))] text-white"
+          : "border-white/10 bg-black/42 text-white"
       )}
     >
-      <div className="text-[13px] font-black uppercase tracking-[0.16em]">
-        {label}
-      </div>
-
+      {/* glass texture */}
       <div
         className={cx(
-          "mt-1 text-[9px] font-black uppercase tracking-[0.14em]",
-          gold
-            ? "text-black/45"
-            : isDay
-            ? "text-black/45"
-            : "text-white/34"
+          "pointer-events-none absolute inset-0",
+          gold ? "opacity-[0.18]" : "opacity-[0.10]"
         )}
-      >
-        {sub}
+        style={{
+          background: `
+            linear-gradient(
+              112deg,
+              transparent 0%,
+              rgba(255,255,255,0.26) 12%,
+              transparent 24%,
+              transparent 34%,
+              rgba(255,255,255,0.14) 46%,
+              transparent 58%,
+              transparent 66%,
+              rgba(255,255,255,0.10) 78%,
+              transparent 90%
+            )
+          `,
+          backgroundSize: "420px 420px",
+        }}
+      />
+
+      <div className="relative z-10">
+        <div className="text-[14px] font-black uppercase tracking-[0.18em]">
+          {label}
+        </div>
+
+        <div
+          className={cx(
+            "mt-1 text-[9px] font-black uppercase tracking-[0.16em]",
+            gold
+              ? "text-black/45"
+              : "text-white/38"
+          )}
+        >
+          {sub}
+        </div>
       </div>
     </button>
   );
