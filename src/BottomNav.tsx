@@ -31,7 +31,7 @@ export default function BottomNav({
     <>
       {/* SETTINGS OVERLAY */}
       {settingsOpen && (
-        <div className="absolute inset-0 z-[70] flex items-end bg-black/18 backdrop-blur-[2px]">
+        <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] flex items-end bg-black/18 backdrop-blur-[2px]">
           <div className="relative w-full overflow-hidden rounded-t-[34px] border border-white/14 shadow-[0_-24px_70px_rgba(0,0,0,0.68)] backdrop-blur-2xl">
 
             {/* background */}
