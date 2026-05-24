@@ -530,18 +530,18 @@ export default function Score({
     const tone =
       status === "red"
         ? isDayTheme
-          ? "border-[#9f1720]/28 bg-white/58 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.08)]"
+          ? "border-[#9f1720]/35 bg-[linear-gradient(145deg,rgba(255,255,255,0.95),rgba(255,226,230,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(159,23,32,0.12)]"
           : "from-[#7c2430]/95 to-[#47151d]/95 border-[#b54854]/40"
         : status === "blue"
         ? isDayTheme
-          ? "border-[#1f4aa8]/28 bg-white/58 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.08)]"
+          ? "border-[#1f4aa8]/35 bg-[linear-gradient(145deg,rgba(255,255,255,0.95),rgba(224,236,255,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(31,74,168,0.12)]"
           : "from-[#415aaf]/95 to-[#29386c]/95 border-[#627dd7]/40"
         : status === "as"
         ? isDayTheme
-          ? "border-black/12 bg-white/50 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.07)]"
+          ? "border-black/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(228,228,225,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(0,0,0,0.11)]"
           : "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
         : isDayTheme
-        ? "border-black/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(224,224,222,0.78))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_14px_28px_rgba(0,0,0,0.10)]"
+        ? "border-black/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,235,232,0.88),rgba(218,218,214,0.74))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-10px_18px_rgba(0,0,0,0.045),0_16px_30px_rgba(0,0,0,0.12)]"
         : "from-black/50 to-black/30 border-white/5";
 
     return (
@@ -555,9 +555,9 @@ export default function Score({
         style={
           active
             ? {
-                border: isDayTheme ? "2px solid #b99b2f" : "2px solid #d1c79f",
+                border: isDayTheme ? "3px solid #b99b2f" : "2px solid #d1c79f",
                 boxShadow: isDayTheme
-                  ? "0 0 0 2px rgba(185,155,47,0.36), 0 0 28px rgba(185,155,47,0.42)"
+                  ? "0 0 0 3px rgba(185,155,47,0.26), 0 0 34px rgba(185,155,47,0.52)"
                   : "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
                 transform: "scale(1.05)",
                 zIndex: 2,
@@ -1074,11 +1074,12 @@ export default function Score({
           </div>
         )}
 
-        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? "border border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.82))] shadow-[0_24px_60px_rgba(18,18,18,0.16)] backdrop-blur-2xl" : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
+        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl" : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
             {isDayTheme && (
               <>
-                <div className="pointer-events-none absolute inset-0 opacity-[0.14] bg-[linear-gradient(115deg,rgba(255,255,255,0.56)_0%,transparent_20%,rgba(255,255,255,0.28)_38%,transparent_56%,rgba(255,255,255,0.20)_76%,transparent_100%)]" />
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.10),transparent_42%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-[0.42] bg-[linear-gradient(112deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.48)_10%,transparent_22%,rgba(255,255,255,0.58)_36%,transparent_50%,rgba(255,255,255,0.48)_66%,transparent_82%)]" />
+                <div className="pointer-events-none absolute inset-0 opacity-[0.35] bg-[linear-gradient(112deg,transparent_0%,transparent_30%,rgba(0,0,0,0.055)_39%,transparent_48%,transparent_67%,rgba(0,0,0,0.045)_74%,transparent_84%)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_42%)]" />
               </>
             )}
 
