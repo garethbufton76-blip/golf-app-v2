@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PlayerScorecard from "./PlayerScorecard";
+import { useDuelTheme } from "./useDuelTheme";
 import {
   Logo,
   blankHoles,
@@ -29,6 +30,9 @@ export default function Score({
   teamNames,
   setMode,
 }: any) {
+  const { theme, themeMode } = useDuelTheme();
+  const isDayTheme = themeMode === "day";
+
   const day = dayConfigs[activeDay];
 
   const count = /singles/i.test(day.format)
@@ -525,26 +529,36 @@ export default function Score({
 
     const tone =
       status === "red"
-        ? "from-[#7c2430]/95 to-[#47151d]/95 border-[#b54854]/40"
+        ? isDayTheme
+          ? "border-[#9f1720]/28 bg-white/58 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.08)]"
+          : "from-[#7c2430]/95 to-[#47151d]/95 border-[#b54854]/40"
         : status === "blue"
-        ? "from-[#415aaf]/95 to-[#29386c]/95 border-[#627dd7]/40"
+        ? isDayTheme
+          ? "border-[#1f4aa8]/28 bg-white/58 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.08)]"
+          : "from-[#415aaf]/95 to-[#29386c]/95 border-[#627dd7]/40"
         : status === "as"
-        ? "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
+        ? isDayTheme
+          ? "border-black/12 bg-white/50 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.07)]"
+          : "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
+        : isDayTheme
+        ? "border-black/12 bg-white/46 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.06)]"
         : "from-black/50 to-black/30 border-white/5";
 
     return (
       <button
         onClick={() => openHole(h.hole)}
         className={cx(
-          "relative h-[86px] rounded-[18px] border bg-gradient-to-b px-2 py-1 text-center transition-all",
+          "relative h-[86px] rounded-[18px] border px-2 py-1 text-center transition-all backdrop-blur-xl",
+          !isDayTheme && "bg-gradient-to-b",
           tone
         )}
         style={
           active
             ? {
-                border: "2px solid #d1c79f",
-                boxShadow:
-                  "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
+                border: isDayTheme ? "2px solid #b99b2f" : "2px solid #d1c79f",
+                boxShadow: isDayTheme
+                  ? "0 0 0 2px rgba(185,155,47,0.32), 0 0 18px rgba(185,155,47,0.38)"
+                  : "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
                 transform: "scale(1.05)",
                 zIndex: 2,
               }
@@ -581,14 +595,14 @@ export default function Score({
 
         <div className="mt-0.5 text-[13px] font-medium">{h.hole}</div>
 
-        <div className="mt-1 text-[9px] text-white/50">SI {detail.si}</div>
+        <div className={cx("mt-1 text-[9px]", isDayTheme ? "text-black/45" : "text-white/50")}>SI {detail.si}</div>
       </button>
     );
   };
 
   return (
     <>
-      <div className="relative flex-1 overflow-y-auto pb-[220px]">
+      <div className={cx("relative flex-1 overflow-y-auto pb-[220px]", theme.app)}>
         {finishStep === "signoff" ? (
           <div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
             <div
@@ -927,12 +941,18 @@ export default function Score({
 
           <div
             className={cx(
-              "relative mt-6 overflow-hidden rounded-[26px] border border-white/15 p-4 backdrop-blur-xl",
-              result.leader === "red"
-                ? "bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
+              "relative mt-6 overflow-hidden rounded-[26px] border p-4 backdrop-blur-xl",
+              isDayTheme
+                ? result.leader === "red"
+                  ? "border-[#9f1720]/22 bg-white/58 shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  : result.leader === "blue"
+                  ? "border-[#1f4aa8]/22 bg-white/58 shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  : theme.panel
+                : result.leader === "red"
+                ? "border-white/15 bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
                 : result.leader === "blue"
-                ? "bg-gradient-to-b from-[#415aaf]/85 to-[#29386c]/85"
-                : "bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
+                ? "border-white/15 bg-gradient-to-b from-[#415aaf]/85 to-[#29386c]/85"
+                : "border-white/15 bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
             )}
           >
             <div
@@ -949,13 +969,13 @@ export default function Score({
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]" />
 
             <div className="relative z-10">
-              <div className="mb-1 text-center text-[11px] font-semibold tracking-[0.22em] text-white/60">
+              <div className={cx("mb-1 text-center text-[11px] font-semibold tracking-[0.22em]", isDayTheme ? "text-black/48" : "text-white/60")}>
                 {day.label.toUpperCase()} •{" "}
                 {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
                 {day.tee.toUpperCase()}
               </div>
 
-              <div className="mb-2 text-center text-[11px] font-extrabold tracking-[0.32em] text-white/80">
+              <div className={cx("mb-2 text-center text-[11px] font-extrabold tracking-[0.32em]", isDayTheme ? "text-black/64" : "text-white/80")}>
                 {day.format.toUpperCase()}
               </div>
 
@@ -969,7 +989,7 @@ export default function Score({
                   setCardPlayer={setCardPlayer}
                 />
 
-                <div className="flex h-[70px] items-center justify-center text-2xl font-bold text-white/75">
+                <div className={cx("flex h-[70px] items-center justify-center text-2xl font-bold", isDayTheme ? "text-black/52" : "text-white/75")}>
                   VS
                 </div>
 
@@ -998,7 +1018,7 @@ export default function Score({
           </div>
         )}
 
-        <div className="relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] border border-white/10 bg-black/45 p-4 backdrop-blur-xl">
+        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? theme.panelStrong : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
           {selectedHole ? (
             <div
               className={cx(
@@ -1198,11 +1218,11 @@ export default function Score({
               )}
 
               <div className="mb-4">
-                <div className="text-[10px] tracking-[0.22em] text-white/60">
+                <div className={cx("text-[10px] tracking-[0.22em]", isDayTheme ? "text-black/48" : "text-white/60")}>
                   HOLE TRACKER
                 </div>
 
-                <div className="text-[14px] font-bold tracking-[0.16em]">
+                <div className={cx("text-[14px] font-bold tracking-[0.16em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
                   Hole {current.hole} • SI {current.si} • {current.metres}m
                 </div>
               </div>
