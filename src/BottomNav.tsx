@@ -81,37 +81,7 @@ export default function BottomNav({
               </div>
             </div>
 
-            {/* SETTINGS PANEL */}
-            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/28 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
-
-              {/* split ambient */}
-              <div className="absolute inset-0 bg-gradient-to-r from-[#64111a]/72 via-[#15181f]/82 to-[#13294c]/72" />
-
-              {/* diagonal glass */}
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.16]"
-                style={{
-                  background: `
-                    linear-gradient(
-                      112deg,
-                      transparent 0%,
-                      rgba(255,255,255,0.26) 12%,
-                      transparent 24%,
-                      transparent 34%,
-                      rgba(255,255,255,0.14) 46%,
-                      transparent 58%,
-                      transparent 66%,
-                      rgba(255,255,255,0.10) 78%,
-                      transparent 90%
-                    )
-                  `,
-                  backgroundSize: "420px 420px",
-                }}
-              />
-
-              {/* content */}
-              <div className="relative z-10 p-4">
-                <div className="space-y-4">
+            <div className="space-y-4">
 
                   <SettingsButton
                     label={isDay ? "Night Mode" : "Day Mode"}
@@ -150,18 +120,16 @@ export default function BottomNav({
                     gold
                     onClick={onNewGame}
                   />
-                </div>
-
-                {/* CLOSE */}
-                <button
-                  type="button"
-                  onClick={() => setSettingsOpen(false)}
-                  className="mt-5 w-full rounded-[24px] border border-white/10 bg-black/42 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/70 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-[0.99]"
-                >
-                  Close
-                </button>
-              </div>
             </div>
+
+            {/* CLOSE */}
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(false)}
+              className="mt-5 w-full rounded-[24px] border border-white/14 bg-white/[0.07] py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/72 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-2xl transition-all active:scale-[0.99]"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
@@ -253,34 +221,41 @@ function SettingsButton({
         gold
           ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
           : danger
-          ? "border-[#7a2424]/55 bg-[linear-gradient(135deg,rgba(85,0,12,0.88),rgba(28,0,8,0.92))] text-white"
-          : "border-white/10 bg-black/42 text-white"
+          ? "border-[#ff4355]/35 bg-[linear-gradient(135deg,rgba(116,25,35,0.46),rgba(38,4,10,0.30))] text-white"
+          : "border-white/18 bg-white/[0.07] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(0,0,0,0.35)]"
       )}
     >
+      {/* red / blue glass tint */}
+      {!gold && !danger && (
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#5b0f18]/26 via-white/[0.025] to-[#10233e]/26" />
+      )}
+
       {/* glass texture */}
       <div
         className={cx(
           "pointer-events-none absolute inset-0",
-          gold ? "opacity-[0.18]" : "opacity-[0.10]"
+          gold ? "opacity-[0.18]" : "opacity-[0.22]"
         )}
         style={{
           background: `
             linear-gradient(
               112deg,
               transparent 0%,
-              rgba(255,255,255,0.26) 12%,
+              rgba(255,255,255,0.30) 12%,
               transparent 24%,
               transparent 34%,
-              rgba(255,255,255,0.14) 46%,
+              rgba(255,255,255,0.18) 46%,
               transparent 58%,
               transparent 66%,
-              rgba(255,255,255,0.10) 78%,
+              rgba(255,255,255,0.12) 78%,
               transparent 90%
             )
           `,
           backgroundSize: "420px 420px",
         }}
       />
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-black/10" />
 
       <div className="relative z-10">
         <div className="text-[14px] font-black uppercase tracking-[0.18em]">
