@@ -541,7 +541,7 @@ export default function Score({
           ? "border-black/12 bg-white/50 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.07)]"
           : "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
         : isDayTheme
-        ? "border-black/12 bg-white/46 text-[#2f3032] shadow-[0_10px_22px_rgba(0,0,0,0.06)]"
+        ? "border-black/14 bg-[linear-gradient(145deg,rgba(255,255,255,0.86),rgba(224,224,222,0.78))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_14px_28px_rgba(0,0,0,0.10)]"
         : "from-black/50 to-black/30 border-white/5";
 
     return (
@@ -557,7 +557,7 @@ export default function Score({
             ? {
                 border: isDayTheme ? "2px solid #b99b2f" : "2px solid #d1c79f",
                 boxShadow: isDayTheme
-                  ? "0 0 0 2px rgba(185,155,47,0.32), 0 0 18px rgba(185,155,47,0.38)"
+                  ? "0 0 0 2px rgba(185,155,47,0.36), 0 0 28px rgba(185,155,47,0.42)"
                   : "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
                 transform: "scale(1.05)",
                 zIndex: 2,
@@ -959,21 +959,33 @@ export default function Score({
               className={cx(
                 "absolute inset-0",
                 isDayTheme
-                  ? "opacity-[0.045]"
+                  ? "opacity-[0.16]"
                   : "opacity-[0.08] mix-blend-soft-light"
               )}
               style={{
                 backgroundImage: isDayTheme
                   ? `
-                    linear-gradient(115deg, rgba(255,255,255,0.44), transparent 24%, rgba(255,255,255,0.22) 54%, transparent 76%)
+                    linear-gradient(
+                      115deg,
+                      rgba(255,255,255,0.62) 0%,
+                      transparent 18%,
+                      rgba(255,255,255,0.34) 34%,
+                      transparent 52%,
+                      rgba(255,255,255,0.24) 72%,
+                      transparent 100%
+                    )
                   `
                   : `
                     radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
                     radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
                   `,
-                backgroundSize: isDayTheme ? "220px 220px" : "80px 80px",
+                backgroundSize: isDayTheme ? "280px 280px" : "80px 80px",
               }}
             />
+            {isDayTheme && (
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.14),transparent_42%)]" />
+            )}
+
 
             <div
               className={cx(
@@ -1062,7 +1074,14 @@ export default function Score({
           </div>
         )}
 
-        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? theme.panelStrong : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
+        <div className={cx("relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4", isDayTheme ? "border border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.82))] shadow-[0_24px_60px_rgba(18,18,18,0.16)] backdrop-blur-2xl" : "border border-white/10 bg-black/45 backdrop-blur-xl")}>
+            {isDayTheme && (
+              <>
+                <div className="pointer-events-none absolute inset-0 opacity-[0.14] bg-[linear-gradient(115deg,rgba(255,255,255,0.56)_0%,transparent_20%,rgba(255,255,255,0.28)_38%,transparent_56%,rgba(255,255,255,0.20)_76%,transparent_100%)]" />
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.10),transparent_42%)]" />
+              </>
+            )}
+
           {selectedHole ? (
             <div
               className={cx(
