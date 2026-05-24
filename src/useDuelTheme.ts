@@ -9,9 +9,10 @@ import {
 } from "./theme";
 
 export function useDuelTheme() {
-  const [themeMode, setThemeModeState] = useState<DuelThemeMode>(() =>
-    getStoredTheme()
-  );
+  const [themeMode, setThemeModeState] = useState<DuelThemeMode>(() => {
+    const stored = getStoredTheme();
+    return stored || "night";
+  });
 
   const theme = useMemo(() => getDuelTheme(themeMode), [themeMode]);
 
