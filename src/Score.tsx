@@ -944,9 +944,9 @@ export default function Score({
               "relative mt-6 overflow-hidden rounded-[26px] border p-4 backdrop-blur-xl",
               isDayTheme
                 ? result.leader === "red"
-                  ? "border-[#9f1720]/28 bg-[linear-gradient(135deg,rgba(255,255,255,0.90),rgba(255,238,240,0.82))] shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  ? "border-[#9f1720]/40 bg-[linear-gradient(135deg,rgba(255,244,245,0.96),rgba(255,214,220,0.92),rgba(255,232,236,0.88))] shadow-[0_18px_40px_rgba(159,23,32,0.18)]"
                   : result.leader === "blue"
-                  ? "border-[#1f4aa8]/28 bg-[linear-gradient(135deg,rgba(255,255,255,0.90),rgba(235,242,255,0.82))] shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  ? "border-[#1f4aa8]/40 bg-[linear-gradient(135deg,rgba(244,248,255,0.96),rgba(210,226,255,0.92),rgba(232,240,255,0.88))] shadow-[0_18px_40px_rgba(31,74,168,0.18)]"
                   : theme.panel
                 : result.leader === "red"
                 ? "border-white/15 bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
@@ -979,7 +979,11 @@ export default function Score({
               className={cx(
                 "absolute inset-0",
                 isDayTheme
-                  ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.22),transparent_48%,rgba(255,255,255,0.08))]"
+                  ? result.leader === "red"
+                  ? "bg-[radial-gradient(circle_at_18%_20%,rgba(159,23,32,0.16),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.30),transparent_48%,rgba(255,255,255,0.10))]"
+                  : result.leader === "blue"
+                  ? "bg-[radial-gradient(circle_at_82%_20%,rgba(31,74,168,0.16),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.30),transparent_48%,rgba(255,255,255,0.10))]"
+                  : "bg-[linear-gradient(180deg,rgba(255,255,255,0.22),transparent_48%,rgba(255,255,255,0.08))]"
                   : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
               )}
             />
