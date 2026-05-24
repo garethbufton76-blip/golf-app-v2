@@ -1004,11 +1004,11 @@ export default function Score({
               </div>
 
               <div className="mt-1 text-center">
-                <div className="text-[20px] font-extrabold tracking-[0.08em]">
+                <div className={cx("text-[20px] font-extrabold tracking-[0.08em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
                   {displayMain}
                 </div>
 
-                <div className="mt-0.5 text-[10px] tracking-[0.16em] text-white/55">
+                <div className={cx("mt-0.5 text-[10px] tracking-[0.16em]", isDayTheme ? "text-black/42" : "text-white/55")}>
                   {result.sub}
                 </div>
 
@@ -1310,7 +1310,7 @@ function TeamPlayers({
             <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
           </button>
 
-          <div className="mt-1 w-full truncate text-[11px] leading-tight text-white">
+          <div className={cx("mt-1 w-full truncate text-[11px] leading-tight", isDayTheme ? "text-[#2f3032]" : "text-white")}>
             {first(p.name)}
           </div>
 
