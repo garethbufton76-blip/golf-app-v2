@@ -1006,11 +1006,33 @@ export default function Score({
               </div>
 
               <div className="mt-1 text-center">
-                <div className={cx("text-[20px] font-extrabold tracking-[0.08em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
+                <div
+                  className={cx(
+                    "text-[20px] font-extrabold tracking-[0.08em]",
+                    isDayTheme
+                      ? result.leader === "red"
+                        ? "text-[#9f1720]"
+                        : result.leader === "blue"
+                        ? "text-[#1f4aa8]"
+                        : "text-[#2f3032]"
+                      : "text-white"
+                  )}
+                >
                   {displayMain}
                 </div>
 
-                <div className={cx("mt-0.5 text-[10px] tracking-[0.16em]", isDayTheme ? "text-black/42" : "text-white/55")}>
+                <div
+                  className={cx(
+                    "mt-0.5 text-[10px] tracking-[0.16em]",
+                    isDayTheme
+                      ? result.leader === "red"
+                        ? "text-[#9f1720]/70"
+                        : result.leader === "blue"
+                        ? "text-[#1f4aa8]/70"
+                        : "text-black/42"
+                      : "text-white/55"
+                  )}
+                >
                   {result.sub}
                 </div>
 
