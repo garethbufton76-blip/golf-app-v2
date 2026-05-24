@@ -974,6 +974,7 @@ export default function QuickGame({
 }
 
 function TeamSetupColumn({
+  const { theme } = useDuelTheme();
   tone,
   teamName,
   setTeamName,
