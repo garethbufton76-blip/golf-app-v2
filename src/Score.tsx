@@ -987,6 +987,7 @@ export default function Score({
                   isAmbrose={isAmbrose}
                   getTeeShotCount={getTeeShotCount}
                   setCardPlayer={setCardPlayer}
+                  isDayTheme={isDayTheme}
                 />
 
                 <div className={cx("flex h-[70px] items-center justify-center text-2xl font-bold", isDayTheme ? "text-black/52" : "text-white/75")}>
@@ -1000,6 +1001,7 @@ export default function Score({
                   isAmbrose={isAmbrose}
                   getTeeShotCount={getTeeShotCount}
                   setCardPlayer={setCardPlayer}
+                  isDayTheme={isDayTheme}
                 />
               </div>
 
@@ -1294,6 +1296,7 @@ function TeamPlayers({
   isAmbrose,
   getTeeShotCount,
   setCardPlayer,
+  isDayTheme = false,
 }: any) {
   const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
   const logoSize =
