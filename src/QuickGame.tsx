@@ -1030,6 +1030,8 @@ function TeamSetupColumn({
 }
 
 function Section({ title, children }: any) {
+  const { theme } = useDuelTheme();
+
   return (
     <div className={cx("mt-3 rounded-[22px] p-3", theme.panel)}>
       <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
