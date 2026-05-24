@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
 import PlayerCard from "./components/quickgame/PlayerCard";
+import { useDuelTheme } from "./useDuelTheme";
 
 function cx(...classes: (string | false | undefined | null)[]) {
   return classes.filter(Boolean).join(" ");
@@ -31,6 +32,8 @@ export default function QuickGame({
   setEventStarted,
   setEventLocked,
 }: any) {
+  const { theme } = useDuelTheme();
+
   const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
     try {
       const stored = localStorage.getItem("duel_saved_api_courses");
@@ -678,10 +681,10 @@ export default function QuickGame({
   }
 
   return (
-    <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
+    <div className={cx("relative h-full w-full overflow-y-auto pb-24", theme.app)}>
       <div className="relative z-20 mx-auto max-w-[430px]">
         <div className="mb-3 text-center">
-          <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]">
+          <div className="text-[11px] font-black uppercase tracking-[0.32em] {theme.textGold}">
             Quick Game
           </div>
           <h1 className="mt-1 text-[26px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
@@ -700,8 +703,8 @@ export default function QuickGame({
                 className={cx(
                   "relative overflow-hidden rounded-[22px] border px-4 py-3 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
                   active
-                    ? "border-[#d1c79f]/80 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#9b8d5c] text-black"
-                    : "border-white/12 bg-black/42 text-white"
+                    ? theme.goldButton
+                    : theme.darkButton
                 )}
               >
                 <div className="text-[28px] font-black uppercase leading-none tracking-[-0.04em]">
@@ -732,8 +735,8 @@ export default function QuickGame({
               className={cx(
                 "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
                 courseMode === "search"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
+                  ? theme.goldButton
+                  : theme.darkButton
               )}
             >
               Course Search
@@ -749,8 +752,8 @@ export default function QuickGame({
               className={cx(
                 "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
                 courseMode === "saved"
-                  ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                  : "border-white/12 bg-black/42 text-white"
+                  ? theme.goldButton
+                  : theme.darkButton
               )}
             >
               Saved
@@ -758,7 +761,7 @@ export default function QuickGame({
           </div>
 
           {showCourseSearchPanel ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3 transition-all duration-300">
+            <div className="rounded-[18px] p-3 transition-all duration-300 {theme.panelSoft}">
               <div className="grid grid-cols-[1fr_78px] gap-2">
                 <input
                   value={courseSearch}
@@ -812,7 +815,7 @@ export default function QuickGame({
           ) : null}
 
           {showSavedCoursesPanel ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/28 p-3 transition-all duration-300">
+            <div className="rounded-[18px] p-3 transition-all duration-300 {theme.panelSoft}">
               <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
                 Last 3 Saved Courses
               </div>
@@ -858,7 +861,7 @@ export default function QuickGame({
         </Section>
 
         {selectedCourseTouched ? (
-          <div className="mt-3 rounded-[20px] border border-[#d1c79f]/45 bg-black/46 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.38)] backdrop-blur-xl">
+          <div className={cx("mt-3 rounded-[20px] p-3", theme.panel)}>
             <div className="text-[7px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/70">
               Selected Course
             </div>
@@ -889,8 +892,8 @@ export default function QuickGame({
                 className={cx(
                   "min-h-[58px] rounded-2xl border px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] transition-all",
                   tee === t.id
-                    ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                    : "border-white/12 bg-black/42 text-white"
+                    ? theme.goldButton
+                    : theme.darkButton
                 )}
               >
                 <div className="leading-[0.95]">
@@ -909,7 +912,7 @@ export default function QuickGame({
             <select
               value={format}
               onChange={(e) => setFormat(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-[#d1c79f]/40 bg-black/55 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none backdrop-blur-xl"
+              className={cx("w-full appearance-none rounded-2xl px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] outline-none", theme.panelSoft, theme.textPrimary)}
             >
               {QUICK_FORMATS.map((f) => (
                 <option key={f} value={f} className="bg-black text-white">
@@ -1028,7 +1031,7 @@ function TeamSetupColumn({
 
 function Section({ title, children }: any) {
   return (
-    <div className="mt-3 rounded-[22px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+    <div className={cx("mt-3 rounded-[22px] p-3", theme.panel)}>
       <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
         {title}
       </div>
