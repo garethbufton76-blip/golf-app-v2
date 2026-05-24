@@ -944,9 +944,9 @@ export default function Score({
               "relative mt-6 overflow-hidden rounded-[26px] border p-4 backdrop-blur-xl",
               isDayTheme
                 ? result.leader === "red"
-                  ? "border-[#9f1720]/22 bg-white/58 shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  ? "border-[#9f1720]/28 bg-[linear-gradient(135deg,rgba(255,255,255,0.90),rgba(255,238,240,0.82))] shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
                   : result.leader === "blue"
-                  ? "border-[#1f4aa8]/22 bg-white/58 shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
+                  ? "border-[#1f4aa8]/28 bg-[linear-gradient(135deg,rgba(255,255,255,0.90),rgba(235,242,255,0.82))] shadow-[0_18px_40px_rgba(18,18,18,0.14)]"
                   : theme.panel
                 : result.leader === "red"
                 ? "border-white/15 bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
@@ -956,26 +956,42 @@ export default function Score({
             )}
           >
             <div
-              className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
+              className={cx(
+                "absolute inset-0",
+                isDayTheme
+                  ? "opacity-[0.045]"
+                  : "opacity-[0.08] mix-blend-soft-light"
+              )}
               style={{
-                backgroundImage: `
-                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
-                  radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
-                `,
-                backgroundSize: "80px 80px",
+                backgroundImage: isDayTheme
+                  ? `
+                    linear-gradient(115deg, rgba(255,255,255,0.44), transparent 24%, rgba(255,255,255,0.22) 54%, transparent 76%)
+                  `
+                  : `
+                    radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
+                    radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                  `,
+                backgroundSize: isDayTheme ? "220px 220px" : "80px 80px",
               }}
             />
 
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]" />
+            <div
+              className={cx(
+                "absolute inset-0",
+                isDayTheme
+                  ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.22),transparent_48%,rgba(255,255,255,0.08))]"
+                  : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
+              )}
+            />
 
             <div className="relative z-10">
-              <div className={cx("mb-1 text-center text-[11px] font-semibold tracking-[0.22em]", isDayTheme ? "text-black/48" : "text-white/60")}>
+              <div className={cx("mb-1 text-center text-[11px] font-semibold tracking-[0.22em]", isDayTheme ? "text-[#404044]/75" : "text-white/60")}>
                 {day.label.toUpperCase()} •{" "}
                 {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
                 {day.tee.toUpperCase()}
               </div>
 
-              <div className={cx("mb-2 text-center text-[11px] font-extrabold tracking-[0.32em]", isDayTheme ? "text-black/64" : "text-white/80")}>
+              <div className={cx("mb-2 text-center text-[11px] font-extrabold tracking-[0.32em]", isDayTheme ? "text-[#2f3032]/85" : "text-white/80")}>
                 {day.format.toUpperCase()}
               </div>
 
@@ -990,7 +1006,7 @@ export default function Score({
                   isDayTheme={isDayTheme}
                 />
 
-                <div className={cx("flex h-[70px] items-center justify-center text-2xl font-bold", isDayTheme ? "text-black/52" : "text-white/75")}>
+                <div className={cx("flex h-[70px] items-center justify-center text-2xl font-bold", isDayTheme ? "text-[#2f3032]/75" : "text-white/75")}>
                   VS
                 </div>
 
@@ -1026,9 +1042,9 @@ export default function Score({
                     "mt-0.5 text-[10px] tracking-[0.16em]",
                     isDayTheme
                       ? result.leader === "red"
-                        ? "text-[#9f1720]/70"
+                        ? "text-[#9f1720]/80"
                         : result.leader === "blue"
-                        ? "text-[#1f4aa8]/70"
+                        ? "text-[#1f4aa8]/80"
                         : "text-black/42"
                       : "text-white/55"
                   )}
@@ -1236,7 +1252,9 @@ export default function Score({
                   alt="DUEL"
                   className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
                   style={{
-                    filter: "brightness(0) invert(1)",
+                    filter: isDayTheme
+                      ? "brightness(0)"
+                      : "brightness(0) invert(1)",
                   }}
                 />
               )}
