@@ -22,82 +22,138 @@ export default function BottomNav({
   onNewGame?: () => void;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+
   const { themeMode, toggleTheme } = useDuelTheme();
+
+  const isDay = themeMode === "day";
 
   return (
     <>
+      {/* SETTINGS OVERLAY */}
       {settingsOpen && (
-        <div className="absolute inset-0 z-[70] flex items-end bg-black/30 backdrop-blur-sm">
-          <div className="w-full rounded-t-[32px] border border-white/12 bg-black/88 p-5 text-white shadow-[0_-24px_70px_rgba(0,0,0,0.72)] backdrop-blur-2xl">
-            <div className="mb-5 text-center">
-              <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d1c79f]">
-                Game Settings
+        <div className="absolute inset-0 z-[70] flex items-end bg-black/18 backdrop-blur-[2px]">
+          <div className="relative w-full overflow-hidden rounded-t-[34px] border border-white/14 shadow-[0_-24px_70px_rgba(0,0,0,0.68)] backdrop-blur-2xl">
+
+            {/* background */}
+            <div
+              className={cx(
+                "absolute inset-0",
+                isDay
+                  ? "bg-[linear-gradient(180deg,rgba(255,255,255,0.88),rgba(238,238,236,0.82))]"
+                  : "bg-[linear-gradient(180deg,rgba(10,10,12,0.94),rgba(15,15,18,0.92))]"
+              )}
+            />
+
+            {/* duel glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(209,199,159,0.12),transparent_48%)]" />
+
+            {/* content */}
+            <div className="relative z-10 px-5 pb-8 pt-5">
+              {/* header */}
+              <div className="mb-5 text-center">
+                <div
+                  className={cx(
+                    "text-[10px] font-black uppercase tracking-[0.28em]",
+                    isDay ? "text-[#b9962f]" : "text-[#d1c79f]"
+                  )}
+                >
+                  Duel Settings
+                </div>
+
+                <div
+                  className={cx(
+                    "mt-1 text-[26px] font-black uppercase",
+                    isDay ? "text-[#242424]" : "text-white"
+                  )}
+                >
+                  Control Centre
+                </div>
+
+                <div
+                  className={cx(
+                    "mx-auto mt-3 h-px w-[140px] bg-gradient-to-r from-transparent to-transparent",
+                    isDay
+                      ? "via-[#b9962f]/40"
+                      : "via-[#d1c79f]/40"
+                  )}
+                />
               </div>
 
-              <div className="mt-1 text-[24px] font-black uppercase">
-                Control Centre
+              {/* buttons */}
+              <div className="space-y-3">
+                <SettingsButton
+                  label={isDay ? "Night Mode" : "Day Mode"}
+                  sub="Switch DUEL interface theme"
+                  onClick={toggleTheme}
+                  isDay={isDay}
+                />
+
+                <SettingsButton
+                  label="Finish Game"
+                  sub="Complete current match"
+                  onClick={onFinishGame}
+                  isDay={isDay}
+                />
+
+                <SettingsButton
+                  label="Change Handicaps"
+                  sub="Edit player handicaps"
+                  onClick={onChangeHandicaps}
+                  isDay={isDay}
+                />
+
+                <SettingsButton
+                  label="Change Format"
+                  sub="Singles, Better Ball, Ambrose"
+                  onClick={onChangeGameType}
+                  isDay={isDay}
+                />
+
+                <SettingsButton
+                  label="Change Tee"
+                  sub="Select another tee"
+                  onClick={onChangeTee}
+                  isDay={isDay}
+                />
+
+                <SettingsButton
+                  label="New Game"
+                  sub="Return to setup"
+                  gold
+                  onClick={onNewGame}
+                  isDay={isDay}
+                />
               </div>
+
+              {/* close */}
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className={cx(
+                  "mt-5 w-full rounded-full border py-4 text-[11px] font-black uppercase tracking-[0.22em] transition-all",
+                  isDay
+                    ? "border-black/10 bg-black/[0.03] text-black/55"
+                    : "border-white/10 bg-white/[0.04] text-white/60"
+                )}
+              >
+                Close
+              </button>
             </div>
-
-            <div className="grid gap-3">
-              <SettingsButton
-                label={themeMode === "night" ? "Day Mode" : "Night Mode"}
-                sub="Switch the app theme"
-                onClick={toggleTheme}
-              />
-
-              <SettingsButton
-                label="Finish Game"
-                sub="Close the current match"
-                onClick={onFinishGame}
-              />
-
-              <SettingsButton
-                label="Change Handicaps"
-                sub="Edit player handicaps"
-                onClick={onChangeHandicaps}
-              />
-
-              <SettingsButton
-                label="Change Game Type"
-                sub="Singles, better ball, Ambrose"
-                onClick={onChangeGameType}
-              />
-
-              <SettingsButton
-                label="Change Tee"
-                sub="Select another tee"
-                onClick={onChangeTee}
-              />
-
-              <SettingsButton
-                label="New Game"
-                sub="Return to game setup"
-                gold
-                onClick={onNewGame}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(false)}
-              className="mt-5 w-full rounded-full border border-white/14 bg-white/[0.04] py-4 text-[12px] font-black uppercase tracking-[0.2em] text-white/70"
-            >
-              Cancel
-            </button>
           </div>
         </div>
       )}
 
+      {/* FOOTER */}
       <div className="absolute bottom-0 left-0 right-0 z-50">
         <div className="relative h-[78px] overflow-hidden border-t border-white/10 bg-black/86 shadow-[0_-18px_42px_rgba(0,0,0,0.68)] backdrop-blur-xl">
-          {/* background glow */}
+
+          {/* glow */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/62 via-[#111318]/82 to-[#10233e]/68" />
 
           {/* top light */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.16),transparent_42%)]" />
 
-          {/* nav items */}
+          {/* nav */}
           <div className="relative grid h-full grid-cols-4">
             <NavButton
               label="Live"
@@ -163,26 +219,33 @@ function SettingsButton({
   sub,
   onClick,
   gold = false,
+  isDay = false,
 }: any) {
   return (
     <button
       type="button"
       onClick={onClick}
       className={cx(
-        "rounded-[20px] border px-4 py-3 text-left transition-all active:scale-[0.99]",
+        "w-full rounded-[24px] border px-4 py-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.16)] backdrop-blur-xl transition-all active:scale-[0.99]",
         gold
-          ? "border-[#d1c79f]/70 bg-[#d1c79f] text-black"
-          : "border-white/10 bg-white/[0.04] text-white"
+          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+          : isDay
+          ? "border-black/10 bg-white/60 text-[#202020]"
+          : "border-white/10 bg-white/[0.05] text-white"
       )}
     >
-      <div className="text-[13px] font-black uppercase tracking-[0.14em]">
+      <div className="text-[13px] font-black uppercase tracking-[0.16em]">
         {label}
       </div>
 
       <div
         className={cx(
           "mt-1 text-[9px] font-black uppercase tracking-[0.14em]",
-          gold ? "text-black/50" : "text-white/36"
+          gold
+            ? "text-black/45"
+            : isDay
+            ? "text-black/45"
+            : "text-white/34"
         )}
       >
         {sub}
