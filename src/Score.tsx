@@ -596,7 +596,7 @@ export default function Score({
         <div
           className={cx(
             "mt-0.5 font-black leading-none tracking-[-0.04em]",
-            isDayTheme ? "text-[22px] text-[#2d2d2f]" : "text-[22px] text-white"
+            isDayTheme ? "text-[20px] text-[#2d2d2f]" : "text-[20px] text-white"
           )}
           style={{
             fontFamily: '"SF Pro Display", "Inter", "Helvetica Neue", sans-serif',
@@ -1071,7 +1071,7 @@ export default function Score({
               <div className="mt-1 text-center">
                 <div
                   className={cx(
-                    "text-[20px] font-extrabold tracking-[0.08em]",
+                    "text-[22px] font-black tracking-[-0.04em] leading-none",
                     isDayTheme
                       ? result.leader === "red"
                         ? "text-[#9f1720]"
@@ -1081,7 +1081,13 @@ export default function Score({
                       : "text-white"
                   )}
                 >
-                  {displayMain}
+                  <span
+                    style={{
+                      fontFamily: '"SF Pro Display", "Inter", "Helvetica Neue", sans-serif',
+                    }}
+                  >
+                    {displayMain}
+                  </span>
                 </div>
 
                 <div
