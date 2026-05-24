@@ -593,7 +593,17 @@ export default function Score({
           ) : null}
         </div>
 
-        <div className="mt-0.5 text-[13px] font-medium">{h.hole}</div>
+        <div
+          className={cx(
+            "mt-0.5 font-black leading-none tracking-[-0.04em]",
+            isDayTheme ? "text-[22px] text-[#2d2d2f]" : "text-[22px] text-white"
+          )}
+          style={{
+            fontFamily: '"SF Pro Display", "Inter", "Helvetica Neue", sans-serif',
+          }}
+        >
+          {h.hole}
+        </div>
 
         <div className={cx("mt-1 text-[9px]", isDayTheme ? "text-black/45" : "text-white/50")}>SI {detail.si}</div>
       </button>
