@@ -32,8 +32,41 @@ export default function BottomNav({
       {/* SETTINGS OVERLAY */}
       {settingsOpen && (
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
-          {/* background blur */}
-          <div className="absolute inset-0 bg-black/26 backdrop-blur-[3px]" />
+          {/* APP BACKGROUND IMAGE */}
+          <div
+            className="absolute inset-0 bg-cover bg-center opacity-[0.38]"
+            style={{
+              backgroundImage: "url('/admin-home-bg.jpg')",
+            }}
+          />
+
+          {/* DARK ATMOSPHERE */}
+          <div className="absolute inset-0 bg-black/42 backdrop-blur-[5px]" />
+
+          {/* RED / BLUE AMBIENT */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/30 via-black/20 to-[#10233e]/30" />
+
+          {/* GLASS TEXTURE */}
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              background: `
+                linear-gradient(
+                  112deg,
+                  transparent 0%,
+                  rgba(255,255,255,0.26) 12%,
+                  transparent 24%,
+                  transparent 34%,
+                  rgba(255,255,255,0.14) 46%,
+                  transparent 58%,
+                  transparent 66%,
+                  rgba(255,255,255,0.10) 78%,
+                  transparent 90%
+                )
+              `,
+              backgroundSize: "420px 420px",
+            }}
+          />
 
           {/* content */}
           <div className="relative z-10 px-4 pt-5 pb-10">
@@ -49,7 +82,7 @@ export default function BottomNav({
             </div>
 
             {/* SETTINGS PANEL */}
-            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/42 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+            <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-black/28 shadow-[0_24px_60px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
 
               {/* split ambient */}
               <div className="absolute inset-0 bg-gradient-to-r from-[#64111a]/72 via-[#15181f]/82 to-[#13294c]/72" />
