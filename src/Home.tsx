@@ -222,7 +222,7 @@ export default function Home({
                 LIVE
               </div>
 
-              <div className=cx("mt-2 rounded-full px-6 py-3 text-center transition-all duration-500", theme.panelSoft)>
+              <div className={cx("mt-2 rounded-full px-6 py-3 text-center transition-all duration-500", theme.panelSoft)}>
                 <span className="text-[28px] font-black">
                   {formatScore(totals.live.red)}
                 </span>
