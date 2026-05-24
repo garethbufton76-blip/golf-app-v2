@@ -974,7 +974,6 @@ export default function QuickGame({
 }
 
 function TeamSetupColumn({
-  const { theme } = useDuelTheme();
   tone,
   teamName,
   setTeamName,
@@ -984,6 +983,7 @@ function TeamSetupColumn({
   courseSlope,
   playingHandicap,
 }: any) {
+  const { theme } = useDuelTheme();
   const isRed = tone === "red";
 
   return (
