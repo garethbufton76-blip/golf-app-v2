@@ -1066,15 +1066,22 @@ export default function Score({
           {selectedHole ? (
             <div
               className={cx(
-                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] bg-[#05070c]/98 p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                isDayTheme
+                  ? "border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.82))] shadow-[0_24px_60px_rgba(18,18,18,0.18)]"
+                  : "bg-[#05070c]/98",
                 isBetterBall ? "top-[-232px]" : "top-0"
               )}
             >
               <div
-                className="pointer-events-none absolute inset-0 opacity-70"
+                className={cx(
+                  "pointer-events-none absolute inset-0",
+                  isDayTheme ? "opacity-100" : "opacity-70"
+                )}
                 style={{
-                  background:
-                    "linear-gradient(90deg, rgba(64,6,12,0.96), rgba(12,15,22,0.985) 48%, rgba(4,13,27,0.985))",
+                  background: isDayTheme
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.35), rgba(244,244,242,0.18) 48%, rgba(255,255,255,0.20))"
+                    : "linear-gradient(90deg, rgba(64,6,12,0.96), rgba(12,15,22,0.985) 48%, rgba(4,13,27,0.985))",
                 }}
               />
 
@@ -1089,24 +1096,33 @@ export default function Score({
                 }}
               />
 
-              <div className="pointer-events-none absolute left-0 right-0 top-0 h-[132px] bg-gradient-to-b from-[#05070c] via-[#05070c]/96 to-transparent" />
+              <div
+                className={cx(
+                  "pointer-events-none absolute left-0 right-0 top-0 h-[132px] bg-gradient-to-b to-transparent",
+                  isDayTheme
+                    ? "from-white/70 via-white/35"
+                    : "from-[#05070c] via-[#05070c]/96"
+                )}
+              />
 
               <img
                 src="/launch-logo.png"
                 alt="DUEL"
                 className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
                 style={{
-                  filter: "brightness(0) invert(1)",
+                  filter: isDayTheme
+                    ? "brightness(0)"
+                    : "brightness(0) invert(1)",
                 }}
               />
 
               <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-[9px] tracking-[0.24em] text-white/50">
+                  <div className={cx("text-[9px] tracking-[0.24em]", isDayTheme ? "text-black/48" : "text-white/50")}>
                     SCORE HOLE
                   </div>
 
-                  <div className="mt-0.5 text-[20px] font-black tracking-[0.04em] text-white">
+                  <div className={cx("mt-0.5 text-[20px] font-black tracking-[0.04em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
                     Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
                     {selectedHole.si}
                   </div>
