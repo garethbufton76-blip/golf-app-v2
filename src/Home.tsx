@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useDuelTheme } from "../useDuelTheme";
 import {
   Logo,
   Button,
@@ -111,6 +112,7 @@ export default function Home({
   roster,
   states,
 }: any) {
+  const { theme } = useDuelTheme();
   const [liveExpanded, setLiveExpanded] = useState(true);
 
   const day = dayConfigs[activeDay];
@@ -141,7 +143,7 @@ export default function Home({
   });
 
   return (
-    <div className="relative flex-1 overflow-y-auto pb-[96px]">
+    <div className={cx("relative flex-1 overflow-y-auto pb-[96px]", theme.app)}>
       <div className="flex justify-center pt-2">
         <img
           src="/launch-logo.png"
@@ -220,7 +222,7 @@ export default function Home({
                 LIVE
               </div>
 
-              <div className="mt-2 rounded-full border border-[#d1c79f]/20 bg-black/50 px-6 py-3 text-center shadow-[0_12px_32px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all duration-500">
+              <div className=cx("mt-2 rounded-full px-6 py-3 text-center transition-all duration-500", theme.panelSoft)>
                 <span className="text-[28px] font-black">
                   {formatScore(totals.live.red)}
                 </span>
@@ -235,7 +237,7 @@ export default function Home({
               <button
                 type="button"
                 onClick={() => setLiveExpanded((value) => !value)}
-                className="mt-4 flex h-9 w-9 items-center justify-center rounded-full border border-[#d1c79f]/25 bg-black/42 text-[#efe6bf] shadow-[0_10px_24px_rgba(0,0,0,0.45)] backdrop-blur-xl transition-all active:scale-95"
+                className=cx("mt-4 flex h-9 w-9 items-center justify-center rounded-full transition-all active:scale-95", theme.panelSoft, theme.textGold)
                 aria-label="Show live matches"
               >
                 <span className="translate-y-[-1px] text-[22px] leading-none">
@@ -331,7 +333,14 @@ export default function Home({
               </button>
             </div>
 
-            <div className="mt-2 h-px w-full bg-gradient-to-r from-transparent via-[#d1c79f]/45 to-transparent" />
+            <div
+              className={cx(
+                "mt-2 h-px w-full bg-gradient-to-r from-transparent to-transparent",
+                theme.mode === "day"
+                  ? "via-[#b99b2f]/35"
+                  : "via-[#d1c79f]/45"
+              )}
+            />
 
           </>
         )}
@@ -365,10 +374,10 @@ export default function Home({
                   className={cx(
                     "relative w-full overflow-hidden rounded-[24px] border px-4 py-4 text-left shadow-[0_14px_34px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-all active:scale-[0.99]",
                     isRedLeader
-                      ? "border-white/68 bg-[#320611]"
+                      ? theme.redPanel
                       : isBlueLeader
-                      ? "border-white/68 bg-[#0a142b]"
-                      : "border-white/48 bg-gradient-to-r from-[#111311]/96 via-[#0b0d10]/98 to-[#090909]/99"
+                      ? theme.bluePanel
+                      : theme.panelStrong
                   )}
                 >
                   <div
@@ -388,7 +397,7 @@ export default function Home({
                         {matchCard.label} • {day.format}
                       </div>
 
-                      <div className="rounded-full bg-gradient-to-b from-[#f0d175] via-[#d6a936] to-[#a96f18] px-3 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-black shadow-[0_8px_18px_rgba(0,0,0,0.35)]">
+                      <div className=cx("rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.14em] shadow-[0_8px_18px_rgba(0,0,0,0.35)]", theme.goldButton)>
                         ⚑ Hole {Math.max(1, matchCard.holesPlayed + 1)}
                       </div>
                     </div>
@@ -398,7 +407,7 @@ export default function Home({
                         <div
                           className={cx(
                             "whitespace-pre-line text-[18px] font-black uppercase leading-[1.08] tracking-[0.01em]",
-                            isRedLeader ? "text-[#ff3a46]" : "text-red-100/92"
+                            isRedLeader ? theme.redAccent : "text-red-100/92"
                           )}
                         >
                           {matchCard.redNames.replaceAll(" / ", "\n&\n")}
@@ -410,9 +419,9 @@ export default function Home({
                           className={cx(
                             "font-black uppercase leading-[0.76] tracking-[0.02em]",
                             isRedLeader
-                              ? "text-[#ff3a46]"
+                              ? theme.redAccent
                               : isBlueLeader
-                              ? "text-[#5f95ff]"
+                              ? theme.blueAccent
                               : "text-white"
                           )}
                           style={{
@@ -430,7 +439,7 @@ export default function Home({
                         <div
                           className={cx(
                             "whitespace-pre-line text-[18px] font-black uppercase leading-[1.08] tracking-[0.01em]",
-                            isBlueLeader ? "text-[#5f95ff]" : "text-blue-100/92"
+                            isBlueLeader ? theme.blueAccent : "text-blue-100/92"
                           )}
                         >
                           {matchCard.blueNames.replaceAll(" / ", "\n&\n")}
@@ -451,4 +460,3 @@ export default function Home({
     </div>
   );
 }
-
