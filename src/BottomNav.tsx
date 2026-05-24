@@ -32,101 +32,73 @@ export default function BottomNav({
       {/* SETTINGS OVERLAY */}
       {settingsOpen && (
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
-          {/* APP BACKGROUND IMAGE */}
+          {/* same DUEL score-page background, without match/hole panels */}
           <div
-            className="absolute inset-0 bg-cover bg-center opacity-[0.38]"
+            className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage: "url('/admin-home-bg.jpg')",
             }}
           />
 
-          {/* DARK ATMOSPHERE */}
-          <div className="absolute inset-0 bg-black/42 backdrop-blur-[5px]" />
-
-          {/* RED / BLUE AMBIENT */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/30 via-black/20 to-[#10233e]/30" />
-
-          {/* GLASS TEXTURE */}
-          <div
-            className="absolute inset-0 opacity-[0.08]"
-            style={{
-              background: `
-                linear-gradient(
-                  112deg,
-                  transparent 0%,
-                  rgba(255,255,255,0.26) 12%,
-                  transparent 24%,
-                  transparent 34%,
-                  rgba(255,255,255,0.14) 46%,
-                  transparent 58%,
-                  transparent 66%,
-                  rgba(255,255,255,0.10) 78%,
-                  transparent 90%
-                )
-              `,
-              backgroundSize: "420px 420px",
-            }}
-          />
+          {/* subtle depth only — no separate modal wrapper */}
+          <div className="absolute inset-0 bg-black/10" />
 
           {/* content */}
-          <div className="relative z-10 px-4 pt-5 pb-10">
-            {/* heading */}
-            <div className="mb-4 text-center">
-              <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/55">
+          <div className="relative z-10 mx-auto flex min-h-full max-w-[430px] flex-col px-4 pb-8 pt-5">
+            <div className="mb-5 text-center">
+              <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/70">
                 Duel Settings
               </div>
 
-              <div className="mt-1 text-[28px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
+              <div className="mt-1 text-[30px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
                 Control Centre
               </div>
             </div>
 
             <div className="space-y-4">
+              <SettingsButton
+                label={isDay ? "Night Mode" : "Day Mode"}
+                sub="Switch score screen panels"
+                onClick={toggleTheme}
+              />
 
-                  <SettingsButton
-                    label={isDay ? "Night Mode" : "Day Mode"}
-                    sub="Switch DUEL interface theme"
-                    onClick={toggleTheme}
-                  />
+              <SettingsButton
+                label="Finish Game"
+                sub="Complete current match"
+                danger
+                onClick={onFinishGame}
+              />
 
-                  <SettingsButton
-                    label="Finish Game"
-                    sub="Complete current match"
-                    danger
-                    onClick={onFinishGame}
-                  />
+              <SettingsButton
+                label="Change Handicaps"
+                sub="Edit player handicaps"
+                onClick={onChangeHandicaps}
+              />
 
-                  <SettingsButton
-                    label="Change Handicaps"
-                    sub="Edit player handicaps"
-                    onClick={onChangeHandicaps}
-                  />
+              <SettingsButton
+                label="Change Format"
+                sub="Singles, Better Ball, Ambrose"
+                onClick={onChangeGameType}
+              />
 
-                  <SettingsButton
-                    label="Change Format"
-                    sub="Singles, Better Ball, Ambrose"
-                    onClick={onChangeGameType}
-                  />
+              <SettingsButton
+                label="Change Tee"
+                sub="Select another tee"
+                onClick={onChangeTee}
+              />
 
-                  <SettingsButton
-                    label="Change Tee"
-                    sub="Select another tee"
-                    onClick={onChangeTee}
-                  />
-
-                  <SettingsButton
-                    label="New Game"
-                    sub="Return to setup"
-                    gold
-                    onClick={onNewGame}
-                  />
+              <SettingsButton
+                label="New Game"
+                sub="Return to setup"
+                gold
+                onClick={onNewGame}
+              />
             </div>
 
-            {/* CLOSE */}
             <button
               type="button"
               onClick={() => setSettingsOpen(false)}
-              className="mt-5 w-full rounded-[24px] border border-white/14 bg-white/[0.07] py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/72 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-2xl transition-all active:scale-[0.99]"
+              className="mt-5 w-full rounded-[24px] border border-white/14 bg-black/38 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/72 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-[0.99]"
             >
               Close
             </button>
@@ -217,37 +189,32 @@ function SettingsButton({
       type="button"
       onClick={onClick}
       className={cx(
-        "relative w-full overflow-hidden rounded-[24px] border px-5 py-5 text-left shadow-[0_18px_40px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
+        "relative w-full overflow-hidden rounded-[26px] border px-5 py-5 text-left shadow-[0_24px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-all active:scale-[0.99]",
         gold
-          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+          ? "border-[#d1c79f]/75 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
           : danger
-          ? "border-[#ff4355]/35 bg-[linear-gradient(135deg,rgba(116,25,35,0.46),rgba(38,4,10,0.30))] text-white"
-          : "border-white/18 bg-white/[0.07] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_18px_40px_rgba(0,0,0,0.35)]"
+          ? "border-[#9f1720]/42 bg-[linear-gradient(135deg,rgba(255,244,245,0.92),rgba(255,214,220,0.86),rgba(255,232,236,0.82))] text-[#681019]"
+          : "border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.78))] text-[#2f3032]"
       )}
     >
-      {/* red / blue glass tint */}
-      {!gold && !danger && (
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#5b0f18]/26 via-white/[0.025] to-[#10233e]/26" />
-      )}
-
-      {/* glass texture */}
+      {/* same cut-glass bands as score panels */}
       <div
         className={cx(
-          "pointer-events-none absolute inset-0",
-          gold ? "opacity-[0.18]" : "opacity-[0.22]"
+          "pointer-events-none absolute inset-0 rounded-[26px]",
+          gold ? "opacity-[0.18]" : "opacity-[0.34]"
         )}
         style={{
           background: `
             linear-gradient(
               112deg,
               transparent 0%,
-              rgba(255,255,255,0.30) 12%,
+              rgba(255,255,255,0.74) 12%,
               transparent 24%,
               transparent 34%,
-              rgba(255,255,255,0.18) 46%,
+              rgba(255,255,255,0.44) 46%,
               transparent 58%,
               transparent 66%,
-              rgba(255,255,255,0.12) 78%,
+              rgba(255,255,255,0.30) 78%,
               transparent 90%
             )
           `,
@@ -255,7 +222,32 @@ function SettingsButton({
         }}
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-black/10" />
+      <div
+        className={cx(
+          "pointer-events-none absolute inset-0 rounded-[26px]",
+          gold ? "opacity-[0.08]" : "opacity-[0.18]"
+        )}
+        style={{
+          background: `
+            linear-gradient(
+              112deg,
+              transparent 0%,
+              transparent 18%,
+              rgba(0,0,0,0.07) 24%,
+              transparent 32%,
+              transparent 52%,
+              rgba(0,0,0,0.05) 58%,
+              transparent 66%,
+              transparent 82%,
+              rgba(0,0,0,0.04) 86%,
+              transparent 100%
+            )
+          `,
+          backgroundSize: "420px 420px",
+        }}
+      />
+
+      <div className="pointer-events-none absolute inset-0 rounded-[26px] bg-gradient-to-b from-white/18 via-transparent to-black/5" />
 
       <div className="relative z-10">
         <div className="text-[14px] font-black uppercase tracking-[0.18em]">
@@ -267,7 +259,9 @@ function SettingsButton({
             "mt-1 text-[9px] font-black uppercase tracking-[0.16em]",
             gold
               ? "text-black/45"
-              : "text-white/38"
+              : danger
+              ? "text-[#681019]/55"
+              : "text-black/45"
           )}
         >
           {sub}
