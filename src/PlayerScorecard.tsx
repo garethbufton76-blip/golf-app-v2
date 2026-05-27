@@ -491,18 +491,6 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
     </div>
   );
 }
-      >
-        {showingTeamCard ? (
-          label
-        ) : (
-          <div className="whitespace-nowrap text-[42px] leading-none tracking-[-0.04em]">
-            {label}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function PlayerNameBlock({ player, align, namePartsFor }: any) {
   const parts = namePartsFor(player);
