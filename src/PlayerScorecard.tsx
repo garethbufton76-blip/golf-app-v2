@@ -280,11 +280,11 @@ export default function PlayerScorecard({
                   <>
                     <div
                       style={{
-                        fontSize: "48px",
+                        fontSize: "42px",
                         lineHeight: "0.85",
                         letterSpacing: "-0.02em",
                         fontWeight: 800,
-                        opacity: 0.28,
+                        opacity: 0.20,
                         transform: "scaleY(1.04)",
                       }}
                     >
@@ -293,11 +293,11 @@ export default function PlayerScorecard({
 
                     <div
                       style={{
-                        marginTop: "-6px",
+                        marginTop: "-1px",
                         fontSize: "32px",
                         lineHeight: "0.95",
                         letterSpacing: "0.28em",
-                        fontWeight: 300,
+                        fontWeight: 50,
                       }}
                     >
                       {titleNameParts.slice(1).join(" ")}
