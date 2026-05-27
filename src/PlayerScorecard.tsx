@@ -269,13 +269,18 @@ export default function PlayerScorecard({
                 />
               </div>
 
-              <div
-                className="text-[34px] font-black uppercase leading-[0.86] tracking-[0.015em] text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)]"
-                style={{
-                  fontFamily:
-                    'Impact, "Arial Narrow", "Arial Black", sans-serif',
-                }}
-              >
+     <div
+  className="uppercase text-white drop-shadow-[0_14px_28px_rgba(0,0,0,0.92)]"
+  style={{
+    fontFamily:
+      '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
+    fontSize: "74px",
+    lineHeight: "0.82",
+    letterSpacing: "-0.045em",
+    fontWeight: 700,
+    transform: "scaleY(1.08)",
+  }}
+>
                 {titleNameParts.length ? (
                   titleNameParts.map((part) => (
                     <div key={part}>{part}</div>
@@ -492,14 +497,17 @@ function PlayerNameBlock({ player, align, namePartsFor }: any) {
   const surname = parts.slice(1).join(" ");
 
   return (
-    <div
-      className={`font-black uppercase text-white drop-shadow-[0_10px_18px_rgba(0,0,0,0.9)] ${
-        align === "right" ? "text-right" : "text-left"
-      }`}
-      style={{
-        fontFamily: 'Impact, "Arial Narrow", "Arial Black", sans-serif',
-      }}
-    >
+  <div
+  className={`uppercase text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.92)] ${
+    align === "right" ? "text-right" : "text-left"
+  }`}
+  style={{
+    fontFamily:
+      '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
+    letterSpacing: "-0.04em",
+    transform: "scaleY(1.05)",
+  }}
+>
       <div className="text-[26px] leading-[0.86] tracking-[0.015em]">
         {firstName}
       </div>
