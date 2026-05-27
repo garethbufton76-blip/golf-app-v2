@@ -24,81 +24,127 @@ export default function BottomNav({
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { themeMode, toggleTheme } = useDuelTheme();
-
   const isDay = themeMode === "day";
 
   return (
     <>
-      {/* SETTINGS OVERLAY */}
+      {/* SETTINGS OVERLAY - QUICK GAME STYLE */}
       {settingsOpen && (
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
-          {/* same DUEL score-page background, without match/hole panels */}
+          {/* same background language as Quick Game */}
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
               backgroundImage: "url('/admin-home-bg.jpg')",
             }}
           />
-
-          {/* subtle depth only — no separate modal wrapper */}
           <div className="absolute inset-0 bg-black/10" />
 
-          {/* content */}
-          <div className="relative z-10 mx-auto flex min-h-full max-w-[430px] flex-col px-4 pb-8 pt-5">
-            <div className="mb-5 text-center">
-              <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/70">
+          <div className="relative z-10 mx-auto max-w-[430px] px-4 pb-8 pt-4 text-white">
+            <div className="mb-4 text-center">
+              <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/60">
                 Duel Settings
               </div>
 
-              <div className="mt-1 text-[30px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
+              <div className="mt-1 text-[28px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
                 Control Centre
               </div>
             </div>
 
-            <div className="space-y-4">
-              <SettingsButton
-                label={isDay ? "Night Mode" : "Day Mode"}
-                sub="Switch score screen panels"
-                onClick={toggleTheme}
-              />
+            <QuickSettingsSection title="Theme">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={cx(
+                    "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    !isDay
+                      ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                      : "border-white/10 bg-black/55 text-white"
+                  )}
+                >
+                  <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
+                    Night
+                  </div>
+                  <div
+                    className={cx(
+                      "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
+                      !isDay ? "text-black/55" : "text-white/35"
+                    )}
+                  >
+                    Mode
+                  </div>
+                </button>
 
-              <SettingsButton
-                label="Finish Game"
-                sub="Complete current match"
-                danger
-                onClick={onFinishGame}
-              />
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className={cx(
+                    "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    isDay
+                      ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                      : "border-white/10 bg-black/55 text-white"
+                  )}
+                >
+                  <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
+                    Day
+                  </div>
+                  <div
+                    className={cx(
+                      "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
+                      isDay ? "text-black/55" : "text-white/35"
+                    )}
+                  >
+                    Mode
+                  </div>
+                </button>
+              </div>
+            </QuickSettingsSection>
 
-              <SettingsButton
-                label="Change Handicaps"
-                sub="Edit player handicaps"
-                onClick={onChangeHandicaps}
-              />
+            <QuickSettingsSection title="Match Control">
+              <div className="grid gap-3">
+                <SettingsButton
+                  label="Finish Game"
+                  sub="Complete current match"
+                  danger
+                  onClick={onFinishGame}
+                />
 
-              <SettingsButton
-                label="Change Format"
-                sub="Singles, Better Ball, Ambrose"
-                onClick={onChangeGameType}
-              />
+                <SettingsButton
+                  label="New Game"
+                  sub="Return to setup"
+                  gold
+                  onClick={onNewGame}
+                />
+              </div>
+            </QuickSettingsSection>
 
-              <SettingsButton
-                label="Change Tee"
-                sub="Select another tee"
-                onClick={onChangeTee}
-              />
+            <QuickSettingsSection title="Edit Game">
+              <div className="grid gap-3">
+                <SettingsButton
+                  label="Change Handicaps"
+                  sub="Edit player handicaps"
+                  onClick={onChangeHandicaps}
+                />
 
-              <SettingsButton
-                label="New Game"
-                sub="Return to setup"
-                gold
-                onClick={onNewGame}
-              />
-            </div>
+                <SettingsButton
+                  label="Change Format"
+                  sub="Singles, Better Ball, Ambrose"
+                  onClick={onChangeGameType}
+                />
+
+                <SettingsButton
+                  label="Change Tee"
+                  sub="Select another tee"
+                  onClick={onChangeTee}
+                />
+              </div>
+            </QuickSettingsSection>
 
             <button
               type="button"
               onClick={() => setSettingsOpen(false)}
-              className="mt-5 w-full rounded-[24px] border border-white/14 bg-black/38 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/72 shadow-[0_10px_30px_rgba(0,0,0,0.32)] backdrop-blur-xl transition-all active:scale-[0.99]"
+              className="mt-4 w-full rounded-[22px] border border-white/10 bg-black/55 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/76 shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]"
             >
               Close
             </button>
@@ -109,7 +155,6 @@ export default function BottomNav({
       {/* FOOTER */}
       <div className="absolute bottom-0 left-0 right-0 z-50">
         <div className="relative h-[78px] overflow-hidden border-t border-white/10 bg-black/86 shadow-[0_-18px_42px_rgba(0,0,0,0.68)] backdrop-blur-xl">
-
           {/* glow */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/62 via-[#111318]/82 to-[#10233e]/68" />
 
@@ -148,9 +193,7 @@ export default function BottomNav({
               <div
                 className={cx(
                   "text-[10px] font-black uppercase tracking-[0.18em]",
-                  activeTab === "score"
-                    ? "text-white"
-                    : "text-white/70"
+                  activeTab === "score" ? "text-white" : "text-white/70"
                 )}
               >
                 Score
@@ -177,6 +220,18 @@ export default function BottomNav({
   );
 }
 
+function QuickSettingsSection({ title, children }: any) {
+  return (
+    <div className="mt-3 rounded-[26px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="mb-3 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
+        {title}
+      </div>
+
+      {children}
+    </div>
+  );
+}
+
 function SettingsButton({
   label,
   sub,
@@ -189,79 +244,25 @@ function SettingsButton({
       type="button"
       onClick={onClick}
       className={cx(
-        "relative w-full overflow-hidden rounded-[26px] border px-5 py-5 text-left shadow-[0_24px_60px_rgba(0,0,0,0.18)] backdrop-blur-2xl transition-all active:scale-[0.99]",
+        "relative w-full overflow-hidden rounded-[22px] border px-4 py-4 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
         gold
-          ? "border-[#d1c79f]/75 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
           : danger
-          ? "border-[#9f1720]/42 bg-[linear-gradient(135deg,rgba(255,244,245,0.92),rgba(255,214,220,0.86),rgba(255,232,236,0.82))] text-[#681019]"
-          : "border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.78))] text-[#2f3032]"
+          ? "border-[#ff4355]/25 bg-[linear-gradient(135deg,rgba(94,8,18,0.76),rgba(20,0,6,0.86))] text-white"
+          : "border-white/10 bg-black/55 text-white"
       )}
     >
-      {/* same cut-glass bands as score panels */}
-      <div
-        className={cx(
-          "pointer-events-none absolute inset-0 rounded-[26px]",
-          gold ? "opacity-[0.18]" : "opacity-[0.34]"
-        )}
-        style={{
-          background: `
-            linear-gradient(
-              112deg,
-              transparent 0%,
-              rgba(255,255,255,0.74) 12%,
-              transparent 24%,
-              transparent 34%,
-              rgba(255,255,255,0.44) 46%,
-              transparent 58%,
-              transparent 66%,
-              rgba(255,255,255,0.30) 78%,
-              transparent 90%
-            )
-          `,
-          backgroundSize: "420px 420px",
-        }}
-      />
-
-      <div
-        className={cx(
-          "pointer-events-none absolute inset-0 rounded-[26px]",
-          gold ? "opacity-[0.08]" : "opacity-[0.18]"
-        )}
-        style={{
-          background: `
-            linear-gradient(
-              112deg,
-              transparent 0%,
-              transparent 18%,
-              rgba(0,0,0,0.07) 24%,
-              transparent 32%,
-              transparent 52%,
-              rgba(0,0,0,0.05) 58%,
-              transparent 66%,
-              transparent 82%,
-              rgba(0,0,0,0.04) 86%,
-              transparent 100%
-            )
-          `,
-          backgroundSize: "420px 420px",
-        }}
-      />
-
-      <div className="pointer-events-none absolute inset-0 rounded-[26px] bg-gradient-to-b from-white/18 via-transparent to-black/5" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/[0.08] via-transparent to-black/10" />
 
       <div className="relative z-10">
-        <div className="text-[14px] font-black uppercase tracking-[0.18em]">
+        <div className="text-[13px] font-black uppercase tracking-[0.18em]">
           {label}
         </div>
 
         <div
           className={cx(
-            "mt-1 text-[9px] font-black uppercase tracking-[0.16em]",
-            gold
-              ? "text-black/45"
-              : danger
-              ? "text-[#681019]/55"
-              : "text-black/45"
+            "mt-1 text-[8px] font-black uppercase tracking-[0.16em]",
+            gold ? "text-black/48" : "text-white/38"
           )}
         >
           {sub}
@@ -311,3 +312,4 @@ function NavButton({
     </button>
   );
 }
+
