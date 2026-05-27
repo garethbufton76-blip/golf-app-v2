@@ -468,18 +468,29 @@ function MatchScoreWatermark({ label, showingTeamCard }: any) {
           : "pointer-events-none absolute right-7 top-[286px] z-[14] w-[150px] text-right"
       }
     >
-     className={
-  showingTeamCard
-    ? "text-[118px] leading-[0.78] tracking-[-0.065em] text-white"
-    : "text-[58px] leading-[0.92] tracking-[0.22em] text-white"
+      <div
+        className={
+          showingTeamCard
+            ? "text-[118px] leading-[0.78] tracking-[-0.065em] text-white"
+            : "text-[58px] leading-[0.92] tracking-[0.22em] text-white"
+        }
+        style={{
+          fontFamily:
+            '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
+          fontWeight: showingTeamCard ? 800 : 300,
+          transform: showingTeamCard ? "scaleY(1.06)" : "none",
+          opacity: showingTeamCard ? 0.22 : 1,
+        }}
+      >
+        {showingTeamCard ? (
+          label
+        ) : (
+          <div className="whitespace-nowrap">{label}</div>
+        )}
+      </div>
+    </div>
+  );
 }
-style={{
-  fontFamily:
-    '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
-  fontWeight: showingTeamCard ? 800 : 300,
-  transform: showingTeamCard ? "scaleY(1.06)" : "none",
-  opacity: showingTeamCard ? 0.22 : 1,
-}}
       >
         {showingTeamCard ? (
           label
