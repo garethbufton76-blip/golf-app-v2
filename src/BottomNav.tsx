@@ -104,17 +104,19 @@ export default function BottomNav({
             <QuickSettingsSection title="Match Control">
               <div className="grid gap-3">
                 <SettingsButton
-                  label="Finish Game"
-                  sub="Complete current match"
-                  danger
-                  onClick={onFinishGame}
-                />
-
-                <SettingsButton
-                  label="New Game"
-                  sub="Return to setup"
+                  label="End Match"
+                  sub="Return to landing screen"
                   gold
-                  onClick={onNewGame}
+                  onClick={() => {
+                    const confirmed = window.confirm(
+                      "Are you sure you want to end this match?\n\nCurrent scores will be lost."
+                    );
+
+                    if (confirmed) {
+                      onNewGame?.();
+                      setSettingsOpen(false);
+                    }
+                  }}
                 />
               </div>
             </QuickSettingsSection>
