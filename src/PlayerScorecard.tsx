@@ -284,7 +284,7 @@ export default function PlayerScorecard({
                         lineHeight: "0.85",
                         letterSpacing: "-0.02em",
                         fontWeight: 800,
-                        opacity: 0.20,
+                        opacity: 0.80,
                         transform: "scaleY(1.04)",
                       }}
                     >
@@ -297,7 +297,7 @@ export default function PlayerScorecard({
                         fontSize: "32px",
                         lineHeight: "0.95",
                         letterSpacing: "0.28em",
-                        fontWeight: 50,
+                        fontWeight: 10,
                       }}
                     >
                       {titleNameParts.slice(1).join(" ")}
