@@ -269,80 +269,44 @@ export default function PlayerScorecard({
                 />
               </div>
 
-    <div
-  className="uppercase text-white"
-  style={{
-    fontFamily:
-      '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
-  }}
->
-  {titleNameParts.length ? (
-    <>
-      {/* GARETH */}
-      <div
-        style={{
-          fontSize: "48px",
-          lineHeight: "0.85",
-          letterSpacing: "-0.02em",
-          fontWeight: 800,
-          opacity: 0.28,
-          transform: "scaleY(1.04)",
-        }}
-      >
-        {titleNameParts[0]}
-      </div>
+  <div
+                className="uppercase text-white"
+                style={{
+                  fontFamily:
+                    '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
+                }}
+              >
+                {titleNameParts.length ? (
+                  <>
+                    <div
+                      style={{
+                        fontSize: "48px",
+                        lineHeight: "0.85",
+                        letterSpacing: "-0.02em",
+                        fontWeight: 800,
+                        opacity: 0.28,
+                        transform: "scaleY(1.04)",
+                      }}
+                    >
+                      {titleNameParts[0]}
+                    </div>
 
-      {/* BUFTON */}
-      <div
-        style={{
-          marginTop: "-6px",
-          fontSize: "32px",
-          lineHeight: "0.95",
-          letterSpacing: "0.28em",
-          fontWeight: 300,
-        }}
-      >
-        {titleNameParts.slice(1).join(" ")}
-      </div>
-    </>
-  ) : (
-    <div>PLAYER</div>
-  )}
-</div>
-
-      <div
-        style={{
-          marginTop: "-6px",
-          fontSize: "32px",
-          lineHeight: "0.95",
-          letterSpacing: "0.28em",
-          fontWeight: 300,
-        }}
-      >
-        {titleNameParts.slice(1).join(" ")}
-      </div>
-    </>
-  ) : (
-    <div>PLAYER</div>
-  )}
-</div>
-
-      <div
-        style={{
-          marginTop: "-18px",
-          fontSize: "58px",
-          lineHeight: "0.95",
-          letterSpacing: "0.22em",
-          fontWeight: 300,
-        }}
-      >
-        {titleNameParts.slice(1).join(" ")}
-      </div>
-    </>
-  ) : (
-    <div>PLAYER</div>
-  )}
-</div>
+                    <div
+                      style={{
+                        marginTop: "-6px",
+                        fontSize: "32px",
+                        lineHeight: "0.95",
+                        letterSpacing: "0.28em",
+                        fontWeight: 300,
+                      }}
+                    >
+                      {titleNameParts.slice(1).join(" ")}
+                    </div>
+                  </>
+                ) : (
+                  <div>PLAYER</div>
+                )}
+              </div>
 
               <div
                 className="mt-3 h-[2px] w-[108px]"
