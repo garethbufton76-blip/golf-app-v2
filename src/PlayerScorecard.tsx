@@ -269,26 +269,44 @@ export default function PlayerScorecard({
                 />
               </div>
 
-     <div
-  className="uppercase text-white drop-shadow-[0_14px_28px_rgba(0,0,0,0.92)]"
+    <div
+  className="uppercase text-white"
   style={{
     fontFamily:
       '"Bebas Neue", Impact, "Arial Narrow", sans-serif',
-    fontSize: "74px",
-    lineHeight: "0.82",
-    letterSpacing: "-0.045em",
-    fontWeight: 700,
-    transform: "scaleY(1.08)",
   }}
 >
-                {titleNameParts.length ? (
-                  titleNameParts.map((part) => (
-                    <div key={part}>{part}</div>
-                  ))
-                ) : (
-                  <div>PLAYER</div>
-                )}
-              </div>
+  {titleNameParts.length ? (
+    <>
+      <div
+        style={{
+          fontSize: "138px",
+          lineHeight: "0.78",
+          letterSpacing: "-0.08em",
+          opacity: 0.18,
+          fontWeight: 800,
+          transform: "scaleY(1.05)",
+        }}
+      >
+        {titleNameParts[0]}
+      </div>
+
+      <div
+        style={{
+          marginTop: "-18px",
+          fontSize: "58px",
+          lineHeight: "0.95",
+          letterSpacing: "0.22em",
+          fontWeight: 300,
+        }}
+      >
+        {titleNameParts.slice(1).join(" ")}
+      </div>
+    </>
+  ) : (
+    <div>PLAYER</div>
+  )}
+</div>
 
               <div
                 className="mt-3 h-[2px] w-[108px]"
