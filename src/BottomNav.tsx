@@ -25,16 +25,17 @@ export default function BottomNav({
   onNewGame?: () => void;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+
   const [settingsView, setSettingsView] =
     useState<SettingsView>("main");
 
   const [handicaps, setHandicaps] = useState<
     Record<string, number>
   >({
-    Gareth: 12,
-    Mark: 7,
-    Nick: 10,
-    Jimmy: 13,
+    Gareth: 4.2,
+    Mark: 7.8,
+    Nick: 10.4,
+    Jimmy: 13.1,
   });
 
   const changeHandicap = (
@@ -45,7 +46,11 @@ export default function BottomNav({
       ...current,
       [player]: Math.max(
         0,
-        (current[player] ?? 0) + amount
+        parseFloat(
+          (
+            (current[player] ?? 0) + amount
+          ).toFixed(1)
+        )
       ),
     }));
   };
@@ -157,7 +162,9 @@ export default function BottomNav({
                       if (confirmed) {
                         onFinishGame?.();
                         onNewGame?.();
+
                         setSettingsOpen(false);
+
                         setSettingsView("main");
                       }
                     }}
@@ -168,7 +175,7 @@ export default function BottomNav({
                   <div className="grid gap-3">
                     <SettingsButton
                       label="Change Handicaps"
-                      sub="Edit player handicaps"
+                      sub="Edit exact handicaps"
                       onClick={() =>
                         setSettingsView(
                           "handicaps"
@@ -217,7 +224,7 @@ export default function BottomNav({
                           </div>
 
                           <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
-                            Playing Handicap
+                            Handicap Index
                           </div>
                         </div>
 
@@ -227,7 +234,7 @@ export default function BottomNav({
                             onClick={() =>
                               changeHandicap(
                                 player,
-                                -1
+                                -0.1
                               )
                             }
                             className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
@@ -235,8 +242,10 @@ export default function BottomNav({
                             -
                           </button>
 
-                          <div className="w-[42px] text-center text-[22px] font-black">
-                            {handicaps[player]}
+                          <div className="w-[52px] text-center text-[22px] font-black">
+                            {handicaps[
+                              player
+                            ].toFixed(1)}
                           </div>
 
                           <button
@@ -244,7 +253,7 @@ export default function BottomNav({
                             onClick={() =>
                               changeHandicap(
                                 player,
-                                1
+                                0.1
                               )
                             }
                             className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
@@ -266,6 +275,7 @@ export default function BottomNav({
                       );
 
                       setSettingsOpen(false);
+
                       setSettingsView("main");
                     }}
                   />
@@ -312,6 +322,7 @@ export default function BottomNav({
                       onChangeGameType?.();
 
                       setSettingsOpen(false);
+
                       setSettingsView("main");
                     }}
                   />
@@ -364,6 +375,7 @@ export default function BottomNav({
                       onChangeTee?.();
 
                       setSettingsOpen(false);
+
                       setSettingsView("main");
                     }}
                   />
@@ -375,6 +387,7 @@ export default function BottomNav({
               type="button"
               onClick={() => {
                 setSettingsOpen(false);
+
                 setSettingsView("main");
               }}
               className="mt-4 w-full rounded-[22px] border border-white/10 bg-black/55 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/76 shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]"
