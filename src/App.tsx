@@ -299,7 +299,6 @@ export default function App() {
     eventStarted &&
     screen !== "admin" &&
     screen !== "quick" &&
-    screen !== "score" &&
     screen !== "eventGate" &&
     screen !== "setupWizard";
 
@@ -440,6 +439,7 @@ export default function App() {
               setScreen={setScreen}
               setMode={setMode}
               dayConfigs={dayConfigs}
+              setDayConfigs={setDayConfigs}
               players={players}
               activeDay={activeDay}
               roster={roster}
