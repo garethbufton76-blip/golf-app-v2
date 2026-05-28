@@ -1,14 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
 type GameTab = "live" | "score" | "team";
 type SettingsView = "main" | "handicaps" | "format" | "tee";
 
+type BottomNavPlayer = {
+  id?: string;
+  name: string;
+  handicap?: number;
+  rawHandicap?: number;
+  exactHandicap?: number;
+};
+
 export default function BottomNav({
   activeTab,
   setActiveTab,
   showTeamTab = false,
+  players = [],
   onFinishGame,
   onChangeHandicaps,
   onChangeGameType,
@@ -18,6 +27,7 @@ export default function BottomNav({
   activeTab: GameTab;
   setActiveTab: (tab: GameTab) => void;
   showTeamTab?: boolean;
+  players?: BottomNavPlayer[];
   onFinishGame?: () => void;
   onChangeHandicaps?: (handicaps: Record<string, number>) => void;
   onChangeGameType?: () => void;
@@ -25,50 +35,59 @@ export default function BottomNav({
   onNewGame?: () => void;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsView, setSettingsView] = useState<SettingsView>("main");
 
-  const [settingsView, setSettingsView] =
-    useState<SettingsView>("main");
+  const fallbackPlayers: BottomNavPlayer[] = [
+    { name: "Gareth", exactHandicap: 4.2 },
+    { name: "Mark", exactHandicap: 7.8 },
+    { name: "Nick", exactHandicap: 10.4 },
+    { name: "Jimmy", exactHandicap: 13.1 },
+  ];
 
-  const [handicaps, setHandicaps] = useState<
-    Record<string, number>
-  >({
-    Gareth: 4.2,
-    Mark: 7.8,
-    Nick: 10.4,
-    Jimmy: 13.1,
-  });
+  const activePlayers = players.length > 0 ? players : fallbackPlayers;
 
-  const changeHandicap = (
-    player: string,
-    amount: number
-  ) => {
+  const buildHandicapState = () =>
+    activePlayers.reduce<Record<string, number>>((acc, player) => {
+      const key = player.id ?? player.name;
+
+      acc[key] =
+        player.exactHandicap ??
+        player.rawHandicap ??
+        player.handicap ??
+        0;
+
+      return acc;
+    }, {});
+
+  const [handicaps, setHandicaps] = useState<Record<string, number>>(
+    buildHandicapState
+  );
+
+  useEffect(() => {
+    setHandicaps(buildHandicapState());
+  }, [players]);
+
+  const changeHandicap = (playerKey: string, amount: number) => {
     setHandicaps((current) => ({
       ...current,
-      [player]: Math.max(
+      [playerKey]: Math.max(
         0,
-        parseFloat(
-          (
-            (current[player] ?? 0) + amount
-          ).toFixed(1)
-        )
+        parseFloat(((current[playerKey] ?? 0) + amount).toFixed(1))
       ),
     }));
   };
 
   const { themeMode, toggleTheme } = useDuelTheme();
-
   const isDay = themeMode === "day";
 
   return (
     <>
-      {/* SETTINGS OVERLAY */}
       {settingsOpen && (
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage:
-                "url('/admin-home-bg.jpg')",
+              backgroundImage: "url('/admin-home-bg.jpg')",
             }}
           />
 
@@ -85,7 +104,6 @@ export default function BottomNav({
               </div>
             </div>
 
-            {/* MAIN SETTINGS */}
             {settingsView === "main" && (
               <>
                 <QuickSettingsSection title="Theme">
@@ -105,13 +123,10 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Night
                       </div>
-
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          !isDay
-                            ? "text-black/55"
-                            : "text-white/35"
+                          !isDay ? "text-black/55" : "text-white/35"
                         )}
                       >
                         Mode
@@ -133,13 +148,10 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Day
                       </div>
-
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          isDay
-                            ? "text-black/55"
-                            : "text-white/35"
+                          isDay ? "text-black/55" : "text-white/35"
                         )}
                       >
                         Mode
@@ -154,17 +166,14 @@ export default function BottomNav({
                     sub="Return to landing screen"
                     gold
                     onClick={() => {
-                      const confirmed =
-                        window.confirm(
-                          "Are you sure you want to end this match?\n\nCurrent scores will be lost."
-                        );
+                      const confirmed = window.confirm(
+                        "Are you sure you want to end this match?\n\nCurrent scores will be lost."
+                      );
 
                       if (confirmed) {
                         onFinishGame?.();
                         onNewGame?.();
-
                         setSettingsOpen(false);
-
                         setSettingsView("main");
                       }
                     }}
@@ -176,51 +185,42 @@ export default function BottomNav({
                     <SettingsButton
                       label="Change Handicaps"
                       sub="Edit exact handicaps"
-                      onClick={() =>
-                        setSettingsView(
-                          "handicaps"
-                        )
-                      }
+                      onClick={() => setSettingsView("handicaps")}
                     />
 
                     <SettingsButton
                       label="Change Format"
                       sub="Singles, Better Ball, Ambrose"
-                      onClick={() =>
-                        setSettingsView("format")
-                      }
+                      onClick={() => setSettingsView("format")}
                     />
 
                     <SettingsButton
                       label="Change Tee"
                       sub="Select another tee"
-                      onClick={() =>
-                        setSettingsView("tee")
-                      }
+                      onClick={() => setSettingsView("tee")}
                     />
                   </div>
                 </QuickSettingsSection>
               </>
             )}
 
-            {/* HANDICAPS */}
             {settingsView === "handicaps" && (
               <SettingsSubScreen
                 title="Change Handicaps"
-                back={() =>
-                  setSettingsView("main")
-                }
+                back={() => setSettingsView("main")}
               >
                 <div className="space-y-3">
-                  {Object.keys(handicaps).map(
-                    (player) => (
+                  {activePlayers.map((player) => {
+                    const playerKey = player.id ?? player.name;
+
+                    return (
                       <div
-                        key={player}
+                        key={playerKey}
                         className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
                       >
                         <div>
                           <div className="text-[15px] font-black uppercase tracking-[0.12em]">
-                            {player}
+                            {player.name}
                           </div>
 
                           <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
@@ -231,51 +231,35 @@ export default function BottomNav({
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() =>
-                              changeHandicap(
-                                player,
-                                -0.1
-                              )
-                            }
+                            onClick={() => changeHandicap(playerKey, -0.1)}
                             className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
                           >
                             -
                           </button>
 
                           <div className="w-[52px] text-center text-[22px] font-black">
-                            {handicaps[
-                              player
-                            ].toFixed(1)}
+                            {(handicaps[playerKey] ?? 0).toFixed(1)}
                           </div>
 
                           <button
                             type="button"
-                            onClick={() =>
-                              changeHandicap(
-                                player,
-                                0.1
-                              )
-                            }
+                            onClick={() => changeHandicap(playerKey, 0.1)}
                             className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
                           >
                             +
                           </button>
                         </div>
                       </div>
-                    )
-                  )}
+                    );
+                  })}
 
                   <SettingsButton
                     label="Apply Handicaps"
                     sub="Update this quick game"
                     gold
                     onClick={() => {
-                      onChangeHandicaps?.(
-                        handicaps
-                      );
-
+                      onChangeHandicaps?.(handicaps);
                       setSettingsOpen(false);
-
                       setSettingsView("main");
                     }}
                   />
@@ -283,13 +267,10 @@ export default function BottomNav({
               </SettingsSubScreen>
             )}
 
-            {/* FORMAT */}
             {settingsView === "format" && (
               <SettingsSubScreen
                 title="Change Format"
-                back={() =>
-                  setSettingsView("main")
-                }
+                back={() => setSettingsView("main")}
               >
                 <div className="grid gap-3">
                   {[
@@ -320,9 +301,7 @@ export default function BottomNav({
                     gold
                     onClick={() => {
                       onChangeGameType?.();
-
                       setSettingsOpen(false);
-
                       setSettingsView("main");
                     }}
                   />
@@ -330,13 +309,10 @@ export default function BottomNav({
               </SettingsSubScreen>
             )}
 
-            {/* TEE */}
             {settingsView === "tee" && (
               <SettingsSubScreen
                 title="Change Tee"
-                back={() =>
-                  setSettingsView("main")
-                }
+                back={() => setSettingsView("main")}
               >
                 <div className="grid grid-cols-2 gap-3">
                   {[
@@ -373,9 +349,7 @@ export default function BottomNav({
                     gold
                     onClick={() => {
                       onChangeTee?.();
-
                       setSettingsOpen(false);
-
                       setSettingsView("main");
                     }}
                   />
@@ -387,7 +361,6 @@ export default function BottomNav({
               type="button"
               onClick={() => {
                 setSettingsOpen(false);
-
                 setSettingsView("main");
               }}
               className="mt-4 w-full rounded-[22px] border border-white/10 bg-black/55 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/76 shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]"
@@ -398,7 +371,6 @@ export default function BottomNav({
         </div>
       )}
 
-      {/* FOOTER */}
       <div className="absolute bottom-0 left-0 right-0 z-50">
         <div className="relative h-[78px] overflow-hidden border-t border-white/10 bg-black/86 shadow-[0_-18px_42px_rgba(0,0,0,0.68)] backdrop-blur-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/62 via-[#111318]/82 to-[#10233e]/68" />
@@ -406,29 +378,22 @@ export default function BottomNav({
           <div
             className={cx(
               "relative grid h-full",
-              showTeamTab
-                ? "grid-cols-4"
-                : "grid-cols-3"
+              showTeamTab ? "grid-cols-4" : "grid-cols-3"
             )}
           >
             <NavButton
               label="Live"
               icon="▦"
               active={activeTab === "live"}
-              onClick={() =>
-                setActiveTab("live")
-              }
+              onClick={() => setActiveTab("live")}
             />
 
             <button
               type="button"
-              onClick={() =>
-                setActiveTab("score")
-              }
+              onClick={() => setActiveTab("score")}
               className={cx(
                 "relative flex flex-col items-center justify-center gap-1 border-x border-white/10 text-white transition-all active:scale-[0.98]",
-                activeTab === "score" &&
-                  "bg-white/[0.06]"
+                activeTab === "score" && "bg-white/[0.06]"
               )}
             >
               <div
@@ -439,17 +404,13 @@ export default function BottomNav({
                     : "border-white/30 bg-white/10 text-white"
                 )}
               >
-                <span className="text-[28px] leading-none">
-                  +
-                </span>
+                <span className="text-[28px] leading-none">+</span>
               </div>
 
               <div
                 className={cx(
                   "text-[10px] font-black uppercase tracking-[0.18em]",
-                  activeTab === "score"
-                    ? "text-white"
-                    : "text-white/70"
+                  activeTab === "score" ? "text-white" : "text-white/70"
                 )}
               >
                 Score
@@ -460,12 +421,8 @@ export default function BottomNav({
               <NavButton
                 label="Team"
                 icon="○"
-                active={
-                  activeTab === "team"
-                }
-                onClick={() =>
-                  setActiveTab("team")
-                }
+                active={activeTab === "team"}
+                onClick={() => setActiveTab("team")}
               />
             )}
 
@@ -473,9 +430,7 @@ export default function BottomNav({
               label="Settings"
               icon="⚙"
               active={settingsOpen}
-              onClick={() =>
-                setSettingsOpen(true)
-              }
+              onClick={() => setSettingsOpen(true)}
             />
           </div>
         </div>
@@ -484,10 +439,7 @@ export default function BottomNav({
   );
 }
 
-function QuickSettingsSection({
-  title,
-  children,
-}: any) {
+function QuickSettingsSection({ title, children }: any) {
   return (
     <div className="mt-3 rounded-[26px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
       <div className="mb-3 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
@@ -499,11 +451,7 @@ function QuickSettingsSection({
   );
 }
 
-function SettingsSubScreen({
-  title,
-  children,
-  back,
-}: any) {
+function SettingsSubScreen({ title, children, back }: any) {
   return (
     <div className="mt-3 rounded-[26px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
       <button
@@ -550,9 +498,7 @@ function SettingsButton({
         <div
           className={cx(
             "mt-1 text-[8px] font-black uppercase tracking-[0.16em]",
-            gold
-              ? "text-black/48"
-              : "text-white/38"
+            gold ? "text-black/48" : "text-white/38"
           )}
         >
           {sub}
@@ -585,9 +531,7 @@ function NavButton({
       <div
         className={cx(
           "text-[24px] leading-none",
-          active
-            ? "text-[#efe6bf]"
-            : "text-white/70"
+          active ? "text-[#efe6bf]" : "text-white/70"
         )}
       >
         {icon}
@@ -596,9 +540,7 @@ function NavButton({
       <div
         className={cx(
           "text-[9px] font-black uppercase tracking-[0.14em]",
-          active
-            ? "text-[#efe6bf]"
-            : "text-white/70"
+          active ? "text-[#efe6bf]" : "text-white/70"
         )}
       >
         {label}
