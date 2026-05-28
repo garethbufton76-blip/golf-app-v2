@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
@@ -37,17 +37,19 @@ export default function BottomNav({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsView, setSettingsView] = useState<SettingsView>("main");
 
-  const fallbackPlayers: BottomNavPlayer[] = [
-    { name: "Gareth", exactHandicap: 4.2 },
-    { name: "Mark", exactHandicap: 7.8 },
-    { name: "Nick", exactHandicap: 10.4 },
-    { name: "Jimmy", exactHandicap: 13.1 },
-  ];
+  const { themeMode, toggleTheme } = useDuelTheme();
+  const isDay = themeMode === "day";
 
-  const activePlayers = players.length > 0 ? players : fallbackPlayers;
+  const playersKey = useMemo(
+    () =>
+      players
+        .map((p) => `${p.id ?? p.name}:${p.exactHandicap ?? p.rawHandicap ?? p.handicap ?? 0}`)
+        .join("|"),
+    [players]
+  );
 
   const buildHandicapState = () =>
-    activePlayers.reduce<Record<string, number>>((acc, player) => {
+    players.reduce<Record<string, number>>((acc, player) => {
       const key = player.id ?? player.name;
 
       acc[key] =
@@ -59,26 +61,21 @@ export default function BottomNav({
       return acc;
     }, {});
 
-  const [handicaps, setHandicaps] = useState<Record<string, number>>(
-    buildHandicapState
-  );
+  const [handicaps, setHandicaps] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setHandicaps(buildHandicapState());
-  }, [players]);
+  }, [playersKey]);
 
   const changeHandicap = (playerKey: string, amount: number) => {
     setHandicaps((current) => ({
       ...current,
       [playerKey]: Math.max(
         0,
-        parseFloat(((current[playerKey] ?? 0) + amount).toFixed(1))
+        Number(((current[playerKey] ?? 0) + amount).toFixed(1))
       ),
     }));
   };
-
-  const { themeMode, toggleTheme } = useDuelTheme();
-  const isDay = themeMode === "day";
 
   return (
     <>
@@ -86,9 +83,7 @@ export default function BottomNav({
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('/admin-home-bg.jpg')",
-            }}
+            style={{ backgroundImage: "url('/admin-home-bg.jpg')" }}
           />
 
           <div className="absolute inset-0 bg-black/10" />
@@ -123,6 +118,7 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Night
                       </div>
+
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
@@ -148,6 +144,7 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Day
                       </div>
+
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
@@ -209,61 +206,67 @@ export default function BottomNav({
                 title="Change Handicaps"
                 back={() => setSettingsView("main")}
               >
-                <div className="space-y-3">
-                  {activePlayers.map((player) => {
-                    const playerKey = player.id ?? player.name;
+                {players.length === 0 ? (
+                  <div className="rounded-[22px] border border-white/10 bg-black/55 px-4 py-5 text-center text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
+                    No quick game players loaded
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {players.map((player) => {
+                      const playerKey = player.id ?? player.name;
 
-                    return (
-                      <div
-                        key={playerKey}
-                        className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
-                      >
-                        <div>
-                          <div className="text-[15px] font-black uppercase tracking-[0.12em]">
-                            {player.name}
+                      return (
+                        <div
+                          key={playerKey}
+                          className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
+                        >
+                          <div>
+                            <div className="text-[15px] font-black uppercase tracking-[0.12em]">
+                              {player.name}
+                            </div>
+
+                            <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
+                              Handicap Index
+                            </div>
                           </div>
 
-                          <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
-                            Handicap Index
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => changeHandicap(playerKey, -0.1)}
+                              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
+                            >
+                              -
+                            </button>
+
+                            <div className="w-[52px] text-center text-[22px] font-black">
+                              {(handicaps[playerKey] ?? 0).toFixed(1)}
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => changeHandicap(playerKey, 0.1)}
+                              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
+                            >
+                              +
+                            </button>
                           </div>
                         </div>
+                      );
+                    })}
 
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => changeHandicap(playerKey, -0.1)}
-                            className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
-                          >
-                            -
-                          </button>
-
-                          <div className="w-[52px] text-center text-[22px] font-black">
-                            {(handicaps[playerKey] ?? 0).toFixed(1)}
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() => changeHandicap(playerKey, 0.1)}
-                            className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
-                          >
-                            +
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  <SettingsButton
-                    label="Apply Handicaps"
-                    sub="Update this quick game"
-                    gold
-                    onClick={() => {
-                      onChangeHandicaps?.(handicaps);
-                      setSettingsOpen(false);
-                      setSettingsView("main");
-                    }}
-                  />
-                </div>
+                    <SettingsButton
+                      label="Apply Handicaps"
+                      sub="Update this quick game"
+                      gold
+                      onClick={() => {
+                        onChangeHandicaps?.(handicaps);
+                        setSettingsOpen(false);
+                        setSettingsView("main");
+                      }}
+                    />
+                  </div>
+                )}
               </SettingsSubScreen>
             )}
 
