@@ -54,7 +54,6 @@ export default function BottomNav({
   onFinishGame,
   onChangeHandicaps,
   onChangeGameType,
-  currentFormat = "Singles Match Play",
   onChangeTee,
   onNewGame,
 }: {
@@ -64,8 +63,7 @@ export default function BottomNav({
   players?: BottomNavPlayer[];
   onFinishGame?: () => void;
   onChangeHandicaps?: (handicaps: Record<string, number>) => void;
-  onChangeGameType?: (format: string) => void;
-  currentFormat?: string;
+  onChangeGameType?: () => void;
   onChangeTee?: () => void;
   onNewGame?: () => void;
 }) {
@@ -88,39 +86,6 @@ export default function BottomNav({
         })),
     [players]
   );
-
-
-  const totalPlayerCount = cleanPlayers.length;
-  const playersPerSide = Math.max(1, Math.ceil(totalPlayerCount / 2));
-
-  const validFormats = useMemo(() => {
-    const allFormats = [
-      "Singles Match Play",
-      "Stableford",
-      "2-Ball Better Ball",
-      "2-Ball Ambrose",
-      "2-Ball Better Ball Stableford",
-    ];
-
-    return allFormats.filter((format) => {
-      const lower = format.toLowerCase();
-
-      if (
-        lower.includes("2-ball") ||
-        lower.includes("better ball") ||
-        lower.includes("ambrose")
-      ) {
-        return playersPerSide >= 2;
-      }
-
-      return playersPerSide >= 1;
-    });
-  }, [playersPerSide]);
-
-  const applyFormat = (format: string) => {
-    onChangeGameType?.(format);
-    closeSettings();
-  };
 
   const playersKey = useMemo(
     () =>
@@ -346,44 +311,37 @@ export default function BottomNav({
                 back={() => setSettingsView("main")}
               >
                 <div className="grid gap-3">
-                  {validFormats.map((format) => {
-                    const active =
-                      String(currentFormat || "").toLowerCase() ===
-                      String(format || "").toLowerCase();
+                  {[
+                    "Singles Match Play",
+                    "2 Ball Better Ball",
+                    "2 Ball Ambrose",
+                    "Stableford",
+                  ].map((format, index) => (
+                    <button
+                      key={format}
+                      type="button"
+                      className={cx(
+                        "rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+                        index === 0
+                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                          : "border-white/10 bg-black/55 text-white"
+                      )}
+                    >
+                      <div className="text-[14px] font-black uppercase tracking-[0.14em]">
+                        {format}
+                      </div>
+                    </button>
+                  ))}
 
-                    return (
-                      <button
-                        key={format}
-                        type="button"
-                        onClick={() => applyFormat(format)}
-                        className={cx(
-                          "relative z-20 rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.98]",
-                          active
-                            ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                            : "border-white/10 bg-black/55 text-white"
-                        )}
-                      >
-                        <div className="text-[14px] font-black uppercase tracking-[0.14em]">
-                          {format}
-                        </div>
-
-                        <div
-                          className={cx(
-                            "mt-1 text-[8px] font-black uppercase tracking-[0.16em]",
-                            active ? "text-black/48" : "text-white/38"
-                          )}
-                        >
-                          Tap to apply
-                        </div>
-                      </button>
-                    );
-                  })}
-
-                  {validFormats.length === 0 && (
-                    <div className="rounded-[22px] border border-white/10 bg-black/55 px-4 py-5 text-center text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
-                      No formats available for this player count
-                    </div>
-                  )}
+                  <SettingsButton
+                    label="Apply Format"
+                    sub="Update this quick game"
+                    gold
+                    onClick={() => {
+                      onChangeGameType?.();
+                      closeSettings();
+                    }}
+                  />
                 </div>
               </SettingsSubScreen>
             )}
