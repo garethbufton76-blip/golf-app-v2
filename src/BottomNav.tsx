@@ -2,13 +2,12 @@ import { useState } from "react";
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
-type GameTab = "live" | "score";
-type SettingsView = "main" | "handicaps" | "format" | "tee";
+type GameTab = "live" | "score" | "team";
 
 export default function BottomNav({
   activeTab,
   setActiveTab,
-  onFinishGame,
+  showTeamTab = false,
   onChangeHandicaps,
   onChangeGameType,
   onChangeTee,
@@ -16,6 +15,7 @@ export default function BottomNav({
 }: {
   activeTab: GameTab;
   setActiveTab: (tab: GameTab) => void;
+  showTeamTab?: boolean;
   onFinishGame?: () => void;
   onChangeHandicaps?: () => void;
   onChangeGameType?: () => void;
@@ -23,23 +23,21 @@ export default function BottomNav({
   onNewGame?: () => void;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsView, setSettingsView] =
-    useState<SettingsView>("main");
-
   const { themeMode, toggleTheme } = useDuelTheme();
 
   const isDay = themeMode === "day";
 
+  const closeSettings = () => {
+    setSettingsOpen(false);
+  };
+
   return (
     <>
-      {/* SETTINGS OVERLAY */}
       {settingsOpen && (
         <div className="absolute left-0 right-0 top-0 bottom-[78px] z-[70] overflow-y-auto">
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{
-              backgroundImage: "url('/admin-home-bg.jpg')",
-            }}
+            style={{ backgroundImage: "url('/admin-home-bg.jpg')" }}
           />
 
           <div className="absolute inset-0 bg-black/10" />
@@ -55,216 +53,114 @@ export default function BottomNav({
               </div>
             </div>
 
-            {/* MAIN SETTINGS */}
-            {settingsView === "main" && (
-              <>
-                <QuickSettingsSection title="Theme">
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={toggleTheme}
-                      className={cx(
-                        "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
-                        !isDay
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
-                        Night
-                      </div>
-
-                      <div
-                        className={cx(
-                          "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          !isDay ? "text-black/55" : "text-white/35"
-                        )}
-                      >
-                        Mode
-                      </div>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={toggleTheme}
-                      className={cx(
-                        "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
-                        isDay
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
-                        Day
-                      </div>
-
-                      <div
-                        className={cx(
-                          "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          isDay ? "text-black/55" : "text-white/35"
-                        )}
-                      >
-                        Mode
-                      </div>
-                    </button>
+            <QuickSettingsSection title="Theme">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isDay) toggleTheme();
+                  }}
+                  className={cx(
+                    "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    !isDay
+                      ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                      : "border-white/10 bg-black/55 text-white"
+                  )}
+                >
+                  <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
+                    Night
                   </div>
-                </QuickSettingsSection>
 
-                <QuickSettingsSection title="Match Control">
-                  <SettingsButton
-                    label="End Match"
-                    sub="Return to landing screen"
-                    gold
-                    onClick={() => {
-                      const confirmed = window.confirm(
-                        "Are you sure you want to end this match?\n\nCurrent scores will be lost."
-                      );
-
-                      if (confirmed) {
-                        onNewGame?.();
-                        setSettingsOpen(false);
-                      }
-                    }}
-                  />
-                </QuickSettingsSection>
-
-                <QuickSettingsSection title="Edit Game">
-                  <div className="grid gap-3">
-                    <SettingsButton
-                      label="Change Handicaps"
-                      sub="Edit player handicaps"
-                      onClick={() => setSettingsView("handicaps")}
-                    />
-
-                    <SettingsButton
-                      label="Change Format"
-                      sub="Singles, Better Ball, Ambrose"
-                      onClick={() => setSettingsView("format")}
-                    />
-
-                    <SettingsButton
-                      label="Change Tee"
-                      sub="Select another tee"
-                      onClick={() => setSettingsView("tee")}
-                    />
+                  <div
+                    className={cx(
+                      "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
+                      !isDay ? "text-black/55" : "text-white/35"
+                    )}
+                  >
+                    Mode
                   </div>
-                </QuickSettingsSection>
-              </>
-            )}
+                </button>
 
-            {/* HANDICAPS */}
-            {settingsView === "handicaps" && (
-              <SettingsSubScreen
-                title="Change Handicaps"
-                back={() => setSettingsView("main")}
-              >
-                <div className="space-y-3">
-                  {["Gareth", "Mark", "Nick", "Jimmy"].map((player) => (
-                    <div
-                      key={player}
-                      className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
-                    >
-                      <div>
-                        <div className="text-[15px] font-black uppercase tracking-[0.12em]">
-                          {player}
-                        </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!isDay) toggleTheme();
+                  }}
+                  className={cx(
+                    "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
+                    isDay
+                      ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                      : "border-white/10 bg-black/55 text-white"
+                  )}
+                >
+                  <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
+                    Day
+                  </div>
 
-                        <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
-                          Playing Handicap
-                        </div>
-                      </div>
+                  <div
+                    className={cx(
+                      "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
+                      isDay ? "text-black/55" : "text-white/35"
+                    )}
+                  >
+                    Mode
+                  </div>
+                </button>
+              </div>
+            </QuickSettingsSection>
 
-                      <div className="flex items-center gap-2">
-                        <button className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl">
-                          -
-                        </button>
+            <QuickSettingsSection title="Match Control">
+              <SettingsButton
+                label="End Match"
+                sub="Return to landing screen"
+                gold
+                onClick={() => {
+                  const confirmed = window.confirm(
+                    "Are you sure you want to end this match?\n\nCurrent scores will be lost."
+                  );
 
-                        <div className="w-[42px] text-center text-[22px] font-black">
-                          12
-                        </div>
+                  if (confirmed) {
+                    onNewGame?.();
+                    closeSettings();
+                  }
+                }}
+              />
+            </QuickSettingsSection>
 
-                        <button className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl">
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </SettingsSubScreen>
-            )}
+            <QuickSettingsSection title="Edit Game">
+              <div className="grid gap-3">
+                <SettingsButton
+                  label="Change Handicaps"
+                  sub="Edit player handicaps"
+                  onClick={() => {
+                    onChangeHandicaps?.();
+                    closeSettings();
+                  }}
+                />
 
-            {/* FORMAT */}
-            {settingsView === "format" && (
-              <SettingsSubScreen
-                title="Change Format"
-                back={() => setSettingsView("main")}
-              >
-                <div className="grid gap-3">
-                  {[
-                    "Singles Match Play",
-                    "2 Ball Better Ball",
-                    "2 Ball Ambrose",
-                    "Stableford",
-                  ].map((format, index) => (
-                    <button
-                      key={format}
-                      className={cx(
-                        "rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl",
-                        index === 0
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[14px] font-black uppercase tracking-[0.14em]">
-                        {format}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </SettingsSubScreen>
-            )}
+                <SettingsButton
+                  label="Change Format"
+                  sub="Singles, Better Ball, Ambrose"
+                  onClick={() => {
+                    onChangeGameType?.();
+                    closeSettings();
+                  }}
+                />
 
-            {/* TEE */}
-            {settingsView === "tee" && (
-              <SettingsSubScreen
-                title="Change Tee"
-                back={() => setSettingsView("main")}
-              >
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    ["Blue", "S138"],
-                    ["White", "S133"],
-                    ["Gold", "S123"],
-                    ["Red", "S131"],
-                  ].map(([tee, slope], index) => (
-                    <button
-                      key={tee}
-                      className={cx(
-                        "rounded-[22px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl",
-                        index === 0
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[18px] font-black uppercase tracking-[0.12em]">
-                        {tee}
-                      </div>
-
-                      <div className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] opacity-60">
-                        {slope}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </SettingsSubScreen>
-            )}
+                <SettingsButton
+                  label="Change Tee"
+                  sub="Select another tee"
+                  onClick={() => {
+                    onChangeTee?.();
+                    closeSettings();
+                  }}
+                />
+              </div>
+            </QuickSettingsSection>
 
             <button
               type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                setSettingsView("main");
-              }}
+              onClick={closeSettings}
               className="mt-4 w-full rounded-[22px] border border-white/10 bg-black/55 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/76 shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]"
             >
               Close
@@ -273,12 +169,16 @@ export default function BottomNav({
         </div>
       )}
 
-      {/* FOOTER */}
       <div className="absolute bottom-0 left-0 right-0 z-50">
         <div className="relative h-[78px] overflow-hidden border-t border-white/10 bg-black/86 shadow-[0_-18px_42px_rgba(0,0,0,0.68)] backdrop-blur-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/62 via-[#111318]/82 to-[#10233e]/68" />
 
-          <div className="relative grid h-full grid-cols-3">
+          <div
+            className={cx(
+              "relative grid h-full",
+              showTeamTab ? "grid-cols-4" : "grid-cols-3"
+            )}
+          >
             <NavButton
               label="Live"
               icon="▦"
@@ -315,6 +215,15 @@ export default function BottomNav({
               </div>
             </button>
 
+            {showTeamTab && (
+              <NavButton
+                label="Team"
+                icon="○"
+                active={activeTab === "team"}
+                onClick={() => setActiveTab("team")}
+              />
+            )}
+
             <NavButton
               label="Settings"
               icon="⚙"
@@ -332,25 +241,6 @@ function QuickSettingsSection({ title, children }: any) {
   return (
     <div className="mt-3 rounded-[26px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
       <div className="mb-3 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
-        {title}
-      </div>
-
-      {children}
-    </div>
-  );
-}
-
-function SettingsSubScreen({ title, children, back }: any) {
-  return (
-    <div className="mt-3 rounded-[26px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <button
-        onClick={back}
-        className="mb-3 rounded-full border border-white/10 bg-black/55 px-4 py-2 text-[9px] font-black uppercase tracking-[0.18em] text-white/70"
-      >
-        ‹ Settings
-      </button>
-
-      <div className="mb-4 text-[11px] font-black uppercase tracking-[0.22em] text-white/45">
         {title}
       </div>
 
