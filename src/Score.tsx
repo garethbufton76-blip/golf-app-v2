@@ -1,5 +1,6 @@
 import { useState } from "react";
 import PlayerScorecard from "./PlayerScorecard";
+import BottomNav from "./BottomNav";
 import { useDuelTheme } from "./useDuelTheme";
 import {
   Logo,
@@ -48,6 +49,8 @@ export default function Score({
   const [finishStep, setFinishStep] = useState<"playing" | "signoff" | "overview">("playing");
   const [showFinishActions, setShowFinishActions] = useState(false);
   const [signedCards, setSignedCards] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<"live" | "score" | "team">("score");
+  const [handicapOverrides, setHandicapOverrides] = useState<Record<string, number>>({});
 
   const [draft, setDraft] = useState<any>({
     red: 4,
@@ -60,12 +63,37 @@ export default function Score({
 
   const [teeShotSelections, setTeeShotSelections] = useState<any>({});
 
+  function playerIdentity(p: any) {
+    return String(`${p?.rosterIndex ?? "player"}-${p?.name ?? "unknown"}`);
+  }
+
+  function withHandicapOverride(p: any) {
+    if (!p) return p;
+
+    const key = playerIdentity(p);
+    const override = handicapOverrides[key] ?? handicapOverrides[p.name];
+
+    if (override == null) return p;
+
+    return {
+      ...p,
+      handicap: override,
+      rawHandicap: override,
+      exactHandicap: override,
+    };
+  }
+
   const stateKey = keyFor(activeDay, activeMatch);
   const holes = states[stateKey] || blankHoles();
-  const match = playersForMatch(roster, players, day.format, activeMatch);
+  const rawMatch = playersForMatch(roster, players, day.format, activeMatch);
 
-  const rosterRed = roster?.Red || roster?.red || [];
-  const rosterBlue = roster?.Blue || roster?.blue || [];
+  const match = {
+    red: (rawMatch.red || []).map(withHandicapOverride),
+    blue: (rawMatch.blue || []).map(withHandicapOverride),
+  };
+
+  const rosterRed = (roster?.Red || roster?.red || []).map(withHandicapOverride);
+  const rosterBlue = (roster?.Blue || roster?.blue || []).map(withHandicapOverride);
 
   const pairStart = activeMatch * 2;
 
@@ -80,6 +108,28 @@ export default function Score({
       : match.blue;
 
   const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
+
+  const bottomNavPlayers = [
+    ...scoringRedPlayers,
+    ...scoringBluePlayers,
+  ].map((p: any) => {
+    const exact = Number(p.exactHandicap ?? p.rawHandicap ?? p.handicap ?? 0);
+
+    return {
+      id: playerIdentity(p),
+      name: p.name,
+      handicap: exact,
+      rawHandicap: exact,
+      exactHandicap: exact,
+    };
+  });
+
+  function handleChangeHandicaps(nextHandicaps: Record<string, number>) {
+    setHandicapOverrides((current) => ({
+      ...current,
+      ...nextHandicaps,
+    }));
+  }
 
   const matchScorecardPlayers = [
     ...scoringRedPlayers.map((p: any) => ({ team: "red", p })),
@@ -1502,7 +1552,33 @@ export default function Score({
         />
       )}
 
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
 
+          if (tab === "live") {
+            setScreen("home");
+          }
+
+          if (tab === "team") {
+            setScreen("team");
+          }
+        }}
+        players={bottomNavPlayers}
+        showTeamTab={false}
+        onChangeHandicaps={handleChangeHandicaps}
+        onChangeGameType={() => {}}
+        onChangeTee={() => {}}
+        onFinishGame={() => {
+          if (setMode) setMode("launch");
+          setScreen("home");
+        }}
+        onNewGame={() => {
+          if (setMode) setMode("launch");
+          setScreen("home");
+        }}
+      />
 
     </>
   );
