@@ -19,7 +19,6 @@ import {
 export default function Score({
   setScreen,
   dayConfigs,
-  setDayConfigs,
   players,
   activeDay,
   roster,
@@ -131,25 +130,6 @@ export default function Score({
       ...nextHandicaps,
     }));
   }
-
-  function handleChangeGameType(nextFormat: string) {
-    if (!nextFormat) return;
-
-    setDayConfigs?.((current: any[]) =>
-      (current || []).map((config: any, index: number) =>
-        index === activeDay
-          ? {
-              ...config,
-              format: nextFormat,
-            }
-          : config
-      )
-    );
-
-    setSelectedHole(null);
-    setCardPlayer(null);
-  }
-
 
   const matchScorecardPlayers = [
     ...scoringRedPlayers.map((p: any) => ({ team: "red", p })),
@@ -1183,7 +1163,7 @@ export default function Score({
 
         <div
           className={cx(
-            "relative mt-4 min-h-[calc(100vh-320px)] overflow-visible rounded-[26px] p-4",
+            "relative mt-4 min-h-[590px] overflow-visible rounded-[26px] p-4 pb-[72px]",
             isDayTheme
               ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl"
               : "border border-white/10 bg-black/45 backdrop-blur-xl"
@@ -1533,7 +1513,7 @@ export default function Score({
                 <img
                   src="/launch-logo.png"
                   alt="DUEL"
-                  className="pointer-events-none absolute bottom-5 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
+                  className="pointer-events-none absolute bottom-8 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
                   style={{
                     filter: isDayTheme
                       ? "brightness(0)"
@@ -1588,8 +1568,7 @@ export default function Score({
         players={bottomNavPlayers}
         showTeamTab={false}
         onChangeHandicaps={handleChangeHandicaps}
-        currentFormat={day.format}
-        onChangeGameType={handleChangeGameType}
+        onChangeGameType={() => {}}
         onChangeTee={() => {}}
         onFinishGame={() => {
           if (setMode) setMode("launch");
