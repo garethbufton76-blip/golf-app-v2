@@ -19,6 +19,7 @@ import {
 export default function Score({
   setScreen,
   dayConfigs,
+  setDayConfigs,
   players,
   activeDay,
   roster,
@@ -130,6 +131,25 @@ export default function Score({
       ...nextHandicaps,
     }));
   }
+
+  function handleChangeGameType(nextFormat: string) {
+    if (!nextFormat) return;
+
+    setDayConfigs?.((current: any[]) =>
+      (current || []).map((config: any, index: number) =>
+        index === activeDay
+          ? {
+              ...config,
+              format: nextFormat,
+            }
+          : config
+      )
+    );
+
+    setSelectedHole(null);
+    setCardPlayer(null);
+  }
+
 
   const matchScorecardPlayers = [
     ...scoringRedPlayers.map((p: any) => ({ team: "red", p })),
@@ -1568,7 +1588,8 @@ export default function Score({
         players={bottomNavPlayers}
         showTeamTab={false}
         onChangeHandicaps={handleChangeHandicaps}
-        onChangeGameType={() => {}}
+        currentFormat={day.format}
+        onChangeGameType={handleChangeGameType}
         onChangeTee={() => {}}
         onFinishGame={() => {
           if (setMode) setMode("launch");
