@@ -2,7 +2,7 @@ import { useState } from "react";
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
-type GameTab = "live" | "score" | "team";
+type GameTab = "live" | "score";
 type SettingsView = "main" | "handicaps" | "format" | "tee";
 
 export default function BottomNav({
@@ -278,7 +278,7 @@ export default function BottomNav({
         <div className="relative h-[78px] overflow-hidden border-t border-white/10 bg-black/86 shadow-[0_-18px_42px_rgba(0,0,0,0.68)] backdrop-blur-xl">
           <div className="absolute inset-0 bg-gradient-to-r from-[#5b0f18]/62 via-[#111318]/82 to-[#10233e]/68" />
 
-          <div className="relative grid h-full grid-cols-4">
+          <div className="relative grid h-full grid-cols-3">
             <NavButton
               label="Live"
               icon="▦"
@@ -314,13 +314,6 @@ export default function BottomNav({
                 Score
               </div>
             </button>
-
-            <NavButton
-              label="Team"
-              icon="○"
-              active={activeTab === "team"}
-              onClick={() => setActiveTab("team")}
-            />
 
             <NavButton
               label="Settings"
@@ -443,4 +436,3 @@ function NavButton({
     </button>
   );
 }
-
