@@ -1163,7 +1163,7 @@ export default function Score({
 
         <div
           className={cx(
-            "relative mt-4 min-h-[590px] overflow-visible rounded-[26px] p-4 pb-[72px]",
+            "relative mt-4 min-h-[430px] overflow-visible rounded-[26px] p-4 pb-14",
             isDayTheme
               ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl"
               : "border border-white/10 bg-black/45 backdrop-blur-xl"
@@ -1513,7 +1513,7 @@ export default function Score({
                 <img
                   src="/launch-logo.png"
                   alt="DUEL"
-                  className="pointer-events-none absolute bottom-8 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
+                  className="pointer-events-none absolute bottom-6 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
                   style={{
                     filter: isDayTheme
                       ? "brightness(0)"
