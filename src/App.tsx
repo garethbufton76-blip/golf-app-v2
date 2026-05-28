@@ -299,6 +299,7 @@ export default function App() {
     eventStarted &&
     screen !== "admin" &&
     screen !== "quick" &&
+    screen !== "score" &&
     screen !== "eventGate" &&
     screen !== "setupWizard";
 
