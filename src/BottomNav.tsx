@@ -6,12 +6,45 @@ type GameTab = "live" | "score" | "team";
 type SettingsView = "main" | "handicaps" | "format" | "tee";
 
 type BottomNavPlayer = {
-  id?: string;
-  name: string;
+  id?: string | number;
+  name?: string;
+  firstName?: string;
+  fullName?: string;
+  displayName?: string;
+  playerName?: string;
+  team?: string;
   handicap?: number;
   rawHandicap?: number;
   exactHandicap?: number;
 };
+
+function getPlayerId(player: BottomNavPlayer, index: number) {
+  return String(
+    player.id ??
+      player.name ??
+      player.fullName ??
+      player.displayName ??
+      player.playerName ??
+      `player-${index}`
+  );
+}
+
+function getPlayerName(player: BottomNavPlayer, index: number) {
+  return String(
+    player.name ??
+      player.fullName ??
+      player.displayName ??
+      player.playerName ??
+      player.firstName ??
+      `Player ${index + 1}`
+  );
+}
+
+function getPlayerHandicap(player: BottomNavPlayer) {
+  return Number(
+    player.exactHandicap ?? player.rawHandicap ?? player.handicap ?? 0
+  );
+}
 
 export default function BottomNav({
   activeTab,
@@ -36,36 +69,41 @@ export default function BottomNav({
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsView, setSettingsView] = useState<SettingsView>("main");
+  const [handicaps, setHandicaps] = useState<Record<string, number>>({});
 
   const { themeMode, toggleTheme } = useDuelTheme();
   const isDay = themeMode === "day";
 
-  const playersKey = useMemo(
+  const cleanPlayers = useMemo(
     () =>
-      players
-        .map((p) => `${p.id ?? p.name}:${p.exactHandicap ?? p.rawHandicap ?? p.handicap ?? 0}`)
-        .join("|"),
+      (players || [])
+        .filter(Boolean)
+        .map((player, index) => ({
+          ...player,
+          __id: getPlayerId(player, index),
+          __name: getPlayerName(player, index),
+          __handicap: getPlayerHandicap(player),
+        })),
     [players]
   );
 
-  const buildHandicapState = () =>
-    players.reduce<Record<string, number>>((acc, player) => {
-      const key = player.id ?? player.name;
-
-      acc[key] =
-        player.exactHandicap ??
-        player.rawHandicap ??
-        player.handicap ??
-        0;
-
-      return acc;
-    }, {});
-
-  const [handicaps, setHandicaps] = useState<Record<string, number>>({});
+  const playersKey = useMemo(
+    () =>
+      cleanPlayers
+        .map((player: any) => `${player.__id}:${player.__name}:${player.__handicap}`)
+        .join("|"),
+    [cleanPlayers]
+  );
 
   useEffect(() => {
-    setHandicaps(buildHandicapState());
-  }, [playersKey]);
+    const next: Record<string, number> = {};
+
+    cleanPlayers.forEach((player: any) => {
+      next[player.__id] = Number(Number(player.__handicap || 0).toFixed(1));
+    });
+
+    setHandicaps(next);
+  }, [playersKey, cleanPlayers]);
 
   const changeHandicap = (playerKey: string, amount: number) => {
     setHandicaps((current) => ({
@@ -75,6 +113,11 @@ export default function BottomNav({
         Number(((current[playerKey] ?? 0) + amount).toFixed(1))
       ),
     }));
+  };
+
+  const closeSettings = () => {
+    setSettingsOpen(false);
+    setSettingsView("main");
   };
 
   return (
@@ -118,7 +161,6 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Night
                       </div>
-
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
@@ -144,7 +186,6 @@ export default function BottomNav({
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
                         Day
                       </div>
-
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
@@ -170,8 +211,7 @@ export default function BottomNav({
                       if (confirmed) {
                         onFinishGame?.();
                         onNewGame?.();
-                        setSettingsOpen(false);
-                        setSettingsView("main");
+                        closeSettings();
                       }
                     }}
                   />
@@ -206,54 +246,50 @@ export default function BottomNav({
                 title="Change Handicaps"
                 back={() => setSettingsView("main")}
               >
-                {players.length === 0 ? (
+                {cleanPlayers.length === 0 ? (
                   <div className="rounded-[22px] border border-white/10 bg-black/55 px-4 py-5 text-center text-[11px] font-black uppercase tracking-[0.18em] text-white/45">
                     No quick game players loaded
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {players.map((player) => {
-                      const playerKey = player.id ?? player.name;
-
-                      return (
-                        <div
-                          key={playerKey}
-                          className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
-                        >
-                          <div>
-                            <div className="text-[15px] font-black uppercase tracking-[0.12em]">
-                              {player.name}
-                            </div>
-
-                            <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
-                              Handicap Index
-                            </div>
+                    {cleanPlayers.map((player: any) => (
+                      <div
+                        key={player.__id}
+                        className="flex items-center justify-between rounded-[22px] border border-white/10 bg-black/55 px-4 py-4 backdrop-blur-xl"
+                      >
+                        <div className="min-w-0 pr-3">
+                          <div className="truncate text-[15px] font-black uppercase tracking-[0.12em]">
+                            {player.__name}
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => changeHandicap(playerKey, -0.1)}
-                              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
-                            >
-                              -
-                            </button>
-
-                            <div className="w-[52px] text-center text-[22px] font-black">
-                              {(handicaps[playerKey] ?? 0).toFixed(1)}
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => changeHandicap(playerKey, 0.1)}
-                              className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
-                            >
-                              +
-                            </button>
+                          <div className="mt-1 text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
+                            Handicap Index
                           </div>
                         </div>
-                      );
-                    })}
+
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => changeHandicap(player.__id, -0.1)}
+                            className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
+                          >
+                            -
+                          </button>
+
+                          <div className="w-[52px] text-center text-[22px] font-black">
+                            {(handicaps[player.__id] ?? 0).toFixed(1)}
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => changeHandicap(player.__id, 0.1)}
+                            className="h-9 w-9 rounded-full border border-white/10 bg-black/55 text-xl"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+                    ))}
 
                     <SettingsButton
                       label="Apply Handicaps"
@@ -261,8 +297,7 @@ export default function BottomNav({
                       gold
                       onClick={() => {
                         onChangeHandicaps?.(handicaps);
-                        setSettingsOpen(false);
-                        setSettingsView("main");
+                        closeSettings();
                       }}
                     />
                   </div>
@@ -304,8 +339,7 @@ export default function BottomNav({
                     gold
                     onClick={() => {
                       onChangeGameType?.();
-                      setSettingsOpen(false);
-                      setSettingsView("main");
+                      closeSettings();
                     }}
                   />
                 </div>
@@ -352,8 +386,7 @@ export default function BottomNav({
                     gold
                     onClick={() => {
                       onChangeTee?.();
-                      setSettingsOpen(false);
-                      setSettingsView("main");
+                      closeSettings();
                     }}
                   />
                 </div>
@@ -362,10 +395,7 @@ export default function BottomNav({
 
             <button
               type="button"
-              onClick={() => {
-                setSettingsOpen(false);
-                setSettingsView("main");
-              }}
+              onClick={closeSettings}
               className="mt-4 w-full rounded-[22px] border border-white/10 bg-black/55 py-4 text-[11px] font-black uppercase tracking-[0.24em] text-white/76 shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]"
             >
               Close
@@ -474,12 +504,7 @@ function SettingsSubScreen({ title, children, back }: any) {
   );
 }
 
-function SettingsButton({
-  label,
-  sub,
-  onClick,
-  gold = false,
-}: any) {
+function SettingsButton({ label, sub, onClick, gold = false }: any) {
   return (
     <button
       type="button"
@@ -551,3 +576,4 @@ function NavButton({
     </button>
   );
 }
+
