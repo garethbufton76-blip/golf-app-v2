@@ -1819,3 +1819,104 @@ function ScoreBox({
     </div>
   );
 }
+
+
+
+{/* NEW PREMIUM MATCH COMPLETE SCREEN */}
+<div className="relative mx-4 mt-4 min-h-[760px] overflow-hidden rounded-[32px] border border-white/10 bg-black/28 backdrop-blur-xl shadow-[0_30px_80px_rgba(0,0,0,0.55)]">
+
+  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,60,90,0.22),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(90,140,255,0.16),transparent_40%)]" />
+
+  <div className="relative z-10 px-6 pb-8 pt-6">
+
+    <div className="text-[12px] font-black uppercase tracking-[0.34em] text-white/65">
+      Match Complete
+    </div>
+
+    <div className="mt-6 flex items-center justify-between">
+      <div className="text-[74px] font-black leading-none tracking-[-0.06em] text-[#ff405d] drop-shadow-[0_0_24px_rgba(255,70,90,0.45)]">
+        {matchResult}
+      </div>
+
+      <div className="rounded-full border border-[#efe6bf]/35 bg-[#efe6bf]/12 px-5 py-3 text-[14px] font-black uppercase tracking-[0.18em] text-[#efe6bf]">
+        FINAL
+      </div>
+    </div>
+
+    <div className="mt-3 text-[16px] font-black uppercase tracking-[0.22em] text-white">
+      {winningTeamName} WON MATCH
+    </div>
+
+    <div className="mt-10 flex items-center justify-between">
+      <div className="flex flex-col items-center">
+        <img src={redLogo} className="h-24 w-24 object-contain" />
+        <div className="mt-3 text-[22px] font-black text-[#ff445c]">
+          {redTeamName}
+        </div>
+      </div>
+
+      <div className="text-[58px] font-black text-white/92">
+        VS
+      </div>
+
+      <div className="flex flex-col items-center opacity-75">
+        <img src={blueLogo} className="h-24 w-24 object-contain" />
+        <div className="mt-3 text-[22px] font-black text-white">
+          {blueTeamName}
+        </div>
+      </div>
+    </div>
+
+    <div className="mt-10 rounded-[28px] border border-white/10 bg-black/18 p-5 backdrop-blur-xl">
+      <div className="mb-5 text-center text-[12px] font-black uppercase tracking-[0.28em] text-[#efe6bf]">
+        Match Stats
+      </div>
+
+      <div className="space-y-4">
+        {[
+          ["Holes Won", redStats.holesWon, blueStats.holesWon],
+          ["Birdies", redStats.birdies, blueStats.birdies],
+          ["Pars", redStats.pars, blueStats.pars],
+          ["Bogeys", redStats.bogeys, blueStats.bogeys],
+        ].map(([label, left, right]) => (
+          <div
+            key={String(label)}
+            className="grid grid-cols-[60px_1fr_60px] items-center"
+          >
+            <div className="text-left text-[40px] font-black text-[#efe6bf]">
+              {left}
+            </div>
+
+            <div className="text-center text-[12px] font-black uppercase tracking-[0.24em] text-white/75">
+              {label}
+            </div>
+
+            <div className="text-right text-[40px] font-black text-[#efe6bf]">
+              {right}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="mt-8 rounded-[26px] border border-white/10 bg-black/18 px-5 py-5 backdrop-blur-xl">
+      <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/55">
+        {courseName}
+      </div>
+
+      <div className="mt-2 text-[30px] font-black uppercase tracking-[0.04em] text-white">
+        {gameFormat}
+      </div>
+
+      <div className="mt-2 text-[12px] font-black uppercase tracking-[0.22em] text-[#efe6bf]">
+        Quick Game • {teeName}
+      </div>
+    </div>
+
+    <button
+      className="mt-10 w-full rounded-[26px] bg-[#ff405d] py-5 text-[18px] font-black uppercase tracking-[0.24em] text-white shadow-[0_12px_34px_rgba(255,60,90,0.45)] transition-all active:scale-[0.985]"
+    >
+      New Game
+    </button>
+  </div>
+</div>
