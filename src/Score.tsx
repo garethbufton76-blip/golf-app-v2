@@ -895,14 +895,20 @@ export default function Score({
                           className="rounded-full p-1"
                         >
                           {p.photo ? (
-                            <img
-                              src={p.photo}
-                              alt={p.name}
+                            <div
                               className={cx(
-                                "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
-                            />
+                              style={{ backgroundImage: "url('/roster-red-bg.jpg')" }}
+                            >
+                              <div className="absolute inset-0 bg-black/42" />
+                              <img
+                                src={p.photo}
+                                alt={p.name}
+                                className="relative z-10 h-full w-full rounded-full object-cover"
+                              />
+                            </div>
                           ) : (
                             <Logo
                               team="red"
@@ -934,14 +940,20 @@ export default function Score({
                           className="rounded-full p-1"
                         >
                           {p.photo ? (
-                            <img
-                              src={p.photo}
-                              alt={p.name}
+                            <div
                               className={cx(
-                                "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
-                            />
+                              style={{ backgroundImage: "url('/roster-blue-bg.jpg')" }}
+                            >
+                              <div className="absolute inset-0 bg-black/42" />
+                              <img
+                                src={p.photo}
+                                alt={p.name}
+                                className="relative z-10 h-full w-full rounded-full object-cover"
+                              />
+                            </div>
                           ) : (
                             <Logo
                               team="blue"
@@ -1723,14 +1735,25 @@ function TeamPlayers({
             className="flex h-[64px] items-center justify-center"
           >
             {p.photo ? (
-              <img
-                src={p.photo}
-                alt={p.name}
+              <div
                 className={cx(
-                  "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
+                  "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
                   logoSize
                 )}
-              />
+                style={{
+                  backgroundImage:
+                    team === "red"
+                      ? "url('/roster-red-bg.jpg')"
+                      : "url('/roster-blue-bg.jpg')",
+                }}
+              >
+                <div className="absolute inset-0 bg-black/42" />
+                <img
+                  src={p.photo}
+                  alt={p.name}
+                  className="relative z-10 h-full w-full rounded-full object-cover"
+                />
+              </div>
             ) : (
               <Logo team={team} size={logoSize} src={fallbackLogo} />
             )}
