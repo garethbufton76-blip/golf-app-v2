@@ -48,6 +48,16 @@ export default function Score({
   const isAmbrose = /ambrose/i.test(day.format);
   const isBetterBall = /better ball/i.test(day.format);
 
+  // 2v2 Stableford should behave like Better Ball for score entry:
+  // four player scoring panels, best individual Stableford score counts.
+  const isTeamStableford =
+    /stableford/i.test(day.format) &&
+    rosterRed.length >= 2 &&
+    rosterBlue.length >= 2;
+
+  const useFourPlayerScoring =
+    isBetterBall || isTeamStableford;
+
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
   const effectiveActiveMatch = isStablefordFormat ? 0 : activeMatch;
   const [selectedHole, setSelectedHole] = useState<any>(null);
@@ -496,14 +506,15 @@ export default function Score({
       const blueBest = Math.max(...bluePoints);
 
       status = redBest > blueBest ? "red" : blueBest > redBest ? "blue" : "as";
-    } else if (isBetterBall) {
+    } else 
+if (useFourPlayerScoring) {
       const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
 
       const lowMarker = Math.min(
         ...allPlayers.map((p: any) => Number(p.handicap || 0))
       );
 
-      const redNets = scoringRedPlayers.map((p: any, i: number) => {
+      const redValues = scoringRedPlayers.map((p: any, i: number) => {
         const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
 
         const strokeCount = shots(
@@ -518,10 +529,12 @@ export default function Score({
           [selectedHole.hole]: gross,
         };
 
-        return gross - strokeCount;
+        return isTeamStableford
+          ? stableford(gross, selectedHole.par, strokeCount)
+          : gross - strokeCount;
       });
 
-      const blueNets = scoringBluePlayers.map((p: any, i: number) => {
+      const blueValues = scoringBluePlayers.map((p: any, i: number) => {
         const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
 
         const strokeCount = shots(
@@ -536,13 +549,31 @@ export default function Score({
           [selectedHole.hole]: gross,
         };
 
-        return gross - strokeCount;
+        return isTeamStableford
+          ? stableford(gross, selectedHole.par, strokeCount)
+          : gross - strokeCount;
       });
 
-      const redBest = Math.min(...redNets);
-      const blueBest = Math.min(...blueNets);
+      const redBest = isTeamStableford
+        ? Math.max(...redValues)
+        : Math.min(...redValues);
 
-      status = redBest < blueBest ? "red" : blueBest < redBest ? "blue" : "as";
+      const blueBest = isTeamStableford
+        ? Math.max(...blueValues)
+        : Math.min(...blueValues);
+
+      status = isTeamStableford
+        ? redBest > blueBest
+          ? "red"
+          : blueBest > redBest
+          ? "blue"
+          : "as"
+        : redBest < blueBest
+        ? "red"
+        : blueBest < redBest
+        ? "blue"
+        : "as";
+
     } else {
       const redScore = Number(draft.red ?? selectedHole.par);
       const blueScore = Number(draft.blue ?? selectedHole.par);
