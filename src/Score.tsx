@@ -806,21 +806,21 @@ export default function Score({
 
             <div
               className={cx(
-                "relative z-10 flex h-[calc(100dvh-32px)] min-h-[700px] flex-col overflow-hidden rounded-[30px] border px-4 pb-5 pt-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
+                "relative z-10 flex h-[calc(100dvh-32px)] min-h-[700px] flex-col overflow-hidden rounded-[30px] border px-4 pb-4 pt-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
                 completedLeader === "red"
-                  ? "border-[#ff4355]/42 bg-[linear-gradient(135deg,rgba(102,0,17,0.92),rgba(74,25,35,0.92)_47%,rgba(17,31,55,0.94))]"
+                  ? "border-[#ff4355]/45 bg-[linear-gradient(135deg,rgba(86,0,14,0.94),rgba(80,23,32,0.92)_48%,rgba(18,35,61,0.94))]"
                   : completedLeader === "blue"
-                  ? "border-[#67a6ff]/42 bg-[linear-gradient(135deg,rgba(62,8,18,0.90),rgba(32,35,58,0.92)_48%,rgba(9,34,72,0.94))]"
-                  : "border-[#d1c79f]/35 bg-[linear-gradient(135deg,rgba(64,20,26,0.92),rgba(29,32,49,0.92)_48%,rgba(12,24,43,0.94))]"
+                  ? "border-[#67a6ff]/45 bg-[linear-gradient(135deg,rgba(82,9,20,0.90),rgba(46,38,64,0.92)_48%,rgba(8,35,76,0.96))]"
+                  : "border-[#d1c79f]/38 bg-[linear-gradient(135deg,rgba(64,20,26,0.92),rgba(29,32,49,0.92)_48%,rgba(12,24,43,0.94))]"
               )}
             >
               <div
                 className={cx(
                   "pointer-events-none absolute inset-0",
                   completedLeader === "red"
-                    ? "bg-[radial-gradient(circle_at_16%_14%,rgba(255,65,85,0.36),transparent_34%),radial-gradient(circle_at_88%_28%,rgba(103,166,255,0.14),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_44%,rgba(0,0,0,0.28))]"
+                    ? "bg-[radial-gradient(circle_at_18%_18%,rgba(255,65,85,0.34),transparent_36%),radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.15),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.30))]"
                     : completedLeader === "blue"
-                    ? "bg-[radial-gradient(circle_at_84%_14%,rgba(103,166,255,0.36),transparent_34%),radial-gradient(circle_at_12%_28%,rgba(255,65,85,0.14),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_44%,rgba(0,0,0,0.28))]"
+                    ? "bg-[radial-gradient(circle_at_82%_18%,rgba(103,166,255,0.34),transparent_36%),radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.15),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.30))]"
                     : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_44%,rgba(0,0,0,0.28))]"
                 )}
               />
@@ -858,45 +858,53 @@ export default function Score({
               />
 
               <div className="relative z-10 flex h-full min-h-0 flex-col">
-                <div className="text-center">
-                  <img
-                    src="/launch-logo.png"
-                    alt="DUEL"
-                    className="mx-auto h-[42px] object-contain opacity-95"
-                    style={{ filter: "brightness(0) invert(1)" }}
-                  />
+                <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/10 px-4 pb-5 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_60%)]" />
 
-                  <div className="mt-4 text-[10px] font-black uppercase tracking-[0.32em] text-white/72">
-                    Match Complete
-                  </div>
+                  <div className="relative z-10">
+                    <img
+                      src="/launch-logo.png"
+                      alt="DUEL"
+                      className="mx-auto h-[38px] object-contain opacity-95"
+                      style={{ filter: "brightness(0) invert(1)" }}
+                    />
 
-                  <div
-                    className={cx(
-                      "mt-3 text-[76px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.72)]",
-                      completedLeader === "red"
-                        ? "text-[#ff4355]"
-                        : completedLeader === "blue"
-                        ? "text-[#67a6ff]"
-                        : "text-white"
-                    )}
-                  >
-                    {finalScoreMain}
-                  </div>
-
-                  <div className="mt-4 text-[12px] font-black uppercase tracking-[0.23em] text-white">
-                    {finalScoreSub}
-                  </div>
-
-                  <div className="mx-auto mt-5 flex max-w-[260px] items-center gap-4">
-                    <div className="h-px flex-1 bg-[#d1c79f]/38" />
-                    <div className="text-[20px] font-black uppercase tracking-[0.28em] text-[#d1c79f]">
-                      Final
+                    <div className="mt-3 text-[9px] font-black uppercase tracking-[0.32em] text-white/68">
+                      Match Complete
                     </div>
-                    <div className="h-px flex-1 bg-[#d1c79f]/38" />
+
+                    <div
+                      className={cx(
+                        "mt-2 text-[76px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.72)]",
+                        completedLeader === "red"
+                          ? "text-[#ff4355]"
+                          : completedLeader === "blue"
+                          ? "text-[#67a6ff]"
+                          : "text-white"
+                      )}
+                    >
+                      {finalScoreMain}
+                    </div>
+
+                    <div className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-white">
+                      {finalScoreSub}
+                    </div>
+
+                    <div className="mx-auto mt-4 flex max-w-[300px] items-center gap-3">
+                      <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                      <div className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+                        {(day.course || "ST MICHAELS").toUpperCase()} • {String(day.tee || "").toUpperCase()}
+                      </div>
+                      <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                    </div>
+
+                    <div className="mt-2 text-[9px] font-black uppercase tracking-[0.22em] text-white/48">
+                      {day.format}
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-6 grid grid-cols-[1fr_48px_1fr] items-center gap-2">
+                <div className="mt-4 grid grid-cols-[1fr_54px_1fr] items-center gap-2">
                   <div className="flex justify-center gap-2">
                     {scoringRedPlayers.map((p: any, i: number) => (
                       <button
@@ -909,19 +917,19 @@ export default function Score({
                           className={cx(
                             "rounded-full p-1",
                             completedLeader === "red"
-                              ? "bg-[#ff4355]/20 shadow-[0_0_28px_rgba(255,67,85,0.30)]"
-                              : "opacity-72"
+                              ? "bg-[#ff4355]/22 shadow-[0_0_30px_rgba(255,67,85,0.32)]"
+                              : "opacity-70"
                           )}
                         >
                           <Logo
                             team="red"
-                            size="h-[78px] w-[78px]"
+                            size="h-[76px] w-[76px]"
                             src={p.photo || teamLogos?.Red}
                           />
                         </div>
                         <div
                           className={cx(
-                            "mt-2 w-full truncate text-[13px] font-black",
+                            "mt-2 w-full truncate text-[12px] font-black",
                             completedLeader === "red" ? "text-[#ff4355]" : "text-white/78"
                           )}
                         >
@@ -931,7 +939,7 @@ export default function Score({
                     ))}
                   </div>
 
-                  <div className="text-center text-[36px] font-black text-white/88">VS</div>
+                  <div className="text-center text-[40px] font-black text-white/90">VS</div>
 
                   <div className="flex justify-center gap-2">
                     {scoringBluePlayers.map((p: any, i: number) => (
@@ -945,19 +953,19 @@ export default function Score({
                           className={cx(
                             "rounded-full p-1",
                             completedLeader === "blue"
-                              ? "bg-[#67a6ff]/20 shadow-[0_0_28px_rgba(103,166,255,0.30)]"
-                              : "opacity-72"
+                              ? "bg-[#67a6ff]/22 shadow-[0_0_30px_rgba(103,166,255,0.32)]"
+                              : "opacity-70"
                           )}
                         >
                           <Logo
                             team="blue"
-                            size="h-[78px] w-[78px]"
+                            size="h-[76px] w-[76px]"
                             src={p.photo || teamLogos?.Blue}
                           />
                         </div>
                         <div
                           className={cx(
-                            "mt-2 w-full truncate text-[13px] font-black",
+                            "mt-2 w-full truncate text-[12px] font-black",
                             completedLeader === "blue" ? "text-[#67a6ff]" : "text-white/78"
                           )}
                         >
@@ -968,13 +976,13 @@ export default function Score({
                   </div>
                 </div>
 
-                <div className="mt-6 rounded-[26px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-xl">
-                  <div className="mx-auto mb-3 flex max-w-[260px] items-center gap-4">
-                    <div className="h-px flex-1 bg-[#d1c79f]/36" />
-                    <div className="text-[12px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                <div className="mt-4 rounded-[26px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-xl">
+                  <div className="mx-auto mb-2 flex max-w-[260px] items-center gap-4">
+                    <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
                       Match Stats
                     </div>
-                    <div className="h-px flex-1 bg-[#d1c79f]/36" />
+                    <div className="h-px flex-1 bg-[#d1c79f]/34" />
                   </div>
 
                   <CompactStatRow label="Holes Won" red={redWins} blue={blueWins} />
@@ -983,21 +991,11 @@ export default function Score({
                   <CompactStatRow label="Bogeys" red={redRoundStats.bogeys} blue={blueRoundStats.bogeys} />
                 </div>
 
-                <div className="mt-4 rounded-[24px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-xl">
-                  <div className="text-[10px] font-black uppercase tracking-[0.24em] text-white/50">
-                    {day.course || "Course"}
-                  </div>
-
-                  <div className="mt-2 text-[19px] font-black uppercase tracking-[0.08em] text-white">
-                    {day.format}
-                  </div>
-
-                  <div className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/85">
-                    {day.label} • {String(day.tee || "").toUpperCase()}
-                  </div>
-                </div>
-
                 <div className="mt-auto pt-4">
+                  <div className="mb-3 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-center text-[8px] font-black uppercase tracking-[0.14em] text-white/48">
+                    Tap a player crest to review their scorecard
+                  </div>
+
                   <button
                     type="button"
                     onClick={() => {
@@ -1536,20 +1534,7 @@ export default function Score({
                   onClick={() => setFinishStep("signoff")}
                   className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-black shadow-[0_0_22px_rgba(209,199,159,0.28)]"
                 >
-                  
-{/* DEV FINAL SCREEN BUTTON */}
-<button
-  type="button"
-  onClick={() => {
-    setFinishStep("overview");
-    setShowFinishActions(true);
-  }}
-  className="absolute bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/70 px-5 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-xl"
->
-  Dev Final Screen
-</button>
-
-Finish Game
+                  Finish Game
                 </button>
               ) : (
                 <img
