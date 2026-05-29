@@ -801,27 +801,27 @@ export default function Score({
                 alt=""
                 className="h-full w-full object-cover"
               />
-              <div className="absolute inset-0 bg-black/18" />
+              <div className="absolute inset-0 bg-black/12" />
             </div>
 
             <div
               className={cx(
                 "relative z-10 flex h-[calc(100dvh-32px)] min-h-[700px] flex-col overflow-hidden rounded-[30px] border px-4 pb-4 pt-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
                 completedLeader === "red"
-                  ? "border-[#ff4355]/45 bg-[linear-gradient(135deg,rgba(86,0,14,0.94),rgba(80,23,32,0.92)_48%,rgba(18,35,61,0.94))]"
+                  ? "border-white/15 bg-gradient-to-b from-[#7c2430]/90 to-[#47151d]/90"
                   : completedLeader === "blue"
-                  ? "border-[#67a6ff]/45 bg-[linear-gradient(135deg,rgba(82,9,20,0.90),rgba(46,38,64,0.92)_48%,rgba(8,35,76,0.96))]"
-                  : "border-[#d1c79f]/38 bg-[linear-gradient(135deg,rgba(64,20,26,0.92),rgba(29,32,49,0.92)_48%,rgba(12,24,43,0.94))]"
+                  ? "border-white/15 bg-gradient-to-b from-[#415aaf]/90 to-[#29386c]/90"
+                  : "border-white/12 bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
               )}
             >
               <div
                 className={cx(
                   "pointer-events-none absolute inset-0",
                   completedLeader === "red"
-                    ? "bg-[radial-gradient(circle_at_18%_18%,rgba(255,65,85,0.34),transparent_36%),radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.15),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.30))]"
+                    ? "bg-[radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.28),transparent_40%),radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.10),transparent_40%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
                     : completedLeader === "blue"
-                    ? "bg-[radial-gradient(circle_at_82%_18%,rgba(103,166,255,0.34),transparent_36%),radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.15),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.30))]"
-                    : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.22),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_44%,rgba(0,0,0,0.28))]"
+                    ? "bg-[radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.30),transparent_40%),radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.10),transparent_40%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
+                    : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.16),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_44%,rgba(0,0,0,0.08))]"
                 )}
               />
 
@@ -858,7 +858,16 @@ export default function Score({
               />
 
               <div className="relative z-10 flex h-full min-h-0 flex-col">
-                <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/10 px-4 pb-4 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
+                <div
+                  className={cx(
+                    "relative overflow-hidden rounded-[26px] border px-4 pb-4 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]",
+                    completedLeader === "red"
+                      ? "border-[#b54854]/30 bg-gradient-to-b from-[#7c2430]/52 to-[#47151d]/42"
+                      : completedLeader === "blue"
+                      ? "border-[#627dd7]/30 bg-gradient-to-b from-[#415aaf]/52 to-[#29386c]/42"
+                      : "border-white/10 bg-black/10"
+                  )}
+                >
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_60%)]" />
 
                   <div className="relative z-10">
@@ -951,7 +960,7 @@ export default function Score({
 
                     <div
                       className={cx(
-                        "mt-2 text-[70px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.72)]",
+                        "mt-2 text-[70px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.62)]",
                         completedLeader === "red"
                           ? "text-[#ff4355]"
                           : completedLeader === "blue"
