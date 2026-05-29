@@ -37,10 +37,6 @@ export default function Score({
 
   const day = dayConfigs[activeDay];
 
-  const isStablefordFormatScore =
-    (day?.format || "").toLowerCase().includes("stableford");
-
-
   const count = /singles/i.test(day.format)
     ? players
     : Math.max(1, Math.ceil(players / 2));
