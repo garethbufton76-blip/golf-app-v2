@@ -188,17 +188,43 @@ export default function Score({
       metres: 0,
     };
 
-  const displayMain = (() => {
-    if (!result.leader) return result.main;
+  function matchLockedResult() {
+    let lead = 0;
 
-    const name =
-      teamNames[result.leader === "red" ? "Red" : "Blue"] ||
-      result.leader.toUpperCase();
+    const orderedHoles = [...holes].sort(
+      (a: any, b: any) => Number(a.hole) - Number(b.hole)
+    );
 
-    return result.main.replace(result.leader.toUpperCase(), name.toUpperCase());
-  })();
+    for (const h of orderedHoles) {
+      if (h.status === "pending") continue;
 
-  function matchClosedResult() {
+      if (h.status === "red") lead += 1;
+      if (h.status === "blue") lead -= 1;
+
+      const holeNo = Number(h.hole || 0);
+      const remaining = Math.max(0, 18 - holeNo);
+      const margin = Math.abs(lead);
+
+      // Match-play result locks the moment the lead is bigger than holes remaining.
+      // Later holes may still be scored for cards/stats, but the match result must
+      // stay fixed, e.g. 6&5 remains 6&5 forever.
+      if (margin > remaining) {
+        return {
+          leader: lead > 0 ? "red" : "blue",
+          main: `${margin}&${remaining}`,
+          wonHole: holeNo,
+        };
+      }
+    }
+
+    return null;
+  }
+
+  function matchFinalResult() {
+    const locked = matchLockedResult();
+
+    if (locked) return locked;
+
     let lead = 0;
 
     const orderedHoles = [...holes].sort(
@@ -208,18 +234,6 @@ export default function Score({
     for (const h of orderedHoles) {
       if (h.status === "red") lead += 1;
       if (h.status === "blue") lead -= 1;
-
-      const holeNo = Number(h.hole || 0);
-      const remaining = Math.max(0, 18 - holeNo);
-      const margin = Math.abs(lead);
-
-      if (margin > remaining) {
-        return {
-          leader: lead > 0 ? "red" : "blue",
-          main: `${margin}&${remaining}`,
-          wonHole: holeNo,
-        };
-      }
     }
 
     if (lead === 0) {
@@ -237,7 +251,24 @@ export default function Score({
     };
   }
 
-  const closedResult = matchClosedResult();
+  const lockedResult = matchLockedResult();
+  const displayResult = lockedResult || result;
+  const displaySub = lockedResult ? "MATCH CLOSED" : result.sub;
+
+  const displayMain = (() => {
+    if (!displayResult.leader) return displayResult.main;
+
+    const name =
+      teamNames[displayResult.leader === "red" ? "Red" : "Blue"] ||
+      displayResult.leader.toUpperCase();
+
+    return displayResult.main.replace(
+      displayResult.leader.toUpperCase(),
+      name.toUpperCase()
+    );
+  })();
+
+  const closedResult = matchFinalResult();
   const completedLeader = closedResult.leader || result.leader;
 
   const winningTeamName = completedLeader
@@ -1141,7 +1172,7 @@ export default function Score({
                       : "text-white/55"
                   )}
                 >
-                  {result.sub}
+                  {displaySub}
                 </div>
 
 
