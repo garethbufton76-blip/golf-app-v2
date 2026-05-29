@@ -899,7 +899,7 @@ export default function Score({
                               src={p.photo}
                               alt={p.name}
                               className={cx(
-                                "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_8px_22px_rgba(0,0,0,0.32)]",
+                                "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
                             />
@@ -938,7 +938,7 @@ export default function Score({
                               src={p.photo}
                               alt={p.name}
                               className={cx(
-                                "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_8px_22px_rgba(0,0,0,0.32)]",
+                                "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
                             />
@@ -1727,7 +1727,7 @@ function TeamPlayers({
                 src={p.photo}
                 alt={p.name}
                 className={cx(
-                  "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_6px_18px_rgba(0,0,0,0.30)]",
+                  "rounded-full border-[3px] border-[#e7e7e7] bg-gradient-to-b from-[#f2f2f2] to-[#bdbdbd] object-cover shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
                   logoSize
                 )}
               />
