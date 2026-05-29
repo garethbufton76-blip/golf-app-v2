@@ -116,6 +116,10 @@ export default function Home({
   const [liveExpanded, setLiveExpanded] = useState(true);
 
   const day = dayConfigs[activeDay];
+
+  const isStablefordFormatHome =
+    (day?.format || "").toLowerCase().includes("stableford");
+
   const count = matchCount(players, day.format);
 
   const matchCards = Array.from({ length: count }, (_, i) => {
