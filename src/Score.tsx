@@ -897,7 +897,7 @@ export default function Score({
                           {p.photo ? (
                             <div
                               className={cx(
-                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
                               style={{ backgroundImage: "url('/roster-red-bg.jpg')" }}
@@ -942,7 +942,7 @@ export default function Score({
                           {p.photo ? (
                             <div
                               className={cx(
-                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
                                 isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
                               )}
                               style={{ backgroundImage: "url('/roster-blue-bg.jpg')" }}
@@ -1737,7 +1737,7 @@ function TeamPlayers({
             {p.photo ? (
               <div
                 className={cx(
-                  "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-[3px] shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
+                  "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
                   logoSize
                 )}
                 style={{
