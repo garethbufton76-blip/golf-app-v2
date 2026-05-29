@@ -102,8 +102,31 @@ function compactMatchScore(result: any) {
 }
 
 
-function scorecardKey(team: string, p: any) {
-  return `${team}-${p.rosterIndex}-${p.name}`;
+
+function scorecardKeyCandidates(team: string, p: any) {
+  const rosterIndex = p?.rosterIndex ?? 0;
+  const name = p?.name ?? "";
+  const id = p?.id ?? "";
+
+  return [
+    `${team}-${rosterIndex}-${name}`,
+    `${team}-${id}-${name}`,
+    `${team}-${name}`,
+    `${rosterIndex}-${name}`,
+    `${id}-${name}`,
+    String(id),
+    String(name),
+  ].filter(Boolean);
+}
+
+function scorecardForPlayer(scorecards: any, team: string, p: any) {
+  const keys = scorecardKeyCandidates(team, p);
+
+  for (const key of keys) {
+    if (scorecards?.[key]) return scorecards[key];
+  }
+
+  return {};
 }
 
 function stablefordLeaderboard({
@@ -125,7 +148,7 @@ function stablefordLeaderboard({
 
   return [...redPlayers, ...bluePlayers]
     .map(({ team, p }: any) => {
-      const card = scorecards?.[scorecardKey(team, p)] || {};
+      const card = scorecardForPlayer(scorecards, team, p);
       let points = 0;
       let holesPlayed = 0;
 
@@ -564,7 +587,7 @@ export default function Home({
                           row.team === "red" ? "text-red-100" : "text-blue-100"
                         )}
                       >
-                        {row.firstName}
+                        {row.firstName || row.name}
                       </div>
 
                       <div className="mt-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/38">
