@@ -1569,27 +1569,19 @@ export default function Score({
         players={bottomNavPlayers}
         showTeamTab={false}
         onChangeHandicaps={handleChangeHandicaps}
+        currentFormat={day.format}
+        currentTee={day.tee}
         onChangeGameType={(nextFormat: string) => {
           setDayConfigs?.((current: any[]) =>
-            current.map((d: any, index: number) =>
-              index === activeDay
-                ? {
-                    ...d,
-                    format: nextFormat,
-                  }
-                : d
+            current.map((config: any, index: number) =>
+              index === activeDay ? { ...config, format: nextFormat } : config
             )
           );
         }}
         onChangeTee={(nextTee: string) => {
           setDayConfigs?.((current: any[]) =>
-            current.map((d: any, index: number) =>
-              index === activeDay
-                ? {
-                    ...d,
-                    tee: nextTee,
-                  }
-                : d
+            current.map((config: any, index: number) =>
+              index === activeDay ? { ...config, tee: nextTee } : config
             )
           );
         }}
