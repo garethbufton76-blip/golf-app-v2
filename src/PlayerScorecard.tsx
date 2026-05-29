@@ -107,6 +107,11 @@ export default function PlayerScorecard({
 
   const scoreVsPar = played.length ? scoreTotal - parPlayed : null;
 
+  const stablefordPointsTotal = played.reduce(
+    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
+    0
+  );
+
   const scoreLabel =
     scoreVsPar == null
       ? "-"
@@ -145,17 +150,7 @@ export default function PlayerScorecard({
 
   const bottomModeLabel = scoreMode === "gross" ? "Gross" : "Net";
 
-  
-  const isStableford =
-    typeof format === "string" &&
-    format.toLowerCase().includes("stableford");
-
-  const totalStablefordPoints = holes.reduce((total: number, hole: any) => {
-    const pts = Number(hole?.stablefordPoints ?? hole?.points ?? 0);
-    return total + (Number.isNaN(pts) ? 0 : pts);
-  }, 0);
-
-return (
+  return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
         {/* BACKGROUND */}
@@ -413,8 +408,14 @@ return (
               />
 
               <Summary
-                label="To Par"
-                value={scoreLabel}
+                label={showStableford ? "Points" : "To Par"}
+                value={
+                  showStableford
+                    ? played.length
+                      ? stablefordPointsTotal
+                      : "-"
+                    : scoreLabel
+                }
               />
             </div>
 
