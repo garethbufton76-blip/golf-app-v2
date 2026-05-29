@@ -139,11 +139,11 @@ function stablefordLeaderboard({
     day?.tee?.charAt(0).toUpperCase() + day?.tee?.slice(1).toLowerCase();
 
   const redPlayers = (roster?.Red || roster?.red || [])
-    .slice(0, players)
+    .slice(0, Math.max(Number(players || 0), 1))
     .map((p: any) => ({ team: "red", p }));
 
   const bluePlayers = (roster?.Blue || roster?.blue || [])
-    .slice(0, players)
+    .slice(0, Math.max(Number(players || 0), 1))
     .map((p: any) => ({ team: "blue", p }));
 
   return [...redPlayers, ...bluePlayers]
