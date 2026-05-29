@@ -129,6 +129,17 @@ function scorecardForPlayer(scorecards: any, team: string, p: any) {
   return {};
 }
 
+function standardStablefordPoints(gross: any, par: any, strokeCount: any) {
+  const grossNumber = Number(gross);
+  const parNumber = Number(par);
+  const strokes = Number(strokeCount || 0);
+
+  if (!Number.isFinite(grossNumber) || !Number.isFinite(parNumber)) return 0;
+
+  const net = grossNumber - strokes;
+  return Math.max(0, 2 + parNumber - net);
+}
+
 function stablefordLeaderboard({
   roster,
   players,
@@ -167,19 +178,28 @@ function stablefordLeaderboard({
 
         if (holeData == null) continue;
 
-        const storedPoints =
-          typeof holeData === "object"
-            ? Number(holeData?.points || 0)
-            : 0;
+        const gross =
+          typeof holeData === "object" ? holeData?.gross : holeData;
 
-        points += storedPoints;
+        if (gross == null) continue;
+
+        const storedPoints =
+          typeof holeData === "object" ? holeData?.points : undefined;
+
+        if (storedPoints != null) {
+          points += Number(storedPoints || 0);
+        } else {
+          const shotCount = shots(Number(p.handicap || 0), detail.si);
+          points += standardStablefordPoints(Number(gross), Number(detail.par), shotCount);
+        }
+
         holesPlayed += 1;
       }
 
       return {
         team,
         name: p.name,
-        firstName: first(p?.name || `${team.toUpperCase()} PLAYER`),
+        firstName: first(p.name),
         points,
         holesPlayed,
       };
