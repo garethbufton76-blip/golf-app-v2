@@ -859,17 +859,8 @@ export default function Score({
 
               <div className="relative z-10 flex h-full min-h-0 flex-col">
                 <div
-                  className={cx(
-                    "relative overflow-hidden rounded-[26px] border px-4 pb-4 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]",
-                    completedLeader === "red"
-                      ? "border-[#b54854]/30 bg-gradient-to-b from-[#7c2430]/52 to-[#47151d]/42"
-                      : completedLeader === "blue"
-                      ? "border-[#627dd7]/30 bg-gradient-to-b from-[#415aaf]/52 to-[#29386c]/42"
-                      : "border-white/10 bg-black/10"
-                  )}
+                  className="relative overflow-hidden px-4 pb-4 pt-4 text-center"
                 >
-                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_60%)]" />
-
                   <div className="relative z-10">
                     <img
                       src="/launch-logo.png"
@@ -1006,7 +997,7 @@ export default function Score({
                 </div>
 
                 <div className="mt-auto pt-4">
-                  <div className="mb-3 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-center text-[8px] font-black uppercase tracking-[0.14em] text-white/48">
+                  <div className="mb-3 px-3 py-2 text-center text-[8px] font-black uppercase tracking-[0.14em] text-white/48">
                     Tap a player crest to review their scorecard
                   </div>
 
