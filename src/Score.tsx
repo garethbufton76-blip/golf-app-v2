@@ -37,7 +37,11 @@ export default function Score({
 
   const day = dayConfigs[activeDay];
 
-  const count = /singles/i.test(day.format)
+  const isStablefordFormat = /stableford/i.test(day?.format || "");
+
+  const count = isStablefordFormat
+    ? 1
+    : /singles/i.test(day.format)
     ? players
     : Math.max(1, Math.ceil(players / 2));
 
@@ -45,6 +49,7 @@ export default function Score({
   const isBetterBall = /better ball/i.test(day.format);
 
   const [activeMatch, setActiveMatch] = useState(startMatch || 0);
+  const effectiveActiveMatch = isStablefordFormat ? 0 : activeMatch;
   const [selectedHole, setSelectedHole] = useState<any>(null);
   const [cardPlayer, setCardPlayer] = useState<any>(null);
   const [finishStep, setFinishStep] = useState<"playing" | "signoff" | "overview">("playing");
@@ -84,9 +89,14 @@ export default function Score({
     };
   }
 
-  const stateKey = keyFor(activeDay, activeMatch);
+  const stateKey = keyFor(activeDay, effectiveActiveMatch);
   const holes = states[stateKey] || blankHoles();
-  const rawMatch = playersForMatch(roster, players, day.format, activeMatch);
+  const rawMatch = isStablefordFormat
+    ? {
+        red: (roster?.Red || roster?.red || []).slice(0, players),
+        blue: (roster?.Blue || roster?.blue || []).slice(0, players),
+      }
+    : playersForMatch(roster, players, day.format, effectiveActiveMatch);
 
   const match = {
     red: (rawMatch.red || []).map(withHandicapOverride),
@@ -96,17 +106,19 @@ export default function Score({
   const rosterRed = (roster?.Red || roster?.red || []).map(withHandicapOverride);
   const rosterBlue = (roster?.Blue || roster?.blue || []).map(withHandicapOverride);
 
-  const pairStart = activeMatch * 2;
+  const pairStart = effectiveActiveMatch * 2;
 
-  const scoringRedPlayers =
-    isBetterBall && match.red.length < 2
-      ? rosterRed.slice(pairStart, pairStart + 2)
-      : match.red;
+  const scoringRedPlayers = isStablefordFormat
+    ? rosterRed.slice(0, players)
+    : isBetterBall && match.red.length < 2
+    ? rosterRed.slice(pairStart, pairStart + 2)
+    : match.red;
 
-  const scoringBluePlayers =
-    isBetterBall && match.blue.length < 2
-      ? rosterBlue.slice(pairStart, pairStart + 2)
-      : match.blue;
+  const scoringBluePlayers = isStablefordFormat
+    ? rosterBlue.slice(0, players)
+    : isBetterBall && match.blue.length < 2
+    ? rosterBlue.slice(pairStart, pairStart + 2)
+    : match.blue;
 
   const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
 
