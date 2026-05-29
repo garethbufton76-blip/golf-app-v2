@@ -858,7 +858,7 @@ export default function Score({
               />
 
               <div className="relative z-10 flex h-full min-h-0 flex-col">
-                <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/10 px-4 pb-5 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
+                <div className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/10 px-4 pb-4 pt-4 text-center shadow-[0_18px_48px_rgba(0,0,0,0.22)]">
                   <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_60%)]" />
 
                   <div className="relative z-10">
@@ -869,13 +869,89 @@ export default function Score({
                       style={{ filter: "brightness(0) invert(1)" }}
                     />
 
-                    <div className="mt-3 text-[9px] font-black uppercase tracking-[0.32em] text-white/68">
+
+
+                <div className="mt-4 grid grid-cols-[1fr_54px_1fr] items-center gap-2">
+                  <div className="flex justify-center gap-2">
+                    {scoringRedPlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-red-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "red", p })}
+                        className="group flex w-[74px] flex-col items-center active:scale-95"
+                      >
+                        <div
+                          className={cx(
+                            "rounded-full p-1",
+                            completedLeader === "red"
+                              ? "bg-[#ff4355]/22 shadow-[0_0_30px_rgba(255,67,85,0.32)]"
+                              : "opacity-70"
+                          )}
+                        >
+                          <Logo
+                            team="red"
+                            size="h-[64px] w-[64px]"
+                            src={p.photo || teamLogos?.Red}
+                          />
+                        </div>
+                        <div
+                          className={cx(
+                            "mt-1 w-full truncate text-[11px] font-black",
+                            completedLeader === "red" ? "text-[#ff4355]" : "text-white/78"
+                          )}
+                        >
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-center text-[34px] font-black text-white/90">VS</div>
+
+                  <div className="flex justify-center gap-2">
+                    {scoringBluePlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-blue-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "blue", p })}
+                        className="group flex w-[74px] flex-col items-center active:scale-95"
+                      >
+                        <div
+                          className={cx(
+                            "rounded-full p-1",
+                            completedLeader === "blue"
+                              ? "bg-[#67a6ff]/22 shadow-[0_0_30px_rgba(103,166,255,0.32)]"
+                              : "opacity-70"
+                          )}
+                        >
+                          <Logo
+                            team="blue"
+                            size="h-[64px] w-[64px]"
+                            src={p.photo || teamLogos?.Blue}
+                          />
+                        </div>
+                        <div
+                          className={cx(
+                            "mt-1 w-full truncate text-[11px] font-black",
+                            completedLeader === "blue" ? "text-[#67a6ff]" : "text-white/78"
+                          )}
+                        >
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                
+
+                    <div className="mt-5 text-[9px] font-black uppercase tracking-[0.32em] text-white/68">
                       Match Complete
                     </div>
 
                     <div
                       className={cx(
-                        "mt-2 text-[76px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.72)]",
+                        "mt-2 text-[70px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.72)]",
                         completedLeader === "red"
                           ? "text-[#ff4355]"
                           : completedLeader === "blue"
@@ -904,79 +980,8 @@ export default function Score({
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-[1fr_54px_1fr] items-center gap-2">
-                  <div className="flex justify-center gap-2">
-                    {scoringRedPlayers.map((p: any, i: number) => (
-                      <button
-                        key={`complete-red-${p.name}-${i}`}
-                        type="button"
-                        onClick={() => setCardPlayer({ team: "red", p })}
-                        className="group flex w-[86px] flex-col items-center active:scale-95"
-                      >
-                        <div
-                          className={cx(
-                            "rounded-full p-1",
-                            completedLeader === "red"
-                              ? "bg-[#ff4355]/22 shadow-[0_0_30px_rgba(255,67,85,0.32)]"
-                              : "opacity-70"
-                          )}
-                        >
-                          <Logo
-                            team="red"
-                            size="h-[76px] w-[76px]"
-                            src={p.photo || teamLogos?.Red}
-                          />
-                        </div>
-                        <div
-                          className={cx(
-                            "mt-2 w-full truncate text-[12px] font-black",
-                            completedLeader === "red" ? "text-[#ff4355]" : "text-white/78"
-                          )}
-                        >
-                          {first(p.name)}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                <div className="mt-4 px-4 py-2">
 
-                  <div className="text-center text-[40px] font-black text-white/90">VS</div>
-
-                  <div className="flex justify-center gap-2">
-                    {scoringBluePlayers.map((p: any, i: number) => (
-                      <button
-                        key={`complete-blue-${p.name}-${i}`}
-                        type="button"
-                        onClick={() => setCardPlayer({ team: "blue", p })}
-                        className="group flex w-[86px] flex-col items-center active:scale-95"
-                      >
-                        <div
-                          className={cx(
-                            "rounded-full p-1",
-                            completedLeader === "blue"
-                              ? "bg-[#67a6ff]/22 shadow-[0_0_30px_rgba(103,166,255,0.32)]"
-                              : "opacity-70"
-                          )}
-                        >
-                          <Logo
-                            team="blue"
-                            size="h-[76px] w-[76px]"
-                            src={p.photo || teamLogos?.Blue}
-                          />
-                        </div>
-                        <div
-                          className={cx(
-                            "mt-2 w-full truncate text-[12px] font-black",
-                            completedLeader === "blue" ? "text-[#67a6ff]" : "text-white/78"
-                          )}
-                        >
-                          {first(p.name)}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-[26px] border border-white/10 bg-black/18 px-4 py-4 backdrop-blur-xl">
                   <div className="mx-auto mb-2 flex max-w-[260px] items-center gap-4">
                     <div className="h-px flex-1 bg-[#d1c79f]/34" />
                     <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
@@ -1009,14 +1014,7 @@ export default function Score({
                       }
                       setScreen("home");
                     }}
-                    className={cx(
-                      "w-full rounded-full border px-4 py-4 text-[15px] font-black uppercase tracking-[0.22em] shadow-[0_0_26px_rgba(255,255,255,0.08)] transition-all active:scale-[0.985]",
-                      completedLeader === "red"
-                        ? "border-[#ff4355]/55 bg-[#ff4355] text-white shadow-[0_10px_28px_rgba(255,67,85,0.32)]"
-                        : completedLeader === "blue"
-                        ? "border-[#67a6ff]/55 bg-[#67a6ff] text-black shadow-[0_10px_28px_rgba(103,166,255,0.28)]"
-                        : "border-[#d1c79f]/45 bg-[#d1c79f] text-black"
-                    )}
+                    className="w-full rounded-full border border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] px-4 py-4 text-[15px] font-black uppercase tracking-[0.22em] text-black shadow-[0_10px_28px_rgba(209,199,159,0.28)] transition-all active:scale-[0.985]"
                   >
                     New Game
                   </button>
