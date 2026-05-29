@@ -51,9 +51,7 @@ export default function Score({
   // 2v2 Stableford should behave like Better Ball for score entry:
   // four player scoring panels, best individual Stableford score counts.
   const isTeamStableford =
-    /stableford/i.test(day.format) &&
-    rosterRed.length >= 2 &&
-    rosterBlue.length >= 2;
+    /stableford/i.test(day.format);
 
   const useFourPlayerScoring =
     isBetterBall || isTeamStableford;
