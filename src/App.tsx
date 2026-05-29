@@ -452,6 +452,7 @@ export default function App() {
               teamNames={teamNames}
               eventLocked={eventLocked}
               pairingLocks={pairingLocks}
+              setDayConfigs={setDayConfigs}
             />
           )}
 
