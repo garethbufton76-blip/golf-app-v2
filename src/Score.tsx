@@ -894,11 +894,22 @@ export default function Score({
                         <div
                           className="rounded-full p-1"
                         >
-                          <Logo
-                            team="red"
-                            size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
-                            src={p.photo || teamLogos?.Red}
-                          />
+                          {p.photo ? (
+                            <img
+                              src={p.photo}
+                              alt={p.name}
+                              className={cx(
+                                "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_8px_22px_rgba(0,0,0,0.32)]",
+                                isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
+                              )}
+                            />
+                          ) : (
+                            <Logo
+                              team="red"
+                              size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
+                              src={teamLogos?.Red}
+                            />
+                          )}
                         </div>
                         <div
                           className="mt-1 w-full truncate text-[11px] font-black text-white"
@@ -922,11 +933,22 @@ export default function Score({
                         <div
                           className="rounded-full p-1"
                         >
-                          <Logo
-                            team="blue"
-                            size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
-                            src={p.photo || teamLogos?.Blue}
-                          />
+                          {p.photo ? (
+                            <img
+                              src={p.photo}
+                              alt={p.name}
+                              className={cx(
+                                "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_8px_22px_rgba(0,0,0,0.32)]",
+                                isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
+                              )}
+                            />
+                          ) : (
+                            <Logo
+                              team="blue"
+                              size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
+                              src={teamLogos?.Blue}
+                            />
+                          )}
                         </div>
                         <div
                           className="mt-1 w-full truncate text-[11px] font-black text-white"
@@ -1700,7 +1722,18 @@ function TeamPlayers({
             onClick={() => setCardPlayer({ team, p })}
             className="flex h-[64px] items-center justify-center"
           >
-            <Logo team={team} size={logoSize} src={p.photo || fallbackLogo} />
+            {p.photo ? (
+              <img
+                src={p.photo}
+                alt={p.name}
+                className={cx(
+                  "rounded-full border-[5px] border-white bg-white object-cover shadow-[0_6px_18px_rgba(0,0,0,0.30)]",
+                  logoSize
+                )}
+              />
+            ) : (
+              <Logo team={team} size={logoSize} src={fallbackLogo} />
+            )}
           </button>
 
           <div className={cx("mt-1 w-full truncate text-[11px] leading-tight", isDayTheme ? "text-[#2f3032]" : "text-white")}>
