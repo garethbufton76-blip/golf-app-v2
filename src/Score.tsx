@@ -30,6 +30,7 @@ export default function Score({
   teamLogos,
   teamNames,
   setMode,
+  setDayConfigs,
 }: any) {
   const { theme, themeMode } = useDuelTheme();
   const isDayTheme = themeMode === "day";
@@ -1568,8 +1569,30 @@ export default function Score({
         players={bottomNavPlayers}
         showTeamTab={false}
         onChangeHandicaps={handleChangeHandicaps}
-        onChangeGameType={() => {}}
-        onChangeTee={() => {}}
+        onChangeGameType={(nextFormat: string) => {
+          setDayConfigs?.((current: any[]) =>
+            current.map((d: any, index: number) =>
+              index === activeDay
+                ? {
+                    ...d,
+                    format: nextFormat,
+                  }
+                : d
+            )
+          );
+        }}
+        onChangeTee={(nextTee: string) => {
+          setDayConfigs?.((current: any[]) =>
+            current.map((d: any, index: number) =>
+              index === activeDay
+                ? {
+                    ...d,
+                    tee: nextTee,
+                  }
+                : d
+            )
+          );
+        }}
         onFinishGame={() => {
           if (setMode) setMode("launch");
           setScreen("home");
