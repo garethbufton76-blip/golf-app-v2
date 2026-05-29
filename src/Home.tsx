@@ -164,28 +164,22 @@ function stablefordLeaderboard({
           };
 
         const holeData = card?.[holeNo];
-        const gross =
-          typeof holeData === "object" ? holeData?.gross : holeData;
 
-        if (gross == null) continue;
+        if (holeData == null) continue;
 
         const storedPoints =
-          typeof holeData === "object" ? holeData?.points : undefined;
+          typeof holeData === "object"
+            ? Number(holeData?.points || 0)
+            : 0;
 
-        if (storedPoints != null) {
-          points += Number(storedPoints || 0);
-        } else {
-          const shotCount = shots(Number(p.handicap || 0), detail.si);
-          points += stableford(Number(gross), Number(detail.par), shotCount);
-        }
-
+        points += storedPoints;
         holesPlayed += 1;
       }
 
       return {
         team,
         name: p.name,
-        firstName: first(p.name),
+        firstName: first(p?.name || `${team.toUpperCase()} PLAYER`),
         points,
         holesPlayed,
       };
