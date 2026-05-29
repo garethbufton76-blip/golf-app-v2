@@ -394,6 +394,7 @@ export default function App() {
               teamNames={teamNames}
               roster={roster}
               states={states}
+              scorecards={scorecards}
             />
           )}
 
