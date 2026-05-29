@@ -10,6 +10,9 @@ import {
   playersForMatch,
   getResult,
   first,
+  holesByTee,
+  shots,
+  stableford,
 } from "./data";
 
 function DayButtons({
@@ -98,6 +101,68 @@ function compactMatchScore(result: any) {
     .toUpperCase();
 }
 
+
+function scorecardKey(team: string, p: any) {
+  return `${team}-${p.rosterIndex}-${p.name}`;
+}
+
+function stablefordLeaderboard({
+  roster,
+  players,
+  scorecards,
+  day,
+}: any) {
+  const teeKey =
+    day?.tee?.charAt(0).toUpperCase() + day?.tee?.slice(1).toLowerCase();
+
+  const redPlayers = (roster?.Red || roster?.red || [])
+    .slice(0, players)
+    .map((p: any) => ({ team: "red", p }));
+
+  const bluePlayers = (roster?.Blue || roster?.blue || [])
+    .slice(0, players)
+    .map((p: any) => ({ team: "blue", p }));
+
+  return [...redPlayers, ...bluePlayers]
+    .map(({ team, p }: any) => {
+      const card = scorecards?.[scorecardKey(team, p)] || {};
+      let points = 0;
+      let holesPlayed = 0;
+
+      for (let holeNo = 1; holeNo <= 18; holeNo += 1) {
+        const detail =
+          holesByTee?.[holeNo]?.[teeKey] ||
+          holesByTee?.[holeNo]?.White ||
+          {
+            hole: holeNo,
+            par: 4,
+            si: holeNo,
+            metres: 0,
+          };
+
+        const gross = card?.[holeNo];
+
+        if (gross == null) continue;
+
+        const shotCount = shots(Number(p.handicap || 0), detail.si);
+        points += stableford(Number(gross), Number(detail.par), shotCount);
+        holesPlayed += 1;
+      }
+
+      return {
+        team,
+        name: p.name,
+        firstName: first(p.name),
+        points,
+        holesPlayed,
+      };
+    })
+    .sort((a: any, b: any) => {
+      if (b.points !== a.points) return b.points - a.points;
+      return b.holesPlayed - a.holesPlayed;
+    });
+}
+
 export default function Home({
   setScreen,
   dayConfigs,
@@ -111,6 +176,7 @@ export default function Home({
   teamNames,
   roster,
   states,
+  scorecards = {},
 }: any) {
   const { theme } = useDuelTheme();
   const [liveExpanded, setLiveExpanded] = useState(true);
@@ -146,6 +212,13 @@ export default function Home({
       sub: result.sub,
       latest: latestHoleText(holes, teamNames),
     };
+  });
+
+  const leaderboardRows = stablefordLeaderboard({
+    roster,
+    players,
+    scorecards,
+    day,
   });
 
   return (
@@ -461,6 +534,59 @@ export default function Home({
               );
             })}
           </div>
+
+          {isStablefordFormat && (
+            <div className="mt-3 overflow-hidden rounded-[24px] border border-white/10 bg-black/38 px-4 py-4 shadow-[0_14px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                  Stableford Leaderboard
+                </div>
+
+                <div className="text-[8px] font-black uppercase tracking-[0.16em] text-white/42">
+                  Individual Points
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {leaderboardRows.map((row: any, index: number) => (
+                  <div
+                    key={`${row.team}-${row.name}`}
+                    className="grid grid-cols-[28px_1fr_auto] items-center gap-3 rounded-[16px] border border-white/8 bg-black/20 px-3 py-2"
+                  >
+                    <div className="text-[15px] font-black text-[#d1c79f]">
+                      {index + 1}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div
+                        className={cx(
+                          "truncate text-[14px] font-black uppercase tracking-[0.06em]",
+                          row.team === "red" ? "text-red-100" : "text-blue-100"
+                        )}
+                      >
+                        {row.firstName}
+                      </div>
+
+                      <div className="mt-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-white/38">
+                        {row.holesPlayed} holes played
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <div className="text-[22px] font-black leading-none text-white">
+                        {row.points}
+                      </div>
+
+                      <div className="mt-0.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/38">
+                        pts
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
         </div>
       )}
     </div>
