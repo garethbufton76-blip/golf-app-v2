@@ -116,13 +116,19 @@ export default function Home({
   const [liveExpanded, setLiveExpanded] = useState(true);
 
   const day = dayConfigs[activeDay];
-  const count = matchCount(players, day.format);
+  const isStablefordFormat = /stableford/i.test(day?.format || "");
+  const count = isStablefordFormat ? 1 : matchCount(players, day.format);
 
   const matchCards = Array.from({ length: count }, (_, i) => {
     const stateKey = keyFor(activeDay, i);
     const holes = states?.[stateKey] || blankHoles();
     const result = getResult(holes);
-    const match = playersForMatch(roster, players, day.format, i);
+    const match = isStablefordFormat
+      ? {
+          red: (roster?.Red || roster?.red || []).slice(0, players),
+          blue: (roster?.Blue || roster?.blue || []).slice(0, players),
+        }
+      : playersForMatch(roster, players, day.format, i);
     const holesPlayed = holes.filter((h: any) => h.status !== "pending").length;
     const holesToPlay = Math.max(0, 18 - holesPlayed);
 
