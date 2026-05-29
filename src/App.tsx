@@ -440,7 +440,6 @@ export default function App() {
               setScreen={setScreen}
               setMode={setMode}
               dayConfigs={dayConfigs}
-              setDayConfigs={setDayConfigs}
               players={players}
               activeDay={activeDay}
               roster={roster}
