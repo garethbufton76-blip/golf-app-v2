@@ -1536,7 +1536,20 @@ export default function Score({
                   onClick={() => setFinishStep("signoff")}
                   className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-black shadow-[0_0_22px_rgba(209,199,159,0.28)]"
                 >
-                  Finish Game
+                  
+{/* DEV FINAL SCREEN BUTTON */}
+<button
+  type="button"
+  onClick={() => {
+    setFinishStep("overview");
+    setShowFinishActions(true);
+  }}
+  className="absolute bottom-24 left-1/2 z-30 -translate-x-1/2 rounded-full border border-white/15 bg-black/70 px-5 py-2 text-[9px] font-black uppercase tracking-[0.16em] text-white backdrop-blur-xl"
+>
+  Dev Final Screen
+</button>
+
+Finish Game
                 </button>
               ) : (
                 <img
