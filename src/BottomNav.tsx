@@ -25,7 +25,7 @@ function getPlayerId(player: BottomNavPlayer, index: number) {
       player.fullName ??
       player.displayName ??
       player.playerName ??
-      `player-${index}`
+      `player-${index}`,
   );
 }
 
@@ -36,13 +36,13 @@ function getPlayerName(player: BottomNavPlayer, index: number) {
       player.displayName ??
       player.playerName ??
       player.firstName ??
-      `Player ${index + 1}`
+      `Player ${index + 1}`,
   );
 }
 
 function getPlayerHandicap(player: BottomNavPlayer) {
   return Number(
-    player.exactHandicap ?? player.rawHandicap ?? player.handicap ?? 0
+    player.exactHandicap ?? player.rawHandicap ?? player.handicap ?? 0,
   );
 }
 
@@ -74,29 +74,40 @@ export default function BottomNav({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsView, setSettingsView] = useState<SettingsView>("main");
   const [handicaps, setHandicaps] = useState<Record<string, number>>({});
+  const [selectedFormat, setSelectedFormat] = useState(currentFormat || "");
+  const [selectedTee, setSelectedTee] = useState(currentTee || "");
 
   const { themeMode, toggleTheme } = useDuelTheme();
   const isDay = themeMode === "day";
 
+  useEffect(() => {
+    setSelectedFormat(currentFormat || "");
+  }, [currentFormat]);
+
+  useEffect(() => {
+    setSelectedTee(currentTee || "");
+  }, [currentTee]);
+
   const cleanPlayers = useMemo(
     () =>
-      (players || [])
-        .filter(Boolean)
-        .map((player, index) => ({
-          ...player,
-          __id: getPlayerId(player, index),
-          __name: getPlayerName(player, index),
-          __handicap: getPlayerHandicap(player),
-        })),
-    [players]
+      (players || []).filter(Boolean).map((player, index) => ({
+        ...player,
+        __id: getPlayerId(player, index),
+        __name: getPlayerName(player, index),
+        __handicap: getPlayerHandicap(player),
+      })),
+    [players],
   );
 
   const playersKey = useMemo(
     () =>
       cleanPlayers
-        .map((player: any) => `${player.__id}:${player.__name}:${player.__handicap}`)
+        .map(
+          (player: any) =>
+            `${player.__id}:${player.__name}:${player.__handicap}`,
+        )
         .join("|"),
-    [cleanPlayers]
+    [cleanPlayers],
   );
 
   useEffect(() => {
@@ -114,7 +125,7 @@ export default function BottomNav({
       ...current,
       [playerKey]: Math.max(
         0,
-        Number(((current[playerKey] ?? 0) + amount).toFixed(1))
+        Number(((current[playerKey] ?? 0) + amount).toFixed(1)),
       ),
     }));
   };
@@ -143,13 +154,17 @@ export default function BottomNav({
     ["Red", "S131"],
   ];
 
-  function applyFormat(format: string) {
-    onChangeGameType?.(format);
+  function applyFormat() {
+    if (!selectedFormat) return;
+
+    onChangeGameType?.(selectedFormat);
     closeSettings();
   }
 
-  function applyTee(tee: string) {
-    onChangeTee?.(tee);
+  function applyTee() {
+    if (!selectedTee) return;
+
+    onChangeTee?.(selectedTee);
     closeSettings();
   }
 
@@ -188,7 +203,7 @@ export default function BottomNav({
                         "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
                         !isDay
                           ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
+                          : "border-white/10 bg-black/55 text-white",
                       )}
                     >
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
@@ -197,7 +212,7 @@ export default function BottomNav({
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          !isDay ? "text-black/55" : "text-white/35"
+                          !isDay ? "text-black/55" : "text-white/35",
                         )}
                       >
                         Mode
@@ -213,7 +228,7 @@ export default function BottomNav({
                         "relative overflow-hidden rounded-[22px] border px-4 py-4 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
                         isDay
                           ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
+                          : "border-white/10 bg-black/55 text-white",
                       )}
                     >
                       <div className="text-[24px] font-black uppercase leading-none tracking-[-0.04em]">
@@ -222,7 +237,7 @@ export default function BottomNav({
                       <div
                         className={cx(
                           "mt-1 text-[7px] font-black uppercase tracking-[0.2em]",
-                          isDay ? "text-black/55" : "text-white/35"
+                          isDay ? "text-black/55" : "text-white/35",
                         )}
                       >
                         Mode
@@ -238,7 +253,7 @@ export default function BottomNav({
                     gold
                     onClick={() => {
                       const confirmed = window.confirm(
-                        "Are you sure you want to end this match?\n\nCurrent scores will be lost."
+                        "Are you sure you want to end this match?\n\nCurrent scores will be lost.",
                       );
 
                       if (confirmed) {
@@ -346,19 +361,19 @@ export default function BottomNav({
                 <div className="grid gap-3">
                   {availableFormats.map((format) => {
                     const selected =
-                      String(currentFormat || "").toLowerCase() ===
+                      String(selectedFormat || "").toLowerCase() ===
                       String(format).toLowerCase();
 
                     return (
                       <button
                         key={format}
                         type="button"
-                        onClick={() => applyFormat(format)}
+                        onClick={() => setSelectedFormat(format)}
                         className={cx(
                           "rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.98]",
                           selected
                             ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                            : "border-white/10 bg-black/55 text-white"
+                            : "border-white/10 bg-black/55 text-white",
                         )}
                       >
                         <div className="text-[14px] font-black uppercase tracking-[0.14em]">
@@ -367,6 +382,13 @@ export default function BottomNav({
                       </button>
                     );
                   })}
+
+                  <SettingsButton
+                    label="Apply New Format"
+                    sub={selectedFormat || "Choose a format"}
+                    gold
+                    onClick={applyFormat}
+                  />
                 </div>
               </SettingsSubScreen>
             )}
@@ -379,19 +401,19 @@ export default function BottomNav({
                 <div className="grid grid-cols-2 gap-3">
                   {availableTees.map(([tee, slope]) => {
                     const selected =
-                      String(currentTee || "").toLowerCase() ===
+                      String(selectedTee || "").toLowerCase() ===
                       String(tee).toLowerCase();
 
                     return (
                       <button
                         key={tee}
                         type="button"
-                        onClick={() => applyTee(tee)}
+                        onClick={() => setSelectedTee(tee)}
                         className={cx(
                           "rounded-[22px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.98]",
                           selected
                             ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                            : "border-white/10 bg-black/55 text-white"
+                            : "border-white/10 bg-black/55 text-white",
                         )}
                       >
                         <div className="text-[18px] font-black uppercase tracking-[0.12em]">
@@ -404,6 +426,15 @@ export default function BottomNav({
                       </button>
                     );
                   })}
+                </div>
+
+                <div className="mt-3">
+                  <SettingsButton
+                    label="Apply New Tee"
+                    sub={selectedTee || "Choose a tee"}
+                    gold
+                    onClick={applyTee}
+                  />
                 </div>
               </SettingsSubScreen>
             )}
@@ -426,7 +457,7 @@ export default function BottomNav({
           <div
             className={cx(
               "relative grid h-full",
-              showTeamTab ? "grid-cols-4" : "grid-cols-3"
+              showTeamTab ? "grid-cols-4" : "grid-cols-3",
             )}
           >
             <NavButton
@@ -441,7 +472,7 @@ export default function BottomNav({
               onClick={() => setActiveTab("score")}
               className={cx(
                 "relative flex flex-col items-center justify-center gap-1 border-x border-white/10 text-white transition-all active:scale-[0.98]",
-                activeTab === "score" && "bg-white/[0.06]"
+                activeTab === "score" && "bg-white/[0.06]",
               )}
             >
               <div
@@ -449,7 +480,7 @@ export default function BottomNav({
                   "flex h-[36px] w-[36px] items-center justify-center rounded-full border font-black leading-none shadow-[0_4px_14px_rgba(0,0,0,0.35)]",
                   activeTab === "score"
                     ? "border-[#efe6bf] bg-[#d1c79f] text-black"
-                    : "border-white/30 bg-white/10 text-white"
+                    : "border-white/30 bg-white/10 text-white",
                 )}
               >
                 <span className="text-[28px] leading-none">+</span>
@@ -458,7 +489,7 @@ export default function BottomNav({
               <div
                 className={cx(
                   "text-[10px] font-black uppercase tracking-[0.18em]",
-                  activeTab === "score" ? "text-white" : "text-white/70"
+                  activeTab === "score" ? "text-white" : "text-white/70",
                 )}
               >
                 Score
@@ -528,7 +559,7 @@ function SettingsButton({ label, sub, onClick, gold = false }: any) {
         "relative w-full overflow-hidden rounded-[22px] border px-4 py-4 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.99]",
         gold
           ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-          : "border-white/10 bg-black/55 text-white"
+          : "border-white/10 bg-black/55 text-white",
       )}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/[0.08] via-transparent to-black/10" />
@@ -541,7 +572,7 @@ function SettingsButton({ label, sub, onClick, gold = false }: any) {
         <div
           className={cx(
             "mt-1 text-[8px] font-black uppercase tracking-[0.16em]",
-            gold ? "text-black/48" : "text-white/38"
+            gold ? "text-black/48" : "text-white/38",
           )}
         >
           {sub}
@@ -568,13 +599,13 @@ function NavButton({
       onClick={onClick}
       className={cx(
         "relative flex flex-col items-center justify-center gap-1 transition-all active:scale-[0.98]",
-        active ? "bg-white/[0.05]" : ""
+        active ? "bg-white/[0.05]" : "",
       )}
     >
       <div
         className={cx(
           "text-[24px] leading-none",
-          active ? "text-[#efe6bf]" : "text-white/70"
+          active ? "text-[#efe6bf]" : "text-white/70",
         )}
       >
         {icon}
@@ -583,7 +614,7 @@ function NavButton({
       <div
         className={cx(
           "text-[9px] font-black uppercase tracking-[0.14em]",
-          active ? "text-[#efe6bf]" : "text-white/70"
+          active ? "text-[#efe6bf]" : "text-white/70",
         )}
       >
         {label}
