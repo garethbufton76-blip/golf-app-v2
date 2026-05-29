@@ -107,6 +107,11 @@ export default function PlayerScorecard({
 
   const scoreVsPar = played.length ? scoreTotal - parPlayed : null;
 
+  const stablefordPointsTotal = played.reduce(
+    (sum: number, h: any) => sum + (h.points == null ? 0 : Number(h.points)),
+    0
+  );
+
   const scoreLabel =
     scoreVsPar == null
       ? "-"
@@ -403,8 +408,14 @@ export default function PlayerScorecard({
               />
 
               <Summary
-                label="To Par"
-                value={scoreLabel}
+                label={showStableford ? "Points" : "To Par"}
+                value={
+                  showStableford
+                    ? played.length
+                      ? stablefordPointsTotal
+                      : "-"
+                    : scoreLabel
+                }
               />
             </div>
 
