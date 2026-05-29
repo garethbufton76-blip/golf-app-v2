@@ -837,29 +837,7 @@ export default function Score({
                   backgroundSize: "86px 86px",
                 }}
               />
-
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.14]"
-                style={{
-                  background: `
-                    linear-gradient(
-                      112deg,
-                      transparent 0%,
-                      rgba(255,255,255,0.50) 12%,
-                      transparent 24%,
-                      transparent 36%,
-                      rgba(255,255,255,0.28) 48%,
-                      transparent 60%,
-                      transparent 72%,
-                      rgba(255,255,255,0.20) 82%,
-                      transparent 92%
-                    )
-                  `,
-                  backgroundSize: "460px 460px",
-                }}
-              />
-
-              <div className="relative z-10 flex h-full min-h-0 flex-col">
+<div className="relative z-10 flex h-full min-h-0 flex-col">
                 <div
                   className="relative overflow-hidden px-4 pb-4 pt-4 text-center"
                 >
@@ -1029,7 +1007,7 @@ export default function Score({
             <div
               className={cx(
                 "pointer-events-none absolute inset-0 rounded-[26px]",
-                isDayTheme ? "opacity-[0.42]" : "opacity-[0.14]"
+                isDayTheme ? "opacity-[0.42]" : "opacity-[0.03]"
               )}
               style={{
                 background: `
