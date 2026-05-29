@@ -145,7 +145,17 @@ export default function PlayerScorecard({
 
   const bottomModeLabel = scoreMode === "gross" ? "Gross" : "Net";
 
-  return (
+  
+  const isStableford =
+    typeof format === "string" &&
+    format.toLowerCase().includes("stableford");
+
+  const totalStablefordPoints = holes.reduce((total: number, hole: any) => {
+    const pts = Number(hole?.stablefordPoints ?? hole?.points ?? 0);
+    return total + (Number.isNaN(pts) ? 0 : pts);
+  }, 0);
+
+return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/90 p-2">
       <div className="relative h-[94vh] w-full max-w-[390px] overflow-hidden rounded-[32px] border border-white/10 bg-black shadow-2xl">
         {/* BACKGROUND */}
