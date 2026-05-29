@@ -109,13 +109,13 @@ export default function Score({
   const pairStart = effectiveActiveMatch * 2;
 
   const scoringRedPlayers = isStablefordFormat
-    ? rosterRed.slice(0, players)
+    ? rosterRed
     : isBetterBall && match.red.length < 2
     ? rosterRed.slice(pairStart, pairStart + 2)
     : match.red;
 
   const scoringBluePlayers = isStablefordFormat
-    ? rosterBlue.slice(0, players)
+    ? rosterBlue
     : isBetterBall && match.blue.length < 2
     ? rosterBlue.slice(pairStart, pairStart + 2)
     : match.blue;
@@ -463,7 +463,40 @@ export default function Score({
     let status = "as";
     const nextScorecards: any = { ...scorecards };
 
-    if (isBetterBall) {
+    if (isStablefordFormat) {
+      const redPoints = scoringRedPlayers.map((p: any, i: number) => {
+        const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
+        const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
+        const points = stableford(gross, selectedHole.par, shotCount);
+        const k = playerKey("red", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return points;
+      });
+
+      const bluePoints = scoringBluePlayers.map((p: any, i: number) => {
+        const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
+        const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
+        const points = stableford(gross, selectedHole.par, shotCount);
+        const k = playerKey("blue", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return points;
+      });
+
+      const redBest = Math.max(...redPoints);
+      const blueBest = Math.max(...bluePoints);
+
+      status = redBest > blueBest ? "red" : blueBest > redBest ? "blue" : "as";
+    } else if (isBetterBall) {
       const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
 
       const lowMarker = Math.min(
