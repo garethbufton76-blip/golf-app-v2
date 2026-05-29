@@ -1507,7 +1507,7 @@ if (useFourPlayerScoring) {
                 </button>
               </div>
 
-              {isBetterBall ? (
+              {useFourPlayerScoring ? (
                 <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-hidden pb-1">
                   <div className="grid h-full grid-rows-2 gap-3">
                     {scoringRedPlayers.map((p: any, i: number) => (
