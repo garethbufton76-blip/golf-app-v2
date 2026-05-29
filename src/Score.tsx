@@ -1388,11 +1388,12 @@ if (useFourPlayerScoring) {
           {selectedHole ? (
             <div
               className={cx(
-                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] p-4 shadow-2xl backdrop-blur-xl",
+                useFourPlayerScoring ? "pb-4" : "pb-[82px]",
                 isDayTheme
                   ? "border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.82))] shadow-[0_24px_60px_rgba(18,18,18,0.18)]"
                   : "bg-[#05070c]/98",
-                isBetterBall ? "top-[-232px]" : "top-0"
+                useFourPlayerScoring ? "top-[-232px]" : "top-0"
               )}
             >
               <div
@@ -1476,16 +1477,18 @@ if (useFourPlayerScoring) {
                 )}
               />
 
-              <img
-                src="/launch-logo.png"
-                alt="DUEL"
-                className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
-                style={{
-                  filter: isDayTheme
-                    ? "brightness(0)"
-                    : "brightness(0) invert(1)",
-                }}
-              />
+              {!useFourPlayerScoring && (
+                <img
+                  src="/launch-logo.png"
+                  alt="DUEL"
+                  className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
+                  style={{
+                    filter: isDayTheme
+                      ? "brightness(0)"
+                      : "brightness(0) invert(1)",
+                  }}
+                />
+              )}
 
               <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
                 <div>
