@@ -480,7 +480,10 @@ export default function Score({
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: gross,
+          [selectedHole.hole]: {
+            gross,
+            points,
+          },
         };
 
         return points;
@@ -494,7 +497,10 @@ export default function Score({
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: gross,
+          [selectedHole.hole]: {
+            gross,
+            points,
+          },
         };
 
         return points;
@@ -524,7 +530,10 @@ if (useFourPlayerScoring) {
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: gross,
+          [selectedHole.hole]: {
+            gross,
+            points,
+          },
         };
 
         return isTeamStableford
@@ -544,7 +553,10 @@ if (useFourPlayerScoring) {
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: gross,
+          [selectedHole.hole]: {
+            gross,
+            points,
+          },
         };
 
         return isTeamStableford
