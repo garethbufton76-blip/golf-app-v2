@@ -137,6 +137,8 @@ export default function Score({
     ...scoringBluePlayers.map((p: any) => ({ team: "blue", p })),
   ];
 
+  const isFinalSinglesLayout = matchScorecardPlayers.length === 2;
+
   const scorecardKey = (team: string, p: any) =>
     `${team}-${p.rosterIndex}-${p.name}`;
 
@@ -878,27 +880,19 @@ export default function Score({
                         key={`complete-red-${p.name}-${i}`}
                         type="button"
                         onClick={() => setCardPlayer({ team: "red", p })}
-                        className="group flex w-[74px] flex-col items-center active:scale-95"
+                        className={cx("group flex flex-col items-center active:scale-95", isFinalSinglesLayout ? "w-[104px]" : "w-[74px]")}
                       >
                         <div
-                          className={cx(
-                            "rounded-full p-1",
-                            completedLeader === "red"
-                              ? "bg-[#ff4355]/22 shadow-[0_0_30px_rgba(255,67,85,0.32)]"
-                              : "opacity-70"
-                          )}
+                          className="rounded-full p-1"
                         >
                           <Logo
                             team="red"
-                            size="h-[64px] w-[64px]"
+                            size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
                             src={p.photo || teamLogos?.Red}
                           />
                         </div>
                         <div
-                          className={cx(
-                            "mt-1 w-full truncate text-[11px] font-black",
-                            completedLeader === "red" ? "text-[#ff4355]" : "text-white/78"
-                          )}
+                          className="mt-1 w-full truncate text-[11px] font-black text-white"
                         >
                           {first(p.name)}
                         </div>
@@ -914,27 +908,19 @@ export default function Score({
                         key={`complete-blue-${p.name}-${i}`}
                         type="button"
                         onClick={() => setCardPlayer({ team: "blue", p })}
-                        className="group flex w-[74px] flex-col items-center active:scale-95"
+                        className={cx("group flex flex-col items-center active:scale-95", isFinalSinglesLayout ? "w-[104px]" : "w-[74px]")}
                       >
                         <div
-                          className={cx(
-                            "rounded-full p-1",
-                            completedLeader === "blue"
-                              ? "bg-[#67a6ff]/22 shadow-[0_0_30px_rgba(103,166,255,0.32)]"
-                              : "opacity-70"
-                          )}
+                          className="rounded-full p-1"
                         >
                           <Logo
                             team="blue"
-                            size="h-[64px] w-[64px]"
+                            size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
                             src={p.photo || teamLogos?.Blue}
                           />
                         </div>
                         <div
-                          className={cx(
-                            "mt-1 w-full truncate text-[11px] font-black",
-                            completedLeader === "blue" ? "text-[#67a6ff]" : "text-white/78"
-                          )}
+                          className="mt-1 w-full truncate text-[11px] font-black text-white"
                         >
                           {first(p.name)}
                         </div>
@@ -967,11 +953,11 @@ export default function Score({
                     </div>
 
                     <div className="mx-auto mt-4 flex max-w-[300px] items-center gap-3">
-                      <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                      <div className="h-px flex-1 bg-transparent" />
                       <div className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
                         {(day.course || "ST MICHAELS").toUpperCase()} • {String(day.tee || "").toUpperCase()}
                       </div>
-                      <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                      <div className="h-px flex-1 bg-transparent" />
                     </div>
 
                     <div className="mt-2 text-[9px] font-black uppercase tracking-[0.22em] text-white/48">
