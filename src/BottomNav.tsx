@@ -56,6 +56,8 @@ export default function BottomNav({
   onChangeGameType,
   onChangeTee,
   onNewGame,
+  currentFormat = "",
+  currentTee = "",
 }: {
   activeTab: GameTab;
   setActiveTab: (tab: GameTab) => void;
@@ -63,8 +65,10 @@ export default function BottomNav({
   players?: BottomNavPlayer[];
   onFinishGame?: () => void;
   onChangeHandicaps?: (handicaps: Record<string, number>) => void;
-  onChangeGameType?: () => void;
-  onChangeTee?: () => void;
+  onChangeGameType?: (format: string) => void;
+  onChangeTee?: (tee: string) => void;
+  currentFormat?: string;
+  currentTee?: string;
   onNewGame?: () => void;
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -119,6 +123,35 @@ export default function BottomNav({
     setSettingsOpen(false);
     setSettingsView("main");
   };
+
+  const playersPerSide = Math.max(1, Math.ceil(cleanPlayers.length / 2));
+
+  const availableFormats = useMemo(() => {
+    const formats = ["Singles Match Play", "Stableford"];
+
+    if (playersPerSide >= 2) {
+      formats.splice(1, 0, "2 Ball Better Ball", "2 Ball Ambrose");
+    }
+
+    return formats;
+  }, [playersPerSide]);
+
+  const availableTees = [
+    ["Blue", "S138"],
+    ["White", "S133"],
+    ["Gold", "S123"],
+    ["Red", "S131"],
+  ];
+
+  function applyFormat(format: string) {
+    onChangeGameType?.(format);
+    closeSettings();
+  }
+
+  function applyTee(tee: string) {
+    onChangeTee?.(tee);
+    closeSettings();
+  }
 
   return (
     <>
@@ -311,37 +344,29 @@ export default function BottomNav({
                 back={() => setSettingsView("main")}
               >
                 <div className="grid gap-3">
-                  {[
-                    "Singles Match Play",
-                    "2 Ball Better Ball",
-                    "2 Ball Ambrose",
-                    "Stableford",
-                  ].map((format, index) => (
-                    <button
-                      key={format}
-                      type="button"
-                      className={cx(
-                        "rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl",
-                        index === 0
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[14px] font-black uppercase tracking-[0.14em]">
-                        {format}
-                      </div>
-                    </button>
-                  ))}
+                  {availableFormats.map((format) => {
+                    const selected =
+                      String(currentFormat || "").toLowerCase() ===
+                      String(format).toLowerCase();
 
-                  <SettingsButton
-                    label="Apply Format"
-                    sub="Update this quick game"
-                    gold
-                    onClick={() => {
-                      onChangeGameType?.();
-                      closeSettings();
-                    }}
-                  />
+                    return (
+                      <button
+                        key={format}
+                        type="button"
+                        onClick={() => applyFormat(format)}
+                        className={cx(
+                          "rounded-[22px] border px-4 py-5 text-left shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.98]",
+                          selected
+                            ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                            : "border-white/10 bg-black/55 text-white"
+                        )}
+                      >
+                        <div className="text-[14px] font-black uppercase tracking-[0.14em]">
+                          {format}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </SettingsSubScreen>
             )}
@@ -352,43 +377,33 @@ export default function BottomNav({
                 back={() => setSettingsView("main")}
               >
                 <div className="grid grid-cols-2 gap-3">
-                  {[
-                    ["Blue", "S138"],
-                    ["White", "S133"],
-                    ["Gold", "S123"],
-                    ["Red", "S131"],
-                  ].map(([tee, slope], index) => (
-                    <button
-                      key={tee}
-                      type="button"
-                      className={cx(
-                        "rounded-[22px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl",
-                        index === 0
-                          ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                          : "border-white/10 bg-black/55 text-white"
-                      )}
-                    >
-                      <div className="text-[18px] font-black uppercase tracking-[0.12em]">
-                        {tee}
-                      </div>
+                  {availableTees.map(([tee, slope]) => {
+                    const selected =
+                      String(currentTee || "").toLowerCase() ===
+                      String(tee).toLowerCase();
 
-                      <div className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] opacity-60">
-                        {slope}
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                    return (
+                      <button
+                        key={tee}
+                        type="button"
+                        onClick={() => applyTee(tee)}
+                        className={cx(
+                          "rounded-[22px] border px-4 py-5 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all active:scale-[0.98]",
+                          selected
+                            ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
+                            : "border-white/10 bg-black/55 text-white"
+                        )}
+                      >
+                        <div className="text-[18px] font-black uppercase tracking-[0.12em]">
+                          {tee}
+                        </div>
 
-                <div className="mt-3">
-                  <SettingsButton
-                    label="Apply Tee"
-                    sub="Update this quick game"
-                    gold
-                    onClick={() => {
-                      onChangeTee?.();
-                      closeSettings();
-                    }}
-                  />
+                        <div className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] opacity-60">
+                          {slope}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </SettingsSubScreen>
             )}
