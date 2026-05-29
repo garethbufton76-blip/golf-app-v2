@@ -75,6 +75,17 @@ export default function Score({
     blue_1: 4,
   });
 
+  function standardStablefordPoints(gross: any, par: any, strokeCount: any) {
+    const grossNumber = Number(gross);
+    const parNumber = Number(par);
+    const strokes = Number(strokeCount || 0);
+
+    if (!Number.isFinite(grossNumber) || !Number.isFinite(parNumber)) return 0;
+
+    const net = grossNumber - strokes;
+    return Math.max(0, 2 + parNumber - net);
+  }
+
   const [teeShotSelections, setTeeShotSelections] = useState<any>({});
 
   function playerIdentity(p: any) {
@@ -475,7 +486,7 @@ export default function Score({
       const redPoints = scoringRedPlayers.map((p: any, i: number) => {
         const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
         const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
-        const points = stableford(gross, selectedHole.par, shotCount);
+        const points = standardStablefordPoints(gross, selectedHole.par, shotCount);
         const k = playerKey("red", p);
 
         nextScorecards[k] = {
@@ -492,7 +503,7 @@ export default function Score({
       const bluePoints = scoringBluePlayers.map((p: any, i: number) => {
         const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
         const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
-        const points = stableford(gross, selectedHole.par, shotCount);
+        const points = standardStablefordPoints(gross, selectedHole.par, shotCount);
         const k = playerKey("blue", p);
 
         nextScorecards[k] = {
@@ -530,14 +541,11 @@ if (useFourPlayerScoring) {
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: {
-            gross,
-            points,
-          },
+          [selectedHole.hole]: gross,
         };
 
         return isTeamStableford
-          ? stableford(gross, selectedHole.par, strokeCount)
+          ? standardStablefordPoints(gross, selectedHole.par, strokeCount)
           : gross - strokeCount;
       });
 
@@ -553,14 +561,11 @@ if (useFourPlayerScoring) {
 
         nextScorecards[k] = {
           ...(nextScorecards[k] || {}),
-          [selectedHole.hole]: {
-            gross,
-            points,
-          },
+          [selectedHole.hole]: gross,
         };
 
         return isTeamStableford
-          ? stableford(gross, selectedHole.par, strokeCount)
+          ? standardStablefordPoints(gross, selectedHole.par, strokeCount)
           : gross - strokeCount;
       });
 
@@ -649,7 +654,11 @@ if (useFourPlayerScoring) {
   }
 
   function grossFor(team: string, p: any, hole: number) {
-    return scorecards[playerKey(team, p)]?.[hole] ?? null;
+    const value = scorecards[playerKey(team, p)]?.[hole];
+
+    if (value == null) return null;
+
+    return typeof value === "object" ? value.gross ?? null : value;
   }
 
   function playerScorecardRows(p: any, team: string, from: number, to: number) {
@@ -668,7 +677,7 @@ if (useFourPlayerScoring) {
       const gross = grossFor(team, p, h.hole);
       const shotCount = shots(Number(p.handicap || 0), h.si);
       const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
-      const points = gross == null ? null : stableford(gross, h.par, shotCount);
+      const points = gross == null ? null : standardStablefordPoints(gross, h.par, shotCount);
 
       return {
         ...h,
