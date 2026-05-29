@@ -1,1039 +1,1923 @@
-// src/QuickGame.tsx
+import { useState } from "react";
+import PlayerScorecard from "./PlayerScorecard";
+import BottomNav from "./BottomNav";
+import { useDuelTheme } from "./useDuelTheme";
+import {
+  Logo,
+  blankHoles,
+  cx,
+  first,
+  holesByTee,
+  keyFor,
+  playersForMatch,
+  shots,
+  stableford,
+  TEAM,
+  getResult,
+} from "./data";
 
-import { useMemo, useState } from "react";
-import { searchCourses } from "./lib/golfCourseApi";
-import { COURSES, getCourseById, getCourseTees, getDefaultTee } from "./courses";
-import PlayerCard from "./components/quickgame/PlayerCard";
-
-function cx(...classes: (string | false | undefined | null)[]) {
-  return classes.filter(Boolean).join(" ");
-}
-
-
-const QUICK_FORMATS = [
-  "Singles Match Play",
-  "2-Ball Better Ball",
-  "2-Ball Ambrose",
-  "Stableford",
-  "2-Ball Better Ball Stableford",
-];
-
-export default function QuickGame({
+export default function Score({
   setScreen,
-  setPlayers,
-  setTeamNames,
-  setRoster,
-  setDayConfigs,
-  setActiveDay,
-  setStartMatch,
+  dayConfigs,
+  players,
+  activeDay,
+  roster,
+  states,
   setStates,
+  scorecards,
   setScorecards,
-  setEventStarted,
-  setEventLocked,
+  startMatch,
+  teamLogos,
+  teamNames,
+  setMode,
+  setDayConfigs,
 }: any) {
-  const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
-    try {
-      const stored = localStorage.getItem("duel_saved_api_courses");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
+  const { theme, themeMode } = useDuelTheme();
+  const isDayTheme = themeMode === "day";
+
+  const day = dayConfigs[activeDay];
+
+  const count = /singles/i.test(day.format)
+    ? players
+    : Math.max(1, Math.ceil(players / 2));
+
+  const isAmbrose = /ambrose/i.test(day.format);
+  const isBetterBall = /better ball/i.test(day.format);
+
+  const [activeMatch, setActiveMatch] = useState(startMatch || 0);
+  const [selectedHole, setSelectedHole] = useState<any>(null);
+  const [cardPlayer, setCardPlayer] = useState<any>(null);
+  const [finishStep, setFinishStep] = useState<"playing" | "signoff" | "overview">("playing");
+  const [showFinishActions, setShowFinishActions] = useState(false);
+  const [signedCards, setSignedCards] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState<"live" | "score" | "team">("score");
+  const [handicapOverrides, setHandicapOverrides] = useState<Record<string, number>>({});
+
+  const [draft, setDraft] = useState<any>({
+    red: 4,
+    blue: 4,
+    red_0: 4,
+    red_1: 4,
+    blue_0: 4,
+    blue_1: 4,
   });
 
-  const [courseMode, setCourseMode] = useState<"saved" | "search">("search");
-  const [courseId, setCourseId] = useState("st-michaels");
-  const [selectedCourseTouched, setSelectedCourseTouched] = useState(false);
-  const [courseSearch, setCourseSearch] = useState("");
-  const [courseSearchResults, setCourseSearchResults] = useState<any[]>([]);
-  const [courseSearchStatus, setCourseSearchStatus] = useState("");
-  const [showCourseSearchPanel, setShowCourseSearchPanel] = useState(false);
-  const [showSavedCoursesPanel, setShowSavedCoursesPanel] = useState(false);
+  const [teeShotSelections, setTeeShotSelections] = useState<any>({});
 
-  const savedCourses = useMemo(
-    () => [...COURSES, ...savedApiCourses],
-    [savedApiCourses]
-  );
-
-  const recentSavedCourses = useMemo(
-    () => savedCourses.slice(-3).reverse(),
-    [savedCourses]
-  );
-
-  const selectedSavedCourse = useMemo(
-    () => savedCourses.find((course: any) => course.id === courseId) || COURSES[0],
-    [savedCourses, courseId]
-  );
-
-  function cleanApiTeeLabel(apiTee: any, index = 0) {
-    const rawName = String(
-      apiTee?.tee_name ||
-        apiTee?.name ||
-        apiTee?.label ||
-        apiTee?.colour ||
-        apiTee?.color ||
-        `Tee ${index + 1}`
-    );
-
-    const parts = rawName
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean)
-      .filter((part) => !/^\d+$/.test(part))
-      .filter((part) => !/^usga$/i.test(part))
-      .filter((part) => !/^men$/i.test(part))
-      .filter((part) => !/^women$/i.test(part));
-
-    const cleaned = parts
-      .map((part) =>
-        part
-          .replace(/\s*\/\s*/g, "/")
-          .replace(/\btee\b/gi, "")
-          .trim()
-      )
-      .filter(Boolean);
-
-    const colourWords = ["black", "blue", "white", "gold", "red", "yellow", "green"];
-
-    const meaningful = cleaned.filter((part) => {
-      const lower = part.toLowerCase();
-
-      return (
-        colourWords.some((colour) => lower.includes(colour)) ||
-        lower.includes("challenge") ||
-        lower.includes("championship") ||
-        lower.includes("composite") ||
-        lower.includes("social")
-      );
-    });
-
-    if (meaningful.length) {
-      const label = meaningful.join(" ").replace(/\s+/g, " ").toUpperCase();
-
-      return label;
-    }
-
-    return (cleaned[0] || rawName).toUpperCase();
+  function playerIdentity(p: any) {
+    return String(`${p?.rosterIndex ?? "player"}-${p?.name ?? "unknown"}`);
   }
 
-  function apiTeeId(apiTee: any, index = 0) {
-    const label = cleanApiTeeLabel(apiTee, index);
-    const slope = Number(apiTee?.slope_rating || apiTee?.slope || 113);
-    const rating = Number(apiTee?.course_rating || apiTee?.rating || 72);
-    const par = Number(apiTee?.par_total || apiTee?.par || 72);
+  function withHandicapOverride(p: any) {
+    if (!p) return p;
 
-    return `${label}-${slope}-${rating}-${par}-${index}`
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
+    const key = playerIdentity(p);
+    const override = handicapOverrides[key] ?? handicapOverrides[p.name];
 
-  const tees = useMemo(() => {
-    const localCourse = COURSES.find((course) => course.id === courseId);
-
-    if (localCourse) {
-      return getCourseTees(courseId);
-    }
-
-    const rawCourse = selectedSavedCourse?.raw || selectedSavedCourse || {};
-    const rawTees = rawCourse?.tees || {};
-
-    const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
-    const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
-
-    const femaleRedOnly = femaleTees.filter((apiTee: any) => {
-      const teeName = String(apiTee?.tee_name || apiTee?.name || "").toLowerCase();
-
-      return teeName.includes("red") && !teeName.includes("yellow");
-    });
-
-    const maleHasRed = maleTees.some((apiTee: any) => {
-      const teeName = String(apiTee?.tee_name || apiTee?.name || "").toLowerCase();
-
-      return teeName.includes("red");
-    });
-
-    // Quick Game prefers men's tee data, but many Australian courses store the Red tee
-    // only in the female API set. Keep a single Red tee available and remove combo tees
-    // such as Red/Yellow.
-    const flatTees = Array.isArray(rawTees)
-      ? rawTees
-      : maleTees.length
-      ? [...maleTees, ...(maleHasRed ? [] : femaleRedOnly)]
-      : femaleTees;
-
-    if (flatTees.length) {
-      const mappedTees = flatTees.map((apiTee: any, index: number) => {
-        const teeName = String(apiTee?.tee_name || apiTee?.name || `Tee ${index + 1}`);
-        const cleanLabel = cleanApiTeeLabel(apiTee, index);
-        const uniqueId = apiTeeId(apiTee, index);
-
-        return {
-          id: uniqueId,
-          label: cleanLabel,
-          name: cleanLabel,
-          fullName: teeName,
-          slope: Number(apiTee?.slope_rating || apiTee?.slope || 113),
-          slopeRating: Number(apiTee?.slope_rating || apiTee?.slope || 113),
-          courseRating: Number(apiTee?.course_rating || apiTee?.rating || 72),
-          course_rating: Number(apiTee?.course_rating || apiTee?.rating || 72),
-          par: Number(apiTee?.par_total || apiTee?.par || 72),
-          par_total: Number(apiTee?.par_total || apiTee?.par || 72),
-          holes: apiTee?.holes || [],
-          raw: apiTee,
-        };
-      });
-
-      const exactDedupedTees = mappedTees.filter(
-        (tee: any, index: number, arr: any[]) =>
-          arr.findIndex(
-            (t: any) =>
-              t.label === tee.label &&
-              t.slope === tee.slope &&
-              Number(t.courseRating).toFixed(1) ===
-                Number(tee.courseRating).toFixed(1) &&
-              t.par === tee.par
-          ) === index
-      );
-
-      const seenStandardColours = new Set<string>();
-
-      return exactDedupedTees.filter((tee: any) => {
-        const label = String(tee.label || "").toUpperCase();
-        const fullName = String(tee.fullName || "").toUpperCase();
-
-        const isSpecialTee =
-          /CHALLENGE|CHAMPIONSHIP|COMPOSITE|TOURNAMENT/.test(label) ||
-          /CHALLENGE|CHAMPIONSHIP|COMPOSITE|TOURNAMENT/.test(fullName);
-
-        const colourMatch = label.match(
-          /\b(BLACK|BLUE|WHITE|GOLD|RED|YELLOW|GREEN)\b/
-        );
-
-        if (!colourMatch || isSpecialTee || label.includes("/")) {
-          return true;
-        }
-
-        const colour = colourMatch[1];
-
-        if (seenStandardColours.has(colour)) {
-          return false;
-        }
-
-        seenStandardColours.add(colour);
-
-        return true;
-      });
-    }
-
-    return getCourseTees("st-michaels");
-  }, [courseId, selectedSavedCourse]);
-
-  const [playersPerTeam, setPlayersPerTeam] = useState(1);
-  const [format, setFormat] = useState("Singles Match Play");
-  const [tee, setTee] = useState(getDefaultTee(courseId));
-
-  const [redName, setRedName] = useState("Team Red");
-  const [blueName, setBlueName] = useState("Team Blue");
-
-  const [redPlayers, setRedPlayers] = useState([
-    { name: "Red 1", handicap: "18.0" },
-    { name: "Red 2", handicap: "18.0" },
-  ]);
-
-  const [bluePlayers, setBluePlayers] = useState([
-    { name: "Blue 1", handicap: "18.0" },
-    { name: "Blue 2", handicap: "18.0" },
-  ]);
-
-  function changeCourse(nextCourseId: string) {
-    setCourseId(nextCourseId);
-    setSelectedCourseTouched(true);
-
-    const localCourse = COURSES.find((course) => course.id === nextCourseId);
-
-    setTee(localCourse ? getDefaultTee(nextCourseId) : getDefaultTee("st-michaels"));
-  }
-
-  function getApiCourseName(course: any) {
-    return (
-      course?.course_name ||
-      course?.name ||
-      course?.club_name ||
-      course?.facility_name ||
-      "Unknown Course"
-    );
-  }
-
-  function getApiCourseLocation(course: any) {
-    const raw = course?.raw || course || {};
-
-    const country =
-      raw?.country ||
-      raw?.country_name ||
-      raw?.nation ||
-      raw?.location?.country ||
-      raw?.address?.country ||
-      "";
-
-    const state =
-      raw?.state ||
-      raw?.state_name ||
-      raw?.province ||
-      raw?.region ||
-      raw?.administrative_area ||
-      raw?.location?.state ||
-      raw?.location?.region ||
-      raw?.address?.state ||
-      raw?.address?.region ||
-      "";
-
-    const county =
-      raw?.county ||
-      raw?.county_name ||
-      raw?.district ||
-      raw?.municipality ||
-      raw?.location?.county ||
-      raw?.address?.county ||
-      "";
-
-    const city =
-      raw?.city ||
-      raw?.town ||
-      raw?.suburb ||
-      raw?.locality ||
-      raw?.location?.city ||
-      raw?.location?.town ||
-      raw?.address?.city ||
-      raw?.address?.suburb ||
-      "";
-
-    const postcode =
-      raw?.postcode ||
-      raw?.postal_code ||
-      raw?.zip ||
-      raw?.address?.postcode ||
-      raw?.address?.postal_code ||
-      "";
-
-    const parts = [country, state || county, city, postcode].filter(Boolean);
-
-    return parts.length ? parts.join(" • ") : "";
-  }
-
-  function getApiCourseId(course: any) {
-    return (
-      course?.id ||
-      course?.course_id ||
-      course?.global_course_id ||
-      course?.club_id ||
-      getApiCourseName(course).toLowerCase().replace(/[^a-z0-9]+/g, "-")
-    );
-  }
-
-  async function handleCourseSearch() {
-    const query = courseSearch.trim();
-
-    if (!query) {
-      setCourseSearchStatus("Enter a course name first");
-      return;
-    }
-
-    setCourseSearchStatus("Searching...");
-
-    try {
-      const result = await searchCourses(query);
-      const courses = Array.isArray(result?.courses)
-        ? result.courses
-        : Array.isArray(result)
-        ? result
-        : [];
-
-      console.log("GolfCourseAPI search result:", result);
-
-      setCourseSearchResults(courses);
-      setCourseSearchStatus(
-        courses.length
-          ? `${courses.length} result${courses.length === 1 ? "" : "s"} found`
-          : "No courses found"
-      );
-    } catch (error) {
-      console.error("GolfCourseAPI search error:", error);
-      setCourseSearchStatus("Search failed — check console");
-    }
-  }
-
-  function importApiCourse(apiCourse: any) {
-    const apiId = getApiCourseId(apiCourse);
-    const importedCourse = {
-      id: `api-${apiId}`,
-      name: getApiCourseName(apiCourse),
-      shortName: getApiCourseName(apiCourse),
-      region: getApiCourseLocation(apiCourse),
-      country:
-        apiCourse?.country ||
-        apiCourse?.country_name ||
-        apiCourse?.location?.country ||
-        apiCourse?.address?.country ||
-        "",
-      source: "GolfCourseAPI",
-      raw: apiCourse,
-    };
-
-    setSavedApiCourses((current: any[]) => {
-      const withoutDuplicate = current.filter(
-        (course) => course.id !== importedCourse.id
-      );
-      const next = [...withoutDuplicate, importedCourse];
-
-      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
-
-      return next;
-    });
-
-    setCourseId(importedCourse.id);
-    setSelectedCourseTouched(true);
-
-    const firstMaleTee = Array.isArray(apiCourse?.tees?.male)
-      ? apiCourse.tees.male[0]
-      : null;
-
-    setTee(firstMaleTee ? apiTeeId(firstMaleTee, 0) : "white");
-    setCourseMode("saved");
-    setShowCourseSearchPanel(false);
-    setShowSavedCoursesPanel(false);
-    setCourseSearchStatus(`Saved ${importedCourse.name}`);
-  }
-
-  function removeSavedApiCourse(courseIdToRemove: string) {
-    setSavedApiCourses((current: any[]) => {
-      const next = current.filter((course) => course.id !== courseIdToRemove);
-
-      localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
-
-      return next;
-    });
-
-    if (courseId === courseIdToRemove) {
-      changeCourse("st-michaels");
-    }
-  }
-
-  function updatePlayer(
-    team: "red" | "blue",
-    index: number,
-    key: string,
-    value: any
-  ) {
-    const setter = team === "red" ? setRedPlayers : setBluePlayers;
-
-    setter((current: any[]) =>
-      current.map((p, i) =>
-        i === index
-          ? {
-              ...p,
-              [key]:
-                key === "handicap"
-                  ? String(value)
-                      .replace(/[^0-9.]/g, "")
-                      .replace(/(\..*)\./g, "$1")
-                  : value,
-            }
-          : p
-      )
-    );
-  }
-
-  function getApiTeeLabel(apiTee: any, index = 0) {
-    return apiTeeId(apiTee, index);
-  }
-
-  function selectedTeeData() {
-    const localTee = tees.find(
-      (t: any) =>
-        String(t.id || "").toLowerCase() === String(tee || "").toLowerCase() ||
-        String(t.label || "").toLowerCase() === String(tee || "").toLowerCase() ||
-        String(t.name || "").toLowerCase() === String(tee || "").toLowerCase()
-    );
-
-    const rawCourse = selectedSavedCourse?.raw || selectedSavedCourse || {};
-    const rawTees = rawCourse?.tees || {};
-
-    const maleTees = Array.isArray(rawTees?.male) ? rawTees.male : [];
-    const femaleTees = Array.isArray(rawTees?.female) ? rawTees.female : [];
-    const flatApiTees = Array.isArray(rawTees)
-      ? rawTees
-      : [...maleTees, ...femaleTees];
-
-    const apiTee = flatApiTees.find(
-      (apiTee: any, index: number) =>
-        getApiTeeLabel(apiTee, index) === String(tee || "").toLowerCase()
-    );
+    if (override == null) return p;
 
     return {
-      ...(localTee || {}),
-      ...(apiTee || {}),
-      raw: apiTee || localTee?.raw || localTee || {},
+      ...p,
+      handicap: override,
+      rawHandicap: override,
+      exactHandicap: override,
     };
   }
 
-  function teeNumberValue(teeData: any, keys: string[], fallback: number) {
-    const sources = [teeData, teeData?.raw].filter(Boolean);
+  const stateKey = keyFor(activeDay, activeMatch);
+  const holes = states[stateKey] || blankHoles();
+  const rawMatch = playersForMatch(roster, players, day.format, activeMatch);
 
-    for (const source of sources) {
-      for (const key of keys) {
-        const value = key
-          .split(".")
-          .reduce((current: any, part: string) => current?.[part], source);
+  const match = {
+    red: (rawMatch.red || []).map(withHandicapOverride),
+    blue: (rawMatch.blue || []).map(withHandicapOverride),
+  };
 
-        if (value !== undefined && value !== null && value !== "") {
-          const numeric = Number(value);
+  const rosterRed = (roster?.Red || roster?.red || []).map(withHandicapOverride);
+  const rosterBlue = (roster?.Blue || roster?.blue || []).map(withHandicapOverride);
 
-          if (Number.isFinite(numeric)) {
-            return numeric;
-          }
-        }
+  const pairStart = activeMatch * 2;
+
+  const scoringRedPlayers =
+    isBetterBall && match.red.length < 2
+      ? rosterRed.slice(pairStart, pairStart + 2)
+      : match.red;
+
+  const scoringBluePlayers =
+    isBetterBall && match.blue.length < 2
+      ? rosterBlue.slice(pairStart, pairStart + 2)
+      : match.blue;
+
+  const scoringPlayerCount = scoringRedPlayers.length + scoringBluePlayers.length;
+
+  const bottomNavPlayers = [
+    ...scoringRedPlayers,
+    ...scoringBluePlayers,
+  ].map((p: any) => {
+    const exact = Number(p.exactHandicap ?? p.rawHandicap ?? p.handicap ?? 0);
+
+    return {
+      id: playerIdentity(p),
+      name: p.name,
+      handicap: exact,
+      rawHandicap: exact,
+      exactHandicap: exact,
+    };
+  });
+
+  function handleChangeHandicaps(nextHandicaps: Record<string, number>) {
+    setHandicapOverrides((current) => ({
+      ...current,
+      ...nextHandicaps,
+    }));
+  }
+
+  const matchScorecardPlayers = [
+    ...scoringRedPlayers.map((p: any) => ({ team: "red", p })),
+    ...scoringBluePlayers.map((p: any) => ({ team: "blue", p })),
+  ];
+
+  const isFinalSinglesLayout = matchScorecardPlayers.length === 2;
+
+  const scorecardKey = (team: string, p: any) =>
+    `${team}-${p.rosterIndex}-${p.name}`;
+
+  const allScorecardsSigned =
+    matchScorecardPlayers.length > 0 &&
+    matchScorecardPlayers.every(({ team, p }: any) => signedCards[scorecardKey(team, p)]);
+
+  function toggleScorecardSigned(team: string, p: any) {
+    const key = scorecardKey(team, p);
+
+    setSignedCards((current) => ({
+      ...current,
+      [key]: !current[key],
+    }));
+  }
+
+  function editSignedScores() {
+    setFinishStep("playing");
+    setShowFinishActions(false);
+    setSelectedHole(null);
+    setCardPlayer(null);
+  }
+
+  const result = getResult(holes);
+
+  const isMatchFinished = holes.every(
+    (h: any) => h.status !== "pending"
+  );
+
+  const redWins = holes.filter((h: any) => h.status === "red").length;
+  const blueWins = holes.filter((h: any) => h.status === "blue").length;
+  const halved = holes.filter((h: any) => h.status === "as").length;
+
+  const nextHoleNumber =
+    holes.find((h: any) => h.status === "pending")?.hole || 18;
+
+  const teeKey =
+    day.tee?.charAt(0).toUpperCase() + day.tee?.slice(1).toLowerCase();
+
+  const current =
+    holesByTee?.[nextHoleNumber]?.[teeKey] ||
+    holesByTee?.[nextHoleNumber]?.White ||
+    {
+      hole: nextHoleNumber,
+      par: 4,
+      si: nextHoleNumber,
+      metres: 0,
+    };
+
+  function matchLockedResult() {
+    let lead = 0;
+
+    const orderedHoles = [...holes].sort(
+      (a: any, b: any) => Number(a.hole) - Number(b.hole)
+    );
+
+    for (const h of orderedHoles) {
+      if (h.status === "pending") continue;
+
+      if (h.status === "red") lead += 1;
+      if (h.status === "blue") lead -= 1;
+
+      const holeNo = Number(h.hole || 0);
+      const remaining = Math.max(0, 18 - holeNo);
+      const margin = Math.abs(lead);
+
+      // Match-play result locks the moment the lead is bigger than holes remaining.
+      // Later holes may still be scored for cards/stats, but the match result must
+      // stay fixed, e.g. 6&5 remains 6&5 forever.
+      if (margin > remaining) {
+        return {
+          leader: lead > 0 ? "red" : "blue",
+          main: `${margin}&${remaining}`,
+          wonHole: holeNo,
+        };
       }
     }
 
-    return fallback;
+    return null;
   }
 
-  function selectedTeeSlope() {
-    const teeData = selectedTeeData();
+  function matchFinalResult() {
+    const locked = matchLockedResult();
 
-    return teeNumberValue(
-      teeData,
-      [
-        "slope_rating",
-        "slope",
-        "slopeRating",
-        "menSlope",
-        "mensSlope",
-        "men.slope",
-        "men.slope_rating",
-        "ratings.men.slope",
-      ],
-      113
+    if (locked) return locked;
+
+    let lead = 0;
+
+    const orderedHoles = [...holes].sort(
+      (a: any, b: any) => Number(a.hole) - Number(b.hole)
     );
-  }
 
-  function selectedTeeCourseRating() {
-    const teeData = selectedTeeData();
-
-    return teeNumberValue(
-      teeData,
-      [
-        "course_rating",
-        "courseRating",
-        "rating",
-        "scratchRating",
-        "scratch_rating",
-        "menRating",
-        "mensRating",
-        "men.rating",
-        "men.course_rating",
-        "ratings.men.rating",
-        "ratings.men.course_rating",
-      ],
-      selectedTeePar()
-    );
-  }
-
-  function selectedTeePar() {
-    const teeData = selectedTeeData();
-
-    return teeNumberValue(
-      teeData,
-      [
-        "par_total",
-        "par",
-        "mensPar",
-        "menPar",
-        "men.par",
-        "ratings.men.par",
-      ],
-      72
-    );
-  }
-
-  function formatAllowance() {
-    const f = String(format || "").toLowerCase();
-
-    if (f.includes("ambrose")) {
-      return 0.25;
+    for (const h of orderedHoles) {
+      if (h.status === "red") lead += 1;
+      if (h.status === "blue") lead -= 1;
     }
 
-    if (f.includes("better ball")) {
-      return 0.85;
+    if (lead === 0) {
+      return {
+        leader: null,
+        main: "AS",
+        wonHole: 18,
+      };
     }
 
-    if (f.includes("stableford")) {
-      return 0.95;
-    }
-
-    return 1;
+    return {
+      leader: lead > 0 ? "red" : "blue",
+      main: `${Math.abs(lead)}UP`,
+      wonHole: 18,
+    };
   }
 
-  function courseHandicap(rawHandicap: any) {
-    const handicapIndex = Number(rawHandicap || 0);
-    const slope = selectedTeeSlope();
-    const courseRating = selectedTeeCourseRating();
-    const par = selectedTeePar();
+  const lockedResult = matchLockedResult();
+  const displayResult = lockedResult || result;
+  const displaySub = lockedResult ? "MATCH CLOSED" : result.sub;
 
-    const calculated =
-      handicapIndex * (slope / 113) + (courseRating - par);
+  const displayMain = (() => {
+    if (!displayResult.leader) return displayResult.main;
 
-    return Math.round(calculated);
-  }
+    const name =
+      teamNames[displayResult.leader === "red" ? "Red" : "Blue"] ||
+      displayResult.leader.toUpperCase();
 
-  function playingHandicap(rawHandicap: any) {
-    const courseHcp = courseHandicap(rawHandicap);
-    const allowance = formatAllowance();
+    return displayResult.main.replace(
+      displayResult.leader.toUpperCase(),
+      name.toUpperCase()
+    );
+  })();
 
-    return Math.round(courseHcp * allowance);
-  }
+  const closedResult = matchFinalResult();
+  const completedLeader = closedResult.leader || result.leader;
 
-  function startQuickGame() {
-    const selectedCourse = selectedSavedCourse || getCourseById("st-michaels");
+  const winningTeamName = completedLeader
+    ? teamNames[completedLeader === "red" ? "Red" : "Blue"] ||
+      completedLeader.toUpperCase()
+    : "";
 
-    // The current Score screen still expects a seeded/local course id so it can
-    // read hole-by-hole data safely. API courses are used here for course name,
-    // tee rating, slope and handicap calculations, but we fall back to the
-    // seeded St Michaels hole model until the Score screen is upgraded to read
-    // API hole arrays directly.
-    const localScoreCourse = COURSES.find((course: any) => course.id === courseId);
-    const scoreCourseId = localScoreCourse ? courseId : "st-michaels";
-    const scoreCourse = localScoreCourse || getCourseById("st-michaels");
+  const finalScoreMain = closedResult.main;
 
-    const red = redPlayers.slice(0, playersPerTeam).map((p, i) => ({
-      id: `quick-red-${i}`,
-      name: p.name || `Red ${i + 1}`,
-      nickname: p.name || `Red ${i + 1}`,
-      handicap: playingHandicap(p.handicap),
-      rawHandicap: Number(p.handicap || 0),
-      courseHandicap: courseHandicap(p.handicap),
-      playingHandicap: playingHandicap(p.handicap),
-      handicapAllowance: formatAllowance(),
-      team: "red",
-      teamId: "red",
-      rosterIndex: i,
-      photo: p.photo || "",
-      image: p.photo || "",
-      photoUrl: p.photo || "",
-      avatar: p.photo || "",
-      homeClub: "",
-      preferredTee: tee,
-      regular: false,
-    }));
+  const finalScoreSub = completedLeader
+    ? `${winningTeamName.toUpperCase()} WON MATCH`
+    : "MATCH HALVED";
 
-    const blue = bluePlayers.slice(0, playersPerTeam).map((p, i) => ({
-      id: `quick-blue-${i}`,
-      name: p.name || `Blue ${i + 1}`,
-      nickname: p.name || `Blue ${i + 1}`,
-      handicap: playingHandicap(p.handicap),
-      rawHandicap: Number(p.handicap || 0),
-      courseHandicap: courseHandicap(p.handicap),
-      playingHandicap: playingHandicap(p.handicap),
-      handicapAllowance: formatAllowance(),
-      team: "blue",
-      teamId: "blue",
-      rosterIndex: i,
-      photo: p.photo || "",
-      image: p.photo || "",
-      photoUrl: p.photo || "",
-      avatar: p.photo || "",
-      homeClub: "",
-      preferredTee: tee,
-      regular: false,
-    }));
+  const playerKey = (team: string, p: any) =>
+    `${team}-${p.rosterIndex}-${p.name}`;
 
-    setPlayers(playersPerTeam);
-    setTeamNames({ Red: redName, Blue: blueName });
-    setRoster({ Red: red, Blue: blue });
+  function teamRoundStats(team: "red" | "blue", teamPlayers: any[]) {
+    return teamPlayers.reduce(
+      (totals: any, p: any) => {
+        for (let holeNo = 1; holeNo <= 18; holeNo += 1) {
+          const detail =
+            holesByTee?.[holeNo]?.[teeKey] ||
+            holesByTee?.[holeNo]?.White ||
+            {
+              hole: holeNo,
+              par: 4,
+              si: holeNo,
+              metres: 0,
+            };
 
-    setDayConfigs([
-      {
-        label: "Quick Game",
-        teeTime: "",
-        courseId: scoreCourseId,
-        displayCourseId: courseId,
-        course: selectedCourse.shortName || selectedCourse.name,
-        scoringCourse: scoreCourse?.shortName || scoreCourse?.name || "St Michaels",
-        tee,
-        teeSlope: selectedTeeSlope(),
-        teeCourseRating: selectedTeeCourseRating(),
-        teePar: selectedTeePar(),
-        handicapAllowance: formatAllowance(),
-        format,
+          const gross = grossFor(team, p, holeNo);
+
+          if (gross == null) continue;
+
+          if (Number(gross) < Number(detail.par)) {
+            totals.birdies += 1;
+          } else if (Number(gross) === Number(detail.par)) {
+            totals.pars += 1;
+          } else {
+            totals.bogeys += 1;
+          }
+        }
+
+        return totals;
       },
-    ]);
-
-    setActiveDay(0);
-    setStartMatch(0);
-    setStates({});
-    setScorecards({});
-    setEventStarted(true);
-    setEventLocked(true);
-    setScreen("score");
+      {
+        birdies: 0,
+        pars: 0,
+        bogeys: 0,
+      }
+    );
   }
+
+  const redRoundStats = teamRoundStats("red", scoringRedPlayers);
+  const blueRoundStats = teamRoundStats("blue", scoringBluePlayers);
+
+
+
+  function teeSelectionKey(hole: number, team: string) {
+    return `${stateKey}-hole-${hole}-${team}`;
+  }
+
+  function getSelectedTeePlayer(hole: number, team: string) {
+    return teeShotSelections[teeSelectionKey(hole, team)] || "";
+  }
+
+  function selectTeeShot(hole: number, team: string, p: any) {
+    setTeeShotSelections((current: any) => ({
+      ...current,
+      [teeSelectionKey(hole, team)]: playerKey(team, p),
+    }));
+  }
+
+  function getTeeShotCount(team: string, p: any) {
+    const key = playerKey(team, p);
+
+    return Object.entries(teeShotSelections).filter(
+      ([selectionKey, value]) =>
+        selectionKey.startsWith(`${stateKey}-hole-`) && value === key
+    ).length;
+  }
+
+  function openHole(holeNumber: number) {
+    const detail =
+      holesByTee?.[holeNumber]?.[teeKey] ||
+      holesByTee?.[holeNumber]?.White ||
+      {
+        hole: holeNumber,
+        par: 4,
+        si: holeNumber,
+        metres: 0,
+      };
+
+    const redTeamScore =
+      match.red.length > 0
+        ? grossFor("red", match.red[0], detail.hole)
+        : null;
+
+    const blueTeamScore =
+      match.blue.length > 0
+        ? grossFor("blue", match.blue[0], detail.hole)
+        : null;
+
+    const nextDraft: any = {
+      red: redTeamScore ?? detail.par,
+      blue: blueTeamScore ?? detail.par,
+      red_0: detail.par,
+      red_1: detail.par,
+      blue_0: detail.par,
+      blue_1: detail.par,
+    };
+
+    scoringRedPlayers.forEach((p: any, i: number) => {
+      nextDraft[`red_${i}`] = grossFor("red", p, detail.hole) ?? detail.par;
+    });
+
+    scoringBluePlayers.forEach((p: any, i: number) => {
+      nextDraft[`blue_${i}`] = grossFor("blue", p, detail.hole) ?? detail.par;
+    });
+
+    setSelectedHole(detail);
+    setDraft(nextDraft);
+  }
+
+  function teamHandicap(side: any[]) {
+    const total = side.reduce((sum, p) => sum + Number(p.handicap || 0), 0);
+
+    if (/ambrose/i.test(day.format)) {
+      if (side.length === 2) return Math.round(total / 4);
+      if (side.length === 3) return Math.round(total / 6);
+      if (side.length === 4) return Math.round(total / 8);
+      return Math.round(total / Math.max(1, side.length * 2));
+    }
+
+    if (/foursomes/i.test(day.format)) return Math.round(total * 0.5);
+
+    if (/chapman|pinehurst|greensomes/i.test(day.format))
+      return Math.round(total * 0.6);
+
+    return Math.round(total);
+  }
+
+  function holeShotDots(detail: any) {
+    const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
+
+    if (allPlayers.length < 2) return { red: false, blue: false };
+
+    if (/ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)) {
+      const redHcp = teamHandicap(match.red);
+      const blueHcp = teamHandicap(match.blue);
+      const low = Math.min(redHcp, blueHcp);
+
+      return {
+        red: shots(Math.max(0, redHcp - low), detail.si) > 0,
+        blue: shots(Math.max(0, blueHcp - low), detail.si) > 0,
+      };
+    }
+
+    const lowMarker = Math.min(
+      ...allPlayers.map((p) => Number(p.handicap || 0))
+    );
+
+    return {
+      red: match.red.some(
+        (p: any) =>
+          shots(Math.max(0, Number(p.handicap || 0) - lowMarker), detail.si) >
+          0
+      ),
+      blue: match.blue.some(
+        (p: any) =>
+          shots(Math.max(0, Number(p.handicap || 0) - lowMarker), detail.si) >
+          0
+      ),
+    };
+  }
+
+  function saveHole() {
+    if (!selectedHole) return;
+
+    let status = "as";
+    const nextScorecards: any = { ...scorecards };
+
+    if (isBetterBall) {
+      const allPlayers = [...scoringRedPlayers, ...scoringBluePlayers];
+
+      const lowMarker = Math.min(
+        ...allPlayers.map((p: any) => Number(p.handicap || 0))
+      );
+
+      const redNets = scoringRedPlayers.map((p: any, i: number) => {
+        const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
+
+        const strokeCount = shots(
+          Math.max(0, Number(p.handicap || 0) - lowMarker),
+          selectedHole.si
+        );
+
+        const k = playerKey("red", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return gross - strokeCount;
+      });
+
+      const blueNets = scoringBluePlayers.map((p: any, i: number) => {
+        const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
+
+        const strokeCount = shots(
+          Math.max(0, Number(p.handicap || 0) - lowMarker),
+          selectedHole.si
+        );
+
+        const k = playerKey("blue", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: gross,
+        };
+
+        return gross - strokeCount;
+      });
+
+      const redBest = Math.min(...redNets);
+      const blueBest = Math.min(...blueNets);
+
+      status = redBest < blueBest ? "red" : blueBest < redBest ? "blue" : "as";
+    } else {
+      const redScore = Number(draft.red ?? selectedHole.par);
+      const blueScore = Number(draft.blue ?? selectedHole.par);
+
+      const redHcp =
+        /ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)
+          ? teamHandicap(match.red)
+          : Number(match.red[0]?.handicap || 0);
+
+      const blueHcp =
+        /ambrose|foursomes|chapman|pinehurst|greensomes/i.test(day.format)
+          ? teamHandicap(match.blue)
+          : Number(match.blue[0]?.handicap || 0);
+
+      const low = Math.min(redHcp, blueHcp);
+
+      const redNet =
+        redScore - shots(Math.max(0, redHcp - low), selectedHole.si);
+
+      const blueNet =
+        blueScore - shots(Math.max(0, blueHcp - low), selectedHole.si);
+
+      status = redNet < blueNet ? "red" : blueNet < redNet ? "blue" : "as";
+
+      match.red.forEach((p: any) => {
+        const k = playerKey("red", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: redScore,
+        };
+      });
+
+      match.blue.forEach((p: any) => {
+        const k = playerKey("blue", p);
+
+        nextScorecards[k] = {
+          ...(nextScorecards[k] || {}),
+          [selectedHole.hole]: blueScore,
+        };
+      });
+    }
+
+    const updated = holes.map((h: any) =>
+      h.hole === selectedHole.hole ? { ...h, status } : h
+    );
+
+    setStates((s: any) => ({
+      ...s,
+      [stateKey]: updated,
+    }));
+
+    setScorecards(nextScorecards);
+    setSelectedHole(null);
+
+    const finished = updated.every((h: any) => h.status !== "pending");
+
+    if (finished) {
+      setTimeout(() => {
+        setShowFinishActions(true);
+      }, 400);
+    }
+  }
+
+  function grossFor(team: string, p: any, hole: number) {
+    return scorecards[playerKey(team, p)]?.[hole] ?? null;
+  }
+
+  function playerScorecardRows(p: any, team: string, from: number, to: number) {
+    return Array.from({ length: to - from + 1 }, (_, i) => {
+      const holeNo = from + i;
+      const h =
+        holesByTee?.[holeNo]?.[teeKey] ||
+        holesByTee?.[holeNo]?.White ||
+        {
+          hole: holeNo,
+          par: 4,
+          si: holeNo,
+          metres: 0,
+        };
+
+      const gross = grossFor(team, p, h.hole);
+      const shotCount = shots(Number(p.handicap || 0), h.si);
+      const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
+      const points = gross == null ? null : stableford(gross, h.par, shotCount);
+
+      return {
+        ...h,
+        gross,
+        net,
+        points,
+      };
+    });
+  }
+
+  const Hole = ({ h }: any) => {
+    const detail =
+      holesByTee?.[h.hole]?.[teeKey] ||
+      holesByTee?.[h.hole]?.White ||
+      {
+        hole: h.hole,
+        par: 4,
+        si: h.hole,
+        metres: 0,
+      };
+
+    const status = h.status;
+    const active = h.hole === nextHoleNumber;
+
+    const shotDot = holeShotDots(detail);
+    const both = shotDot.red && shotDot.blue;
+    const single = shotDot.red || shotDot.blue;
+
+    const tone =
+      status === "red"
+        ? isDayTheme
+          ? "border-[#9f1720]/35 bg-[linear-gradient(145deg,rgba(255,255,255,0.95),rgba(255,226,230,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(159,23,32,0.12)]"
+          : "from-[#7c2430]/95 to-[#47151d]/95 border-[#b54854]/40"
+        : status === "blue"
+        ? isDayTheme
+          ? "border-[#1f4aa8]/35 bg-[linear-gradient(145deg,rgba(255,255,255,0.95),rgba(224,236,255,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(31,74,168,0.12)]"
+          : "from-[#415aaf]/95 to-[#29386c]/95 border-[#627dd7]/40"
+        : status === "as"
+        ? isDayTheme
+          ? "border-black/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(228,228,225,0.82))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_16px_30px_rgba(0,0,0,0.11)]"
+          : "from-[#5c5c5c]/95 to-[#2d2d2d]/95 border-white/15"
+        : isDayTheme
+        ? "border-black/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.96),rgba(235,235,232,0.88),rgba(218,218,214,0.74))] text-[#2f3032] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_0_-10px_18px_rgba(0,0,0,0.045),0_16px_30px_rgba(0,0,0,0.12)]"
+        : "from-black/50 to-black/30 border-white/5";
+
+    return (
+      <button
+        onClick={() => openHole(h.hole)}
+        className={cx(
+          "relative h-[86px] rounded-[18px] border px-2 py-1 text-center transition-all backdrop-blur-xl",
+          !isDayTheme && "bg-gradient-to-b",
+          tone
+        )}
+        style={
+          active
+            ? {
+                border: isDayTheme ? "3px solid #b99b2f" : "2px solid #d1c79f",
+                boxShadow: isDayTheme
+                  ? "0 0 0 3px rgba(185,155,47,0.26), 0 0 34px rgba(185,155,47,0.52)"
+                  : "0 0 0 2px rgba(209,199,159,0.45), 0 0 18px rgba(209,199,159,0.85)",
+                transform: "scale(1.05)",
+                zIndex: 2,
+              }
+            : undefined
+        }
+      >
+        <div className="absolute left-0 right-0 top-1 flex justify-center">
+          {both ? (
+            <div className="flex gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ff6d6d] shadow-[0_0_7px_rgba(255,109,109,0.9)]" />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#67a6ff] shadow-[0_0_7px_rgba(103,166,255,0.9)]" />
+            </div>
+          ) : single ? (
+            <span
+              className={cx(
+                "h-1.5 w-1.5 rounded-full shadow-[0_0_7px_rgba(255,255,255,0.6)]",
+                shotDot.red ? "bg-[#ff6d6d]" : "bg-[#67a6ff]"
+              )}
+            />
+          ) : null}
+        </div>
+
+        <div className="flex h-5 items-center justify-center">
+          {status === "red" || status === "blue" ? (
+            <Logo
+              team={status}
+              size="h-5 w-5"
+              src={teamLogos[status === "red" ? "Red" : "Blue"]}
+            />
+          ) : status === "as" ? (
+            <span className="text-[9px]">AS</span>
+          ) : null}
+        </div>
+
+        <div
+          className={cx(
+            "mt-0.5 font-black leading-none tracking-[-0.04em]",
+            isDayTheme ? "text-[20px] text-[#2d2d2f]" : "text-[20px] text-white"
+          )}
+          style={{
+            fontFamily: '"SF Pro Display", "Inter", "Helvetica Neue", sans-serif',
+          }}
+        >
+          {h.hole}
+        </div>
+
+        <div className={cx("mt-1 text-[9px]", isDayTheme ? "text-black/45" : "text-white/50")}>SI {detail.si}</div>
+      </button>
+    );
+  };
 
   return (
-    <div className="relative h-full w-full overflow-y-auto pb-24 text-white">
-      <div className="relative z-20 mx-auto max-w-[430px]">
-        <div className="mb-3 text-center">
-          <div className="text-[11px] font-black uppercase tracking-[0.32em] text-[#d1c79f]/55">
-            Quick Game
-          </div>
-          <h1 className="mt-1 text-[26px] font-black uppercase leading-none text-white drop-shadow-[0_8px_18px_rgba(0,0,0,0.75)]">
-            Set Up
-          </h1>
-        </div>
-
-        <div className="mb-3 mt-3 grid grid-cols-2 gap-3">
-          {[1, 2].map((n) => {
-            const active = playersPerTeam === n;
-            return (
-              <button
-                type="button"
-                key={n}
-                onClick={() => setPlayersPerTeam(n)}
-                className={cx(
-                  "relative overflow-hidden rounded-[22px] border px-4 py-3 text-center shadow-[0_16px_34px_rgba(0,0,0,0.42)] backdrop-blur-xl transition-all",
-                  active
-                    ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                    : "border-white/10 bg-black/55 text-white"
-                )}
-              >
-                <div className="text-[28px] font-black uppercase leading-none tracking-[-0.04em]">
-                  {n}v{n}
-                </div>
-                <div
-                  className={cx(
-                    "mt-0.5 text-[7px] font-black uppercase tracking-[0.2em]",
-                    active ? "text-black/55" : "text-white/35"
-                  )}
-                >
-                  Players
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <Section title="Course">
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setCourseMode("search");
-                setShowCourseSearchPanel(true);
-                setShowSavedCoursesPanel(false);
+    <>
+      <div className={cx("relative flex-1 overflow-y-auto pb-[220px]", theme.app)}>
+        {finishStep === "signoff" ? (
+          <div className="relative mt-6 overflow-hidden rounded-[30px] border border-white/15 bg-gradient-to-b from-[#381017]/92 via-[#1e151b]/92 to-[#07101d]/92 p-4 shadow-[0_22px_60px_rgba(0,0,0,0.52)] backdrop-blur-xl">
+            <div
+              className="absolute inset-0 opacity-[0.08] mix-blend-soft-light"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20px 20px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.07) 11px, transparent 12px),
+                  radial-gradient(circle at 60px 60px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                `,
+                backgroundSize: "80px 80px",
               }}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "search"
-                  ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                  : "border-white/10 bg-black/55 text-white"
-              )}
-            >
-              Course Search
-            </button>
+            />
 
-            <button
-              type="button"
-              onClick={() => {
-                setCourseMode("saved");
-                setShowSavedCoursesPanel(true);
-                setShowCourseSearchPanel(false);
-              }}
-              className={cx(
-                "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em] transition-all",
-                courseMode === "saved"
-                  ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                  : "border-white/10 bg-black/55 text-white"
-              )}
-            >
-              Saved
-            </button>
-          </div>
+            <div className="relative z-10">
+              <div className="text-center">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#d1c79f]/65">
+                  Sign Off Scorecards
+                </div>
 
-          {showCourseSearchPanel ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/35 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all duration-300">
-              <div className="grid grid-cols-[1fr_78px] gap-2">
-                <input
-                  value={courseSearch}
-                  onChange={(e) => setCourseSearch(e.target.value)}
-                  placeholder="Search course"
-                  className="w-full rounded-full border border-white/10 bg-black/50 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.1em] text-white outline-none placeholder:text-white/25"
-                />
+                <div className="mt-2 text-[24px] font-black uppercase leading-none tracking-[-0.02em] text-white">
+                  Check Every Card
+                </div>
 
-                <button
-                  type="button"
-                  onClick={handleCourseSearch}
-                  className="rounded-full border border-[#d1c79f]/50 bg-[#d1c79f] px-2 py-2.5 text-[8px] font-black uppercase tracking-[0.08em] text-black"
-                >
-                  Search
-                </button>
+                <div className="mt-2 text-[9px] font-black uppercase tracking-[0.18em] text-white/42">
+                  Review • Edit if needed • Sign off
+                </div>
               </div>
 
-              {courseSearchStatus ? (
-                <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/45">
-                  {courseSearchStatus}
-                </div>
-              ) : null}
-
-              {courseSearchResults.length ? (
-                <div className="mt-3 space-y-2">
-                  {courseSearchResults.slice(0, 3).map((course: any, index: number) => (
-                    <div
-                      key={`${getApiCourseId(course)}-${index}`}
-                      className="rounded-[16px] border border-white/10 bg-black/35 p-3"
-                    >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {getApiCourseName(course)}
-                      </div>
-
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {getApiCourseLocation(course) || "Course details unavailable"}
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => importApiCourse(course)}
-                        className="mt-2 w-full rounded-full bg-[#d1c79f] py-2 text-[8px] font-black uppercase tracking-[0.14em] text-black"
-                      >
-                        Import & Save
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
-          {showSavedCoursesPanel ? (
-            <div className="rounded-[18px] border border-white/10 bg-black/35 p-3 shadow-[0_14px_30px_rgba(0,0,0,0.35)] backdrop-blur-xl transition-all duration-300">
-              <div className="mb-2 text-[8px] font-black uppercase tracking-[0.2em] text-white/42">
-                Last 3 Saved Courses
-              </div>
-
-              <div className="space-y-2">
-                {recentSavedCourses.map((course: any) => {
-                  const active = courseId === course.id;
-                  const isApiCourse = course.source === "GolfCourseAPI";
+              <div className="mt-5 grid grid-cols-1 gap-2">
+                {matchScorecardPlayers.map(({ team, p }: any, index: number) => {
+                  const key = scorecardKey(team, p);
+                  const signed = !!signedCards[key];
+                  const isRed = team === "red";
 
                   return (
-                    <button
-                      key={course.id}
-                      type="button"
-                      onClick={() => {
-                        changeCourse(course.id);
-                        setShowCourseSearchPanel(false);
-                        setShowSavedCoursesPanel(false);
-                      }}
+                    <div
+                      key={`signoff-card-${key}`}
                       className={cx(
-                        "w-full rounded-[16px] border p-3 text-left transition-all",
-                        active
-                          ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                          : "border-white/10 bg-black/35"
+                        "rounded-[20px] border p-3",
+                        signed
+                          ? "border-[#d1c79f]/45 bg-[#d1c79f]/12"
+                          : "border-white/10 bg-black/28"
                       )}
                     >
-                      <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                        {course.name}
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <Logo
+                            team={team}
+                            size="h-[42px] w-[42px]"
+                            src={p.photo || teamLogos?.[isRed ? "Red" : "Blue"]}
+                          />
+
+                          <div className="min-w-0">
+                            <div className="truncate text-[12px] font-black uppercase tracking-[0.12em] text-white">
+                              Scorecard {index + 1}
+                            </div>
+                            <div className="mt-0.5 truncate text-[10px] font-bold text-white/55">
+                              {p.name}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div
+                          className={cx(
+                            "rounded-full px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em]",
+                            signed
+                              ? "bg-[#d1c79f] text-black"
+                              : "border border-white/10 bg-white/[0.04] text-white/45"
+                          )}
+                        >
+                          {signed ? "Signed" : "Open"}
+                        </div>
                       </div>
 
-                      <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                        {isApiCourse
-                          ? course.region || "Saved from GolfCourseAPI"
-                          : `${course.region || ""}${
-                              course.country ? ` • ${course.country}` : ""
-                            }` || "Saved Course"}
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setCardPlayer({ team, p })}
+                          className="rounded-full border border-white/12 bg-white/[0.04] px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white"
+                        >
+                          Review
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={editSignedScores}
+                          className="rounded-full border border-white/12 bg-black/30 px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] text-white/70"
+                        >
+                          Edit Scores
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => toggleScorecardSigned(team, p)}
+                          className={cx(
+                            "rounded-full px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em]",
+                            signed
+                              ? "border border-[#d1c79f]/35 bg-black/30 text-[#d1c79f]"
+                              : "bg-[#d1c79f] text-black"
+                          )}
+                        >
+                          {signed ? "Undo" : "Sign"}
+                        </button>
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
-            </div>
-          ) : null}
-        </Section>
 
-        {selectedCourseTouched ? (
-          <div className="mt-3 rounded-[20px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-            <div className="text-[7px] font-black uppercase tracking-[0.24em] text-[#d1c79f]/70">
-              Selected Course
-            </div>
-
-            <div className="mt-1 text-[13px] font-black uppercase tracking-[0.1em] text-white">
-              {selectedSavedCourse?.name || "Course Selected"}
-            </div>
-
-            <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/42">
-              {selectedSavedCourse?.region ||
-                selectedSavedCourse?.country ||
-                "Ready for tee selection"}
-            </div>
-
-            <div className="mt-2 text-[8px] font-black uppercase tracking-[0.14em] text-[#d1c79f]/70">
-              Par {selectedTeePar()} • Rating {selectedTeeCourseRating().toFixed(1)} • Slope {selectedTeeSlope()}
-            </div>
-          </div>
-        ) : null}
-
-        <Section title="Tee">
-          <div className="grid grid-cols-4 gap-2">
-            {tees.map((t) => (
               <button
                 type="button"
-                key={t.id}
-                onClick={() => setTee(t.id)}
+                disabled={!allScorecardsSigned}
+                onClick={() => setFinishStep("overview")}
                 className={cx(
-                  "min-h-[58px] rounded-2xl border px-2 py-2 text-[9px] font-black uppercase tracking-[0.08em] transition-all",
-                  tee === t.id
-                    ? "border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-                    : "border-white/10 bg-black/55 text-white"
+                  "mt-4 w-full rounded-[22px] px-4 py-4",
+                  allScorecardsSigned
+                    ? "border border-[#d1c79f]/35 bg-[#d1c79f] text-black"
+                    : "border border-white/10 bg-white/[0.04] text-white/30"
                 )}
               >
-                <div className="leading-[0.95]">
-                  <div className="break-words">{t.label}</div>
-                  <div className="mt-1 text-[7px] opacity-45">
-                    S{t.slope || t.slopeRating || t.slope_rating || 113}
-                  </div>
+                <div className="text-[8px] font-black uppercase tracking-[0.16em] opacity-55">
+                  Scorecards
+                </div>
+                <div className="mt-1 text-[13px] font-black uppercase">
+                  Signed Off
                 </div>
               </button>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="Format">
-          <div className="relative">
-            <select
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
-              className="w-full appearance-none rounded-2xl border border-white/10 bg-black/40 px-4 py-3 pr-10 text-[12px] font-black uppercase tracking-[0.06em] text-white outline-none"
-            >
-              {QUICK_FORMATS.map((f) => (
-                <option key={f} value={f} className="bg-black text-white">
-                  {f}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-[#d1c79f]">
-              ▾
             </div>
           </div>
+        ) : finishStep === "overview" ? (
+          <div className="fixed inset-y-0 left-1/2 z-[55] w-full max-w-[430px] -translate-x-1/2 overflow-hidden px-3 py-4 text-white">
+            <div className="absolute inset-0">
+              <img
+                src="/admin-home-bg.jpg"
+                alt=""
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/12" />
+            </div>
 
-          <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/35">
-            Playing handicap allowance: {Math.round(formatAllowance() * 100)}%
+            <div
+              className={cx(
+                "relative z-10 flex h-[calc(100dvh-32px)] min-h-[700px] flex-col overflow-hidden rounded-[30px] border px-4 pb-4 pt-4 shadow-[0_30px_90px_rgba(0,0,0,0.72)] backdrop-blur-2xl",
+                completedLeader === "red"
+                  ? "border-white/15 bg-gradient-to-b from-[#7c2430]/90 to-[#47151d]/90"
+                  : completedLeader === "blue"
+                  ? "border-white/15 bg-gradient-to-b from-[#415aaf]/90 to-[#29386c]/90"
+                  : "border-white/12 bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
+              )}
+            >
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0",
+                  completedLeader === "red"
+                    ? "bg-[radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.28),transparent_40%),radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.10),transparent_40%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
+                    : completedLeader === "blue"
+                    ? "bg-[radial-gradient(circle_at_82%_22%,rgba(103,166,255,0.30),transparent_40%),radial-gradient(circle_at_18%_22%,rgba(255,65,85,0.10),transparent_40%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
+                    : "bg-[radial-gradient(circle_at_50%_12%,rgba(209,199,159,0.16),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.05),transparent_44%,rgba(0,0,0,0.08))]"
+                )}
+              />
+
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-screen"
+                style={{
+                  backgroundImage: `
+                    radial-gradient(circle at 20px 20px, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.05) 11px, transparent 12px),
+                    radial-gradient(circle at 64px 64px, rgba(255,255,255,0.10) 0px, rgba(255,255,255,0.04) 11px, transparent 12px)
+                  `,
+                  backgroundSize: "86px 86px",
+                }}
+              />
+<div className="relative z-10 flex h-full min-h-0 flex-col">
+                <div
+                  className="relative overflow-hidden px-4 pb-4 pt-4 text-center"
+                >
+                  <div className="relative z-10">
+                    <img
+                      src="/launch-logo.png"
+                      alt="DUEL"
+                      className="mx-auto h-[38px] object-contain opacity-95"
+                      style={{ filter: "brightness(0) invert(1)" }}
+                    />
+
+
+
+                <div className="mt-4 grid grid-cols-[1fr_54px_1fr] items-center gap-2">
+                  <div className="flex justify-center gap-2">
+                    {scoringRedPlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-red-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "red", p })}
+                        className={cx("group flex flex-col items-center active:scale-95", isFinalSinglesLayout ? "w-[104px]" : "w-[74px]")}
+                      >
+                        <div
+                          className="rounded-full p-1"
+                        >
+                          {p.photo ? (
+                            <div
+                              className={cx(
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
+                              )}
+                              style={{ backgroundImage: "url('/roster-red-bg.jpg')" }}
+                            >
+                              <div className="absolute inset-0 bg-black/42" />
+                              <img
+                                src={p.photo}
+                                alt={p.name}
+                                className="relative z-10 h-full w-full rounded-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <Logo
+                              team="red"
+                              size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
+                              src={teamLogos?.Red}
+                            />
+                          )}
+                        </div>
+                        <div
+                          className="mt-1 w-full truncate text-[11px] font-black text-white"
+                        >
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="text-center text-[34px] font-black text-white/90">VS</div>
+
+                  <div className="flex justify-center gap-2">
+                    {scoringBluePlayers.map((p: any, i: number) => (
+                      <button
+                        key={`complete-blue-${p.name}-${i}`}
+                        type="button"
+                        onClick={() => setCardPlayer({ team: "blue", p })}
+                        className={cx("group flex flex-col items-center active:scale-95", isFinalSinglesLayout ? "w-[104px]" : "w-[74px]")}
+                      >
+                        <div
+                          className="rounded-full p-1"
+                        >
+                          {p.photo ? (
+                            <div
+                              className={cx(
+                                "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_8px_22px_rgba(0,0,0,0.22)]",
+                                isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"
+                              )}
+                              style={{ backgroundImage: "url('/roster-blue-bg.jpg')" }}
+                            >
+                              <div className="absolute inset-0 bg-black/42" />
+                              <img
+                                src={p.photo}
+                                alt={p.name}
+                                className="relative z-10 h-full w-full rounded-full object-cover"
+                              />
+                            </div>
+                          ) : (
+                            <Logo
+                              team="blue"
+                              size={isFinalSinglesLayout ? "h-[90px] w-[90px]" : "h-[64px] w-[64px]"}
+                              src={teamLogos?.Blue}
+                            />
+                          )}
+                        </div>
+                        <div
+                          className="mt-1 w-full truncate text-[11px] font-black text-white"
+                        >
+                          {first(p.name)}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                
+
+                    <div className="mt-5 text-[9px] font-black uppercase tracking-[0.32em] text-white/68">
+                      Match Complete
+                    </div>
+
+                    <div
+                      className={cx(
+                        "mt-2 text-[70px] font-black uppercase leading-[0.84] tracking-[-0.09em] drop-shadow-[0_14px_34px_rgba(0,0,0,0.62)]",
+                        completedLeader === "red"
+                          ? "text-[#ff4355]"
+                          : completedLeader === "blue"
+                          ? "text-[#67a6ff]"
+                          : "text-white"
+                      )}
+                    >
+                      {finalScoreMain}
+                    </div>
+
+                    <div className="mt-3 text-[11px] font-black uppercase tracking-[0.22em] text-white">
+                      {finalScoreSub}
+                    </div>
+
+                    <div className="mx-auto mt-4 flex max-w-[300px] items-center gap-3">
+                      <div className="h-px flex-1 bg-transparent" />
+                      <div className="text-[9px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+                        {(day.course || "ST MICHAELS").toUpperCase()} • {String(day.tee || "").toUpperCase()}
+                      </div>
+                      <div className="h-px flex-1 bg-transparent" />
+                    </div>
+
+                    <div className="mt-2 text-[9px] font-black uppercase tracking-[0.22em] text-white/48">
+                      {day.format}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 px-4 py-2">
+
+                  <div className="mx-auto mb-2 flex max-w-[260px] items-center gap-4">
+                    <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
+                      Match Stats
+                    </div>
+                    <div className="h-px flex-1 bg-[#d1c79f]/34" />
+                  </div>
+
+                  <CompactStatRow label="Holes Won" red={redWins} blue={blueWins} />
+                  <CompactStatRow label="Birdies" red={redRoundStats.birdies} blue={blueRoundStats.birdies} />
+                  <CompactStatRow label="Pars" red={redRoundStats.pars} blue={blueRoundStats.pars} />
+                  <CompactStatRow label="Bogeys" red={redRoundStats.bogeys} blue={blueRoundStats.bogeys} />
+                </div>
+
+                <div className="mt-auto pt-4">
+                  <div className="mb-3 px-3 py-2 text-center text-[8px] font-black uppercase tracking-[0.14em] text-white/48">
+                    Tap a player crest to review their scorecard
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFinishStep("playing");
+                      setShowFinishActions(false);
+                      setSignedCards({});
+                      setSelectedHole(null);
+                      setCardPlayer(null);
+                      if (setMode) {
+                        setMode("launch");
+                      }
+                      setScreen("home");
+                    }}
+                    className="w-full rounded-full border border-[#d1c79f]/70 bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] px-4 py-4 text-[15px] font-black uppercase tracking-[0.22em] text-black shadow-[0_10px_28px_rgba(209,199,159,0.28)] transition-all active:scale-[0.985]"
+                  >
+                    New Game
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        </Section>
+        ) : (
 
-        <div className="mt-3 space-y-3">
-          <TeamSetupColumn
-            tone="red"
-            teamName={redName}
-            setTeamName={setRedName}
-            players={redPlayers}
-            count={playersPerTeam}
-            updatePlayer={updatePlayer}
-            courseSlope={selectedTeeSlope()}
-            playingHandicap={playingHandicap}
-          />
-
-          <TeamSetupColumn
-            tone="blue"
-            teamName={blueName}
-            setTeamName={setBlueName}
-            players={bluePlayers}
-            count={playersPerTeam}
-            updatePlayer={updatePlayer}
-            courseSlope={selectedTeeSlope()}
-            playingHandicap={playingHandicap}
-          />
-        </div>
-
-        <div className="mt-4 flex justify-center pb-6">
-          <button
-            type="button"
-            onClick={startQuickGame}
-            className="flex h-[78px] w-[78px] items-center justify-center rounded-full border border-[#d1c79f]/40 bg-gradient-to-b from-[#245438] via-[#163d2b] to-[#071b13] shadow-[0_18px_40px_rgba(0,0,0,0.65),0_0_22px_rgba(42,115,73,0.45)]"
-            aria-label="Start quick game"
+          <div
+            className={cx(
+              "relative mt-6 overflow-hidden rounded-[26px] border p-4 backdrop-blur-xl",
+              isDayTheme
+                ? result.leader === "red"
+                  ? "border-[#9f1720]/40 bg-[linear-gradient(135deg,rgba(255,244,245,0.96),rgba(255,214,220,0.92),rgba(255,232,236,0.88))] shadow-[0_18px_40px_rgba(159,23,32,0.18)]"
+                  : result.leader === "blue"
+                  ? "border-[#1f4aa8]/40 bg-[linear-gradient(135deg,rgba(244,248,255,0.96),rgba(210,226,255,0.92),rgba(232,240,255,0.88))] shadow-[0_18px_40px_rgba(31,74,168,0.18)]"
+                  : theme.panel
+                : result.leader === "red"
+                ? "border-white/15 bg-gradient-to-b from-[#7c2430]/85 to-[#47151d]/85"
+                : result.leader === "blue"
+                ? "border-white/15 bg-gradient-to-b from-[#415aaf]/85 to-[#29386c]/85"
+                : "border-white/15 bg-gradient-to-b from-[#5c5c5c]/80 to-[#2d2d2d]/80"
+            )}
           >
-            <img
-              src="/launch-logo.png"
-              alt="DUEL"
-              className="h-[31px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)]"
+            <div
+              className={cx(
+                "pointer-events-none absolute inset-0 rounded-[26px]",
+                isDayTheme ? "opacity-[0.42]" : "opacity-[0.03]"
+              )}
+              style={{
+                background: `
+                  linear-gradient(
+                    112deg,
+                    transparent 0%,
+                    rgba(255,255,255,0.74) 12%,
+                    transparent 24%,
+                    transparent 34%,
+                    rgba(255,255,255,0.44) 46%,
+                    transparent 58%,
+                    transparent 66%,
+                    rgba(255,255,255,0.30) 78%,
+                    transparent 90%
+                  )
+                `,
+                backgroundSize: "420px 420px",
+              }}
             />
-          </button>
+
+            <div
+              className={cx(
+                "pointer-events-none absolute inset-0 rounded-[26px]",
+                isDayTheme ? "opacity-[0.20]" : "opacity-[0.08]"
+              )}
+              style={{
+                background: `
+                  linear-gradient(
+                    112deg,
+                    transparent 0%,
+                    transparent 18%,
+                    rgba(0,0,0,0.08) 24%,
+                    transparent 32%,
+                    transparent 52%,
+                    rgba(0,0,0,0.06) 58%,
+                    transparent 66%,
+                    transparent 82%,
+                    rgba(0,0,0,0.05) 86%,
+                    transparent 100%
+                  )
+                `,
+                backgroundSize: "420px 420px",
+              }}
+            />
+            {isDayTheme && (
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.14),transparent_42%)]" />
+            )}
+
+
+            <div
+              className={cx(
+                "absolute inset-0",
+                isDayTheme
+                  ? result.leader === "red"
+                  ? "bg-[radial-gradient(circle_at_18%_20%,rgba(159,23,32,0.16),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.30),transparent_48%,rgba(255,255,255,0.10))]"
+                  : result.leader === "blue"
+                  ? "bg-[radial-gradient(circle_at_82%_20%,rgba(31,74,168,0.16),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.30),transparent_48%,rgba(255,255,255,0.10))]"
+                  : "bg-[linear-gradient(180deg,rgba(255,255,255,0.22),transparent_48%,rgba(255,255,255,0.08))]"
+                  : "bg-[linear-gradient(180deg,rgba(255,255,255,0.05),transparent_45%,rgba(0,0,0,0.08))]"
+              )}
+            />
+
+            <div className="relative z-10">
+              <div className={cx("mb-1 text-center text-[11px] font-semibold tracking-[0.22em]", isDayTheme ? "text-[#404044]/75" : "text-white/60")}>
+                {day.label.toUpperCase()} •{" "}
+                {(day.course || "ST MICHAELS").toUpperCase()} •{" "}
+                {day.tee.toUpperCase()}
+              </div>
+
+              <div className={cx("mb-2 text-center text-[11px] font-extrabold tracking-[0.32em]", isDayTheme ? "text-[#2f3032]/85" : "text-white/80")}>
+                {day.format.toUpperCase()}
+              </div>
+
+              <div className="grid grid-cols-[minmax(0,1fr)_44px_minmax(0,1fr)] items-start gap-3">
+                <TeamPlayers
+                  team="red"
+                  players={match.red}
+                  teamLogos={teamLogos}
+                  isAmbrose={isAmbrose}
+                  getTeeShotCount={getTeeShotCount}
+                  setCardPlayer={setCardPlayer}
+                  isDayTheme={isDayTheme}
+                />
+
+                <div className={cx("flex h-[70px] items-center justify-center text-2xl font-bold", isDayTheme ? "text-[#2f3032]/75" : "text-white/75")}>
+                  VS
+                </div>
+
+                <TeamPlayers
+                  team="blue"
+                  players={match.blue}
+                  teamLogos={teamLogos}
+                  isAmbrose={isAmbrose}
+                  getTeeShotCount={getTeeShotCount}
+                  setCardPlayer={setCardPlayer}
+                  isDayTheme={isDayTheme}
+                />
+              </div>
+
+              <div className="mt-1 text-center">
+                <div
+                  className={cx(
+                    "text-[22px] font-black tracking-[-0.04em] leading-none",
+                    isDayTheme
+                      ? result.leader === "red"
+                        ? "text-[#9f1720]"
+                        : result.leader === "blue"
+                        ? "text-[#1f4aa8]"
+                        : "text-[#2f3032]"
+                      : "text-white"
+                  )}
+                >
+                  <span
+                    style={{
+                      fontFamily: '"SF Pro Display", "Inter", "Helvetica Neue", sans-serif',
+                    }}
+                  >
+                    {displayMain}
+                  </span>
+                </div>
+
+                <div
+                  className={cx(
+                    "mt-0.5 text-[10px] tracking-[0.16em]",
+                    isDayTheme
+                      ? result.leader === "red"
+                        ? "text-[#9f1720]/80"
+                        : result.leader === "blue"
+                        ? "text-[#1f4aa8]/80"
+                        : "text-black/42"
+                      : "text-white/55"
+                  )}
+                >
+                  {displaySub}
+                </div>
+
+
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div
+          className={cx(
+            "relative mt-4 min-h-[430px] overflow-visible rounded-[26px] p-4 pb-14",
+            isDayTheme
+              ? "border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(246,246,244,0.90),rgba(232,232,229,0.84))] shadow-[0_24px_60px_rgba(18,18,18,0.18)] backdrop-blur-2xl"
+              : "border border-white/10 bg-black/45 backdrop-blur-xl"
+          )}
+        >
+          {/* GOLD LIGHT */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme
+                ? "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.18),transparent_42%)]"
+                : "bg-[radial-gradient(circle_at_50%_18%,rgba(209,199,159,0.10),transparent_42%)]"
+            )}
+          />
+
+          {/* MASSIVE DIAGONAL GLASS BANDS */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme ? "opacity-[0.52]" : "opacity-[0.16]"
+            )}
+            style={{
+              background: `
+                linear-gradient(
+                  112deg,
+                  transparent 0%,
+                  rgba(255,255,255,0.88) 10%,
+                  rgba(255,255,255,0.32) 16%,
+                  transparent 24%,
+
+                  transparent 34%,
+                  rgba(255,255,255,0.58) 42%,
+                  rgba(255,255,255,0.18) 48%,
+                  transparent 56%,
+
+                  transparent 66%,
+                  rgba(255,255,255,0.42) 74%,
+                  rgba(255,255,255,0.12) 79%,
+                  transparent 86%
+                )
+              `,
+              backgroundSize: "460px 460px",
+            }}
+          />
+
+          {/* GLASS SHADOW CUTS */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme ? "opacity-[0.28]" : "opacity-[0.10]"
+            )}
+            style={{
+              background: `
+                linear-gradient(
+                  112deg,
+                  transparent 0%,
+                  transparent 14%,
+                  rgba(0,0,0,0.08) 18%,
+                  transparent 24%,
+
+                  transparent 44%,
+                  rgba(0,0,0,0.06) 48%,
+                  transparent 54%,
+
+                  transparent 74%,
+                  rgba(0,0,0,0.05) 78%,
+                  transparent 84%
+                )
+              `,
+              backgroundSize: "460px 460px",
+            }}
+          />
+
+          {/* TOP REFLECTION */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-x-0 top-0 h-[140px] rounded-t-[26px]",
+              isDayTheme
+                ? "bg-gradient-to-b from-white/60 via-white/20 to-transparent"
+                : "bg-gradient-to-b from-white/[0.08] via-white/[0.03] to-transparent"
+            )}
+          />
+
+          {/* SIDE VIGNETTE */}
+          <div
+            className={cx(
+              "pointer-events-none absolute inset-0 rounded-[26px]",
+              isDayTheme
+                ? "bg-[radial-gradient(circle_at_0%_50%,rgba(0,0,0,0.06),transparent_28%),radial-gradient(circle_at_100%_50%,rgba(0,0,0,0.05),transparent_28%)]"
+                : "bg-[radial-gradient(circle_at_0%_50%,rgba(255,255,255,0.03),transparent_28%),radial-gradient(circle_at_100%_50%,rgba(255,255,255,0.03),transparent_28%)]"
+            )}
+          />
+
+          {selectedHole ? (
+            <div
+              className={cx(
+                "absolute left-0 right-0 bottom-0 z-30 flex flex-col overflow-hidden rounded-[26px] p-4 pb-[82px] shadow-2xl backdrop-blur-xl",
+                isDayTheme
+                  ? "border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(241,241,238,0.82))] shadow-[0_24px_60px_rgba(18,18,18,0.18)]"
+                  : "bg-[#05070c]/98",
+                isBetterBall ? "top-[-232px]" : "top-0"
+              )}
+            >
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0",
+                  isDayTheme ? "opacity-100" : "opacity-70"
+                )}
+                style={{
+                  background: isDayTheme
+                    ? "linear-gradient(135deg, rgba(255,255,255,0.35), rgba(244,244,242,0.18) 48%, rgba(255,255,255,0.20))"
+                    : "linear-gradient(90deg, rgba(64,6,12,0.96), rgba(12,15,22,0.985) 48%, rgba(4,13,27,0.985))",
+                }}
+              />
+
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0 rounded-[26px]",
+                  isDayTheme ? "opacity-[0.42]" : "opacity-[0.12]"
+                )}
+                style={{
+                  background: `
+                    linear-gradient(
+                      112deg,
+                      transparent 0%,
+                      rgba(255,255,255,0.72) 12%,
+                      transparent 24%,
+                      transparent 34%,
+                      rgba(255,255,255,0.42) 46%,
+                      transparent 58%,
+                      transparent 66%,
+                      rgba(255,255,255,0.28) 78%,
+                      transparent 90%
+                    )
+                  `,
+                  backgroundSize: "420px 420px",
+                }}
+              />
+
+              <div
+                className={cx(
+                  "pointer-events-none absolute inset-0 rounded-[26px]",
+                  isDayTheme ? "opacity-[0.22]" : "opacity-[0.08]"
+                )}
+                style={{
+                  background: `
+                    linear-gradient(
+                      112deg,
+                      transparent 0%,
+                      transparent 18%,
+                      rgba(0,0,0,0.08) 24%,
+                      transparent 32%,
+                      transparent 52%,
+                      rgba(0,0,0,0.06) 58%,
+                      transparent 66%,
+                      transparent 82%,
+                      rgba(0,0,0,0.05) 86%,
+                      transparent 100%
+                    )
+                  `,
+                  backgroundSize: "420px 420px",
+                }}
+              />
+
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.08]"
+                style={{
+                  backgroundImage: `
+                    radial-gradient(circle at 22px 22px, rgba(255,255,255,0.16) 0px, rgba(255,255,255,0.06) 11px, transparent 12px),
+                    radial-gradient(circle at 68px 68px, rgba(255,255,255,0.12) 0px, rgba(255,255,255,0.05) 11px, transparent 12px)
+                  `,
+                  backgroundSize: "90px 90px",
+                }}
+              />
+
+              <div
+                className={cx(
+                  "pointer-events-none absolute left-0 right-0 top-0 h-[132px] bg-gradient-to-b to-transparent",
+                  isDayTheme
+                    ? "from-white/70 via-white/35"
+                    : "from-[#05070c] via-[#05070c]/96"
+                )}
+              />
+
+              <img
+                src="/launch-logo.png"
+                alt="DUEL"
+                className="pointer-events-none absolute bottom-5 left-1/2 z-20 h-7 -translate-x-1/2 object-contain opacity-85"
+                style={{
+                  filter: isDayTheme
+                    ? "brightness(0)"
+                    : "brightness(0) invert(1)",
+                }}
+              />
+
+              <div className="relative z-10 mb-3 flex items-start justify-between gap-3">
+                <div>
+                  <div className={cx("text-[9px] tracking-[0.24em]", isDayTheme ? "text-black/48" : "text-white/50")}>
+                    SCORE HOLE
+                  </div>
+
+                  <div className={cx("mt-0.5 text-[20px] font-black tracking-[0.04em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
+                    Hole {selectedHole.hole} • Par {selectedHole.par} • SI{" "}
+                    {selectedHole.si}
+                  </div>
+                </div>
+
+                <button
+                  onClick={saveHole}
+                  className="rounded-full bg-[#d1c79f] px-5 py-2.5 text-[14px] font-black text-black"
+                >
+                  Save
+                </button>
+              </div>
+
+              {isBetterBall ? (
+                <div className="relative z-10 grid flex-1 grid-cols-2 gap-3 overflow-hidden pb-1">
+                  <div className="grid h-full grid-rows-2 gap-3">
+                    {scoringRedPlayers.map((p: any, i: number) => (
+                      <ScoreBox
+                        key={`red-${i}`}
+                        team="red"
+                        players={[p]}
+                        score={draft[`red_${i}`]}
+                        setScore={(v: number) =>
+                          setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
+                        }
+                        par={selectedHole.par}
+                        compact={scoringPlayerCount >= 4}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="grid h-full grid-rows-2 gap-3">
+                    {scoringBluePlayers.map((p: any, i: number) => (
+                      <ScoreBox
+                        key={`blue-${i}`}
+                        team="blue"
+                        players={[p]}
+                        score={draft[`blue_${i}`]}
+                        setScore={(v: number) =>
+                          setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
+                        }
+                        par={selectedHole.par}
+                        compact={scoringPlayerCount >= 4}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="relative z-10 grid flex-1 grid-cols-2 gap-0 overflow-hidden rounded-[28px] border border-white/10 bg-black/25 shadow-[0_24px_54px_rgba(0,0,0,0.5)]">
+                  <ScoreBox
+                    team="red"
+                    players={match.red}
+                    score={draft.red}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, red: v }))
+                    }
+                    par={selectedHole.par}
+                    splitSide="left"
+                  />
+
+                  <ScoreBox
+                    team="blue"
+                    players={match.blue}
+                    score={draft.blue}
+                    setScore={(v: number) =>
+                      setDraft((d: any) => ({ ...d, blue: v }))
+                    }
+                    par={selectedHole.par}
+                    splitSide="right"
+                  />
+                </div>
+              )}
+
+              {isAmbrose && (
+                <div className="relative z-10 mt-3 max-h-[128px] overflow-y-auto rounded-[18px] border border-white/10 bg-white/[0.04] p-3">
+                  <div className="mb-2 text-center text-[9px] font-bold tracking-[0.22em] text-white/45">
+                    TEE SHOT USED
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      {match.red.map((p: any) => {
+                        const selected =
+                          getSelectedTeePlayer(selectedHole.hole, "red") ===
+                          playerKey("red", p);
+
+                        return (
+                          <button
+                            key={`red-${p.name}`}
+                            onClick={() =>
+                              selectTeeShot(selectedHole.hole, "red", p)
+                            }
+                            className={cx(
+                              "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
+                              selected
+                                ? "border-red-300 bg-red-800 text-white shadow-[0_0_12px_rgba(255,109,109,0.45)]"
+                                : "border-red-400/25 bg-red-950/35 text-red-100"
+                            )}
+                          >
+                            {first(p.name)} • {getTeeShotCount("red", p)}/6
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="space-y-2">
+                      {match.blue.map((p: any) => {
+                        const selected =
+                          getSelectedTeePlayer(selectedHole.hole, "blue") ===
+                          playerKey("blue", p);
+
+                        return (
+                          <button
+                            key={`blue-${p.name}`}
+                            onClick={() =>
+                              selectTeeShot(selectedHole.hole, "blue", p)
+                            }
+                            className={cx(
+                              "w-full rounded-xl border px-2 py-2 text-[11px] font-semibold transition-all",
+                              selected
+                                ? "border-blue-300 bg-blue-800 text-white shadow-[0_0_12px_rgba(103,166,255,0.45)]"
+                                : "border-blue-400/25 bg-blue-950/35 text-blue-100"
+                            )}
+                          >
+                            {first(p.name)} • {getTeeShotCount("blue", p)}/6
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {isMatchFinished && showFinishActions && finishStep === "playing" ? (
+                <button
+                  type="button"
+                  onClick={() => setFinishStep("signoff")}
+                  className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 rounded-full bg-[#d1c79f] px-8 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-black shadow-[0_0_22px_rgba(209,199,159,0.28)]"
+                >
+                  Finish Game
+                </button>
+              ) : (
+                <img
+                  src="/launch-logo.png"
+                  alt="DUEL"
+                  className="pointer-events-none absolute bottom-6 left-1/2 h-7 -translate-x-1/2 object-contain opacity-85 transition-all duration-500"
+                  style={{
+                    filter: isDayTheme
+                      ? "brightness(0)"
+                      : "brightness(0) invert(1)",
+                  }}
+                />
+              )}
+
+              <div className="mb-4">
+                <div className={cx("text-[10px] tracking-[0.22em]", isDayTheme ? "text-black/48" : "text-white/60")}>
+                  HOLE TRACKER
+                </div>
+
+                <div className={cx("text-[14px] font-bold tracking-[0.16em]", isDayTheme ? "text-[#2f3032]" : "text-white")}>
+                  Hole {current.hole} • SI {current.si} • {current.metres}m
+                </div>
+              </div>
+
+              <div className="grid grid-cols-6 gap-2.5">
+                {holes.map((h: any) => (
+                  <Hole key={h.hole} h={h} />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {cardPlayer && (
+        <PlayerScorecard
+          cardPlayer={cardPlayer}
+          close={() => setCardPlayer(null)}
+          day={day}
+          teamLogos={teamLogos}
+          playerScorecardRows={playerScorecardRows}
+        />
+      )}
+
+      <BottomNav
+        activeTab={activeTab}
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+
+          if (tab === "live") {
+            setScreen("home");
+          }
+
+          if (tab === "team") {
+            setScreen("team");
+          }
+        }}
+        players={bottomNavPlayers}
+        showTeamTab={false}
+        onChangeHandicaps={handleChangeHandicaps}
+        currentFormat={day.format}
+        currentTee={day.tee}
+        onChangeGameType={(nextFormat: string) => {
+          setDayConfigs?.((current: any[]) =>
+            current.map((config: any, index: number) =>
+              index === activeDay ? { ...config, format: nextFormat } : config
+            )
+          );
+        }}
+        onChangeTee={(nextTee: string) => {
+          setDayConfigs?.((current: any[]) =>
+            current.map((config: any, index: number) =>
+              index === activeDay ? { ...config, tee: nextTee } : config
+            )
+          );
+        }}
+        onFinishGame={() => {
+          if (setMode) setMode("launch");
+          setScreen("home");
+        }}
+        onNewGame={() => {
+          if (setMode) setMode("launch");
+          setScreen("home");
+        }}
+      />
+
+    </>
+  );
+}
+
+
+function CompactStatRow({
+  label,
+  red,
+  blue,
+}: {
+  label: string;
+  red: number;
+  blue: number;
+}) {
+  return (
+    <div className="grid grid-cols-[70px_1fr_70px] items-center py-1.5">
+      <div className="text-left text-[27px] font-black leading-none text-[#d1c79f]">
+        {red}
+      </div>
+
+      <div className="text-center text-[10px] font-black uppercase tracking-[0.22em] text-white/82">
+        {label}
+      </div>
+
+      <div className="text-right text-[27px] font-black leading-none text-[#d1c79f]">
+        {blue}
+      </div>
+    </div>
+  );
+}
+
+function StatRow({
+  label,
+  red,
+  blue,
+}: {
+  label: string;
+  red: number;
+  blue: number;
+}) {
+  return (
+    <div className="grid grid-cols-[120px_1fr_120px] items-center py-1">
+      <div className="flex justify-center">
+        <div className="text-[20px] font-black leading-none text-[#d1c79f]">
+          {red}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center">
+        <div className="text-center text-[9px] font-black uppercase leading-[1.05] tracking-[0.2em] text-white">
+          {label}
+        </div>
+      </div>
+
+      <div className="flex justify-center">
+        <div className="text-[20px] font-black leading-none text-[#d1c79f]">
+          {blue}
         </div>
       </div>
     </div>
   );
 }
 
-function TeamSetupColumn({
-  tone,
-  teamName,
-  setTeamName,
+
+
+function TeamPlayers({
+  team,
   players,
-  count,
-  updatePlayer,
-  courseSlope,
-  playingHandicap,
+  teamLogos,
+  isAmbrose,
+  getTeeShotCount,
+  setCardPlayer,
+  isDayTheme = false,
 }: any) {
-  const isRed = tone === "red";
+  const fallbackLogo = teamLogos?.[team === "red" ? "Red" : "Blue"] || "";
+  const logoSize =
+    players.length > 1 ? "h-[50px] w-[50px]" : "h-[64px] w-[64px]";
+
+  return (
+    <div className="flex items-start justify-center gap-2 text-center">
+      {players.map((p: any, i: number) => (
+        <div key={`${p.name}-${i}`} className="flex w-[64px] flex-col items-center">
+          <button
+            onClick={() => setCardPlayer({ team, p })}
+            className="flex h-[64px] items-center justify-center"
+          >
+            {p.photo ? (
+              <div
+                className={cx(
+                  "relative overflow-hidden rounded-full border-[2px] border-white/90 bg-cover bg-center p-0 shadow-[0_6px_18px_rgba(0,0,0,0.22)]",
+                  logoSize
+                )}
+                style={{
+                  backgroundImage:
+                    team === "red"
+                      ? "url('/roster-red-bg.jpg')"
+                      : "url('/roster-blue-bg.jpg')",
+                }}
+              >
+                <div className="absolute inset-0 bg-black/42" />
+                <img
+                  src={p.photo}
+                  alt={p.name}
+                  className="relative z-10 h-full w-full rounded-full object-cover"
+                />
+              </div>
+            ) : (
+              <Logo team={team} size={logoSize} src={fallbackLogo} />
+            )}
+          </button>
+
+          <div className={cx("mt-1 w-full truncate text-[11px] leading-tight", isDayTheme ? "text-[#2f3032]" : "text-white")}>
+            {first(p.name)}
+          </div>
+
+          {isAmbrose && (
+            <div className="mt-1 flex justify-center gap-[2px]">
+              {Array.from({ length: 6 }, (_, dot) => (
+                <span
+                  key={dot}
+                  className={cx(
+                    "h-1.5 w-1.5 rounded-full border border-white/25",
+                    dot < getTeeShotCount(team, p)
+                      ? team === "red"
+                        ? "bg-[#ff6d6d]"
+                        : "bg-[#67a6ff]"
+                      : "bg-black/45"
+                  )}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+
+function ScoreBox({
+  team,
+  players,
+  score,
+  setScore,
+  par,
+  compact = false,
+  splitSide = "single",
+}: any) {
+  const namesText =
+    players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
+
+  const points = stableford(score, par, 0);
+  const isRed = team === "red";
+  const isSplit = splitSide !== "single";
+
+  const sideRadius =
+    splitSide === "left"
+      ? "rounded-l-[28px] rounded-r-none"
+      : splitSide === "right"
+      ? "rounded-r-[28px] rounded-l-none"
+      : compact
+      ? "rounded-[24px]"
+      : "rounded-[28px]";
 
   return (
     <div
       className={cx(
-        "rounded-[28px] border p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl",
+        "relative overflow-hidden border backdrop-blur-xl",
+        sideRadius,
+        isSplit
+          ? "h-full min-h-[270px] border-y-0 border-l-0 border-r-0 shadow-none"
+          : compact
+          ? "h-full min-h-0 shadow-[0_18px_45px_rgba(0,0,0,0.55)]"
+          : "min-h-[245px] shadow-[0_18px_45px_rgba(0,0,0,0.55)]",
         isRed
-          ? "border-[#7a2424]/65 bg-[#320611]"
-          : "border-[#33466c]/70 bg-[#0a142b]"
+          ? "border-[#ff4d5e]/35 bg-gradient-to-b from-[#741923] via-[#35080d] to-[#130204]"
+          : "border-[#58a6ff]/35 bg-gradient-to-b from-[#183a63] via-[#09192d] to-[#020913]"
       )}
     >
-      <div className="mb-3">
-        <input
-          value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
-          className="w-full border-0 bg-transparent p-0 text-[20px] font-black uppercase leading-none text-white outline-none placeholder:text-white/25"
-        />
+      {isSplit && splitSide === "left" ? (
+        <div className="absolute bottom-0 right-0 top-0 w-px bg-gradient-to-b from-[#ff4d5e]/45 via-white/10 to-[#58a6ff]/30" />
+      ) : null}
+
+      <div
+        className={cx(
+          "pointer-events-none absolute inset-0 opacity-65",
+          isRed
+            ? "bg-[radial-gradient(circle_at_28%_10%,rgba(255,93,103,0.28),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.38))]"
+            : "bg-[radial-gradient(circle_at_72%_10%,rgba(94,169,255,0.28),transparent_42%),linear-gradient(180deg,rgba(255,255,255,0.08),transparent_45%,rgba(0,0,0,0.38))]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "pointer-events-none absolute bottom-[-34px] h-[145%] w-[56%] rotate-[14deg] opacity-[0.08]",
+          isRed ? "right-[-42px] bg-white" : "left-[-42px] bg-[#9fc2ff]"
+        )}
+      />
+
+      <div
+        className={cx(
+          "relative z-10 flex h-full flex-col items-center justify-between",
+          isSplit ? "px-3 py-5" : compact ? "px-3 py-4" : "p-3"
+        )}
+      >
+        <div
+          className={cx(
+            "max-w-full truncate text-center font-black uppercase text-white drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]",
+            isSplit
+              ? "text-[18px] tracking-[0.14em]"
+              : compact
+              ? "text-[13px] tracking-[0.12em]"
+              : "text-[16px] tracking-[0.12em]"
+          )}
+        >
+          {isSplit ? TEAM[team].title : namesText}
+        </div>
 
         <div
           className={cx(
-            "mt-3 h-[2px] w-full rounded-full",
-            isRed ? "bg-[#781522]" : "bg-[#223a65]"
+            "font-black leading-none tracking-[-0.08em] text-white drop-shadow-[0_12px_24px_rgba(0,0,0,0.55)]",
+            isSplit ? "text-[92px]" : compact ? "text-[74px]" : "text-[98px]"
           )}
-        />
-      </div>
+        >
+          {score === par + 4 ? "P" : score}
+        </div>
 
-      <div className="space-y-2.5">
-        {players.slice(0, count).map((p: any, i: number) => (
-          <PlayerCard
-            key={i}
-            tone={tone}
-            player={p}
-            index={i}
-            playingHandicap={playingHandicap}
-            updatePlayer={updatePlayer}
-          />
-        ))}
-      </div>
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setScore(Math.max(0, score - 1))}
+            className={cx(
+              "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[42px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isRed
+                ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
+                : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
+            )}
+          >
+            −
+          </button>
 
-      <div className="mt-2 text-center text-[8px] font-black uppercase tracking-[0.16em] text-white/30">
-        Playing handicap calculated from slope {courseSlope || 113} and format allowance
-      </div>
-    </div>
-  );
-}
+          <button
+            type="button"
+            onClick={() => setScore(Math.min(par + 4, score + 1))}
+            className={cx(
+              "flex items-center justify-center rounded-full border bg-black/45 font-black text-white transition-all active:scale-95",
+              isSplit ? "h-[48px] w-[48px] text-[34px]" : compact ? "h-[42px] w-[58px] text-[30px]" : "h-[44px] w-[64px] text-[34px]",
+              isRed
+                ? "border-[#ff4d5e] shadow-[0_0_18px_rgba(255,77,94,0.24)] hover:bg-[#ff4d5e]/18"
+                : "border-[#58a6ff] shadow-[0_0_18px_rgba(88,166,255,0.24)] hover:bg-[#58a6ff]/18"
+            )}
+          >
+            +
+          </button>
+        </div>
 
-function Section({ title, children }: any) {
-  return (
-    <div className="mt-3 rounded-[22px] border border-white/10 bg-black/46 p-3 shadow-[0_18px_36px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="mb-2 text-[9px] font-black uppercase tracking-[0.24em] text-white/45">
-        {title}
+        <div
+          className={cx(
+            "rounded-full border px-4 py-1.5 text-center font-black uppercase tracking-[0.08em]",
+            isSplit ? "text-[12px]" : compact ? "text-[11px]" : "text-[16px]",
+            isRed
+              ? "border-[#ff4d5e]/35 bg-[#3d0b12]/80 text-[#ff5f68]"
+              : "border-[#58a6ff]/35 bg-[#0c203a]/80 text-[#69b3ff]"
+          )}
+        >
+          {points} {points === 1 ? "POINT" : "POINTS"}
+        </div>
       </div>
-
-      {children}
     </div>
   );
 }
