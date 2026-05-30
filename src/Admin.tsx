@@ -403,7 +403,7 @@ export default function Admin({
         setActiveTab={setAdminMode}
       />
 
-      <div className="flex-1 overflow-y-auto pb-28 pt-[116px]">
+      <div className="flex-1 overflow-y-auto pb-28 pt-[124px]">
         {adminMode === "day" && (
           <div>
             <StatusPanel eventStarted={eventStarted} />
