@@ -1898,7 +1898,14 @@ function ScoreBox({
   const namesText =
     players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
 
-  const points = standardStablefordPoints(score, par, 0);
+  const points = (() => {
+    const grossNumber = Number(score);
+    const parNumber = Number(par);
+
+    if (!Number.isFinite(grossNumber) || !Number.isFinite(parNumber)) return 0;
+
+    return Math.max(0, 2 + parNumber - grossNumber);
+  })();
   const isRed = team === "red";
   const isSplit = splitSide !== "single";
 
