@@ -4,14 +4,29 @@ import {
   Logo,
   Select,
   cx,
-  dayOptions,
   playerOptions,
-  rosterMeta,
   times,
   validFormats,
 } from "./data";
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getDefaultTee } from "./courses";
+
+type RoundStatus = "setup" | "locked" | "live" | "complete";
+type CoursePickerMode = "summary" | "saved" | "search";
+
+const STATUS_LABEL: Record<RoundStatus, string> = {
+  setup: "Setup Open",
+  locked: "Locked",
+  live: "Live",
+  complete: "Complete",
+};
+
+const STATUS_STYLE: Record<RoundStatus, string> = {
+  setup: "border-white/15 bg-black/35 text-white/65",
+  locked: "border-[#d1c79f]/45 bg-[#d1c79f]/15 text-[#efe6bf]",
+  live: "border-[#4ade80]/45 bg-[#4ade80] text-black",
+  complete: "border-[#60a5fa]/45 bg-[#60a5fa]/18 text-[#bfdbfe]",
+};
 
 export default function Admin({
   setScreen,
@@ -40,8 +55,48 @@ export default function Admin({
   savedPlayers,
   setSavedPlayers,
 }: any) {
-  const [adminMode, setAdminMode] = useState("event");
-  const [editingTeam, setEditingTeam] = useState("Red");
+  const [adminMode, setAdminMode] = useState<"day" | "teams" | "players" | "pairings">("day");
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [editingTeam, setEditingTeam] = useState<"Red" | "Blue">("Red");
+
+  const [roundStatuses, setRoundStatuses] = useState<Record<number, RoundStatus>>(() => {
+    try {
+      const stored = localStorage.getItem("duel_round_statuses");
+      if (stored) return JSON.parse(stored);
+    } catch {
+      // ignore
+    }
+
+    return {
+      0: dayLocks?.[0] ? "locked" : "setup",
+      1: dayLocks?.[1] ? "locked" : "setup",
+      2: dayLocks?.[2] ? "locked" : "setup",
+      3: dayLocks?.[3] ? "locked" : "setup",
+    };
+  });
+
+  const [captains, setCaptains] = useState<Record<number, { red?: string; blue?: string }>>(() => {
+    try {
+      const stored = localStorage.getItem("duel_round_captains");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [groupScorers, setGroupScorers] = useState<Record<number, Record<number, string>>>(() => {
+    try {
+      const stored = localStorage.getItem("duel_group_scorers");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  const [coursePickerMode, setCoursePickerMode] = useState<Record<number, CoursePickerMode>>({});
+  const [courseSearch, setCourseSearch] = useState<Record<number, string>>({});
+  const [courseSearchResults, setCourseSearchResults] = useState<Record<number, any[]>>({});
+  const [courseSearchStatus, setCourseSearchStatus] = useState<Record<number, string>>({});
 
   const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
     try {
@@ -52,32 +107,142 @@ export default function Admin({
     }
   });
 
-  const [coursePickerMode, setCoursePickerMode] = useState<
-    Record<number, "summary" | "saved" | "search">
-  >({});
-
-  const [courseSearch, setCourseSearch] = useState<Record<number, string>>({});
-  const [courseSearchResults, setCourseSearchResults] = useState<
-    Record<number, any[]>
-  >({});
-  const [courseSearchStatus, setCourseSearchStatus] = useState<
-    Record<number, string>
-  >({});
-
   const savedCourses = useMemo(
     () => [...COURSES, ...savedApiCourses],
     [savedApiCourses]
   );
 
-  function getCourseTeesForAdmin(courseId: string) {
-    const course = COURSES.find((c) => c.id === courseId);
+  const visibleDays = dayConfigs.slice(0, days);
+  const day = visibleDays[selectedDay] || dayConfigs[0];
+  const roundStatus: RoundStatus = roundStatuses[selectedDay] || "setup";
+  const dayEditable = roundStatus === "setup";
 
-    return course?.tees?.map((tee: any) => tee.id) || [
-      "Blue",
-      "White",
-      "Gold",
-      "Red",
-    ];
+  const redPlayers = (roster?.Red || roster?.red || []).slice(0, players);
+  const bluePlayers = (roster?.Blue || roster?.blue || []).slice(0, players);
+  const allPlayers = [
+    ...redPlayers.map((p: any) => ({ ...p, team: "red" })),
+    ...bluePlayers.map((p: any) => ({ ...p, team: "blue" })),
+  ];
+
+  function persistRoundStatuses(next: Record<number, RoundStatus>) {
+    setRoundStatuses(next);
+    localStorage.setItem("duel_round_statuses", JSON.stringify(next));
+  }
+
+  function updateRoundStatus(dayIndex: number, status: RoundStatus) {
+    const next = {
+      ...roundStatuses,
+      [dayIndex]: status,
+    };
+
+    persistRoundStatuses(next);
+
+    setDayLocks?.((current: any) => ({
+      ...(current || {}),
+      [dayIndex]: status !== "setup",
+    }));
+
+    if (status === "live") {
+      setEventStarted?.(true);
+      setEventLocked?.(false);
+    }
+  }
+
+  function setDay(dayIndex: number, key: string, value: any) {
+    setDayConfigs((configs: any[]) =>
+      configs.map((config, index) =>
+        index === dayIndex
+          ? {
+              ...config,
+              [key]: value,
+            }
+          : config
+      )
+    );
+  }
+
+  function updateEventDetails(key: string, value: any) {
+    setEventDetails?.((current: any) => ({
+      ...(current || {}),
+      [key]: value,
+    }));
+  }
+
+  function updatePlayer(team: "Red" | "Blue", index: number, key: string, value: any) {
+    setRoster((current: any) => {
+      const next = {
+        ...current,
+        Red: [...(current?.Red || [])],
+        Blue: [...(current?.Blue || [])],
+      };
+
+      next[team][index] = {
+        ...next[team][index],
+        [key]: value,
+      };
+
+      return next;
+    });
+  }
+
+  function updateTeamName(team: "Red" | "Blue", value: string) {
+    setTeamNames((current: any) => ({
+      ...(current || {}),
+      [team]: value,
+    }));
+  }
+
+  function readImageFile(file: File | undefined, done: (value: string) => void) {
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => done(String(reader.result || ""));
+    reader.readAsDataURL(file);
+  }
+
+  function courseLabel(course: any) {
+    return course?.name || course?.shortName || course?.course_name || "Unknown Course";
+  }
+
+  function courseLocation(course: any) {
+    return (
+      [course?.region, course?.state, course?.province, course?.country]
+        .filter(Boolean)
+        .join(" • ") || (course?.source === "GolfCourseAPI" ? "Saved from GolfCourseAPI" : "Saved Course")
+    );
+  }
+
+  function currentCourseFor(dayConfig: any) {
+    return (
+      savedCourses.find(
+        (course: any) =>
+          dayConfig?.courseId === course.id ||
+          dayConfig?.course === course.shortName ||
+          dayConfig?.course === course.name
+      ) || null
+    );
+  }
+
+  function getCourseTees(courseId: string) {
+    const course = savedCourses.find((c: any) => c.id === courseId);
+    return course?.tees?.map((tee: any) => tee.id) || ["Blue", "White", "Gold", "Red"];
+  }
+
+  function selectSavedCourseForDay(dayIndex: number, course: any) {
+    const tee = getDefaultTee?.(course.id) || course?.tees?.[0]?.id || "Blue";
+
+    setDayConfigs((configs: any[]) =>
+      configs.map((config, index) =>
+        index === dayIndex
+          ? {
+              ...config,
+              courseId: course.id,
+              course: course.shortName || course.name,
+              tee,
+            }
+          : config
+      )
+    );
   }
 
   function getApiCourseName(course: any) {
@@ -130,8 +295,6 @@ export default function Admin({
         ? result
         : [];
 
-      console.log("Weekend GolfCourseAPI search result:", result);
-
       setCourseSearchResults((current) => ({
         ...current,
         [dayIndex]: courses,
@@ -148,704 +311,440 @@ export default function Admin({
 
       setCourseSearchStatus((current) => ({
         ...current,
-        [dayIndex]: "Search failed — check console",
+        [dayIndex]: "Search failed",
       }));
     }
   }
 
-  function importApiCourse(apiCourse: any, dayIndex: number) {
-    const apiId = getApiCourseId(apiCourse);
+  function importApiCourse(course: any, dayIndex: number) {
+    const id = getApiCourseId(course);
+    const name = getApiCourseName(course);
 
-    const importedCourse = {
-      id: `api-${apiId}`,
-      name: getApiCourseName(apiCourse),
-      shortName: getApiCourseName(apiCourse),
-      region: getApiCourseLocation(apiCourse),
-      country: apiCourse?.country || "",
+    const imported = {
+      id,
+      name,
+      shortName: name,
+      region: getApiCourseLocation(course),
+      country: "",
       source: "GolfCourseAPI",
-      raw: apiCourse,
+      raw: course,
+      tees: [
+        { id: "Blue" },
+        { id: "White" },
+        { id: "Gold" },
+        { id: "Red" },
+      ],
     };
 
-    setSavedApiCourses((current: any[]) => {
-      const withoutDuplicate = current.filter(
-        (course) => course.id !== importedCourse.id
-      );
-
-      const next = [...withoutDuplicate, importedCourse];
-
+    setSavedApiCourses((current) => {
+      const exists = current.some((c: any) => c.id === id);
+      const next = exists ? current : [...current, imported];
       localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
-
       return next;
     });
 
-    setDay(dayIndex, "courseId", importedCourse.id);
-    setDay(dayIndex, "course", importedCourse.shortName);
-    setDay(dayIndex, "tee", getDefaultTee("st-michaels"));
-
-    setCoursePickerMode((current) => ({
-      ...current,
-      [dayIndex]: "saved",
-    }));
-
-    setCourseSearchStatus((current) => ({
-      ...current,
-      [dayIndex]: `Saved ${importedCourse.name}`,
-    }));
+    selectSavedCourseForDay(dayIndex, imported);
   }
 
-  function selectSavedCourseForDay(dayIndex: number, course: any) {
-    setDay(dayIndex, "courseId", course.id);
-    setDay(dayIndex, "course", course.shortName || course.name);
-
-    if (COURSES.some((c) => c.id === course.id)) {
-      setDay(dayIndex, "tee", getDefaultTee(course.id));
-    } else {
-      setDay(dayIndex, "tee", getDefaultTee("st-michaels"));
-    }
-  }
-
-  function removeSavedApiCourse(courseIdToRemove: string) {
-    setSavedApiCourses((current: any[]) => {
-      const next = current.filter((course) => course.id !== courseIdToRemove);
-
+  function removeSavedApiCourse(courseId: string) {
+    setSavedApiCourses((current) => {
+      const next = current.filter((course: any) => course.id !== courseId);
       localStorage.setItem("duel_saved_api_courses", JSON.stringify(next));
-
       return next;
     });
   }
 
-  const readImageFile = (
-    file: File | undefined,
-    callback: (value: string) => void
-  ) => {
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      callback(String(reader.result || ""));
+  function updateCaptain(dayIndex: number, team: "red" | "blue", value: string) {
+    const next = {
+      ...captains,
+      [dayIndex]: {
+        ...(captains[dayIndex] || {}),
+        [team]: value,
+      },
     };
 
-    reader.readAsDataURL(file);
-  };
+    setCaptains(next);
+    localStorage.setItem("duel_round_captains", JSON.stringify(next));
+  }
 
-  const setDay = (i: number, field: string, value: any) => {
-    if (eventLocked || dayLocks[i]) return;
+  function updateScorer(dayIndex: number, matchIndex: number, value: string) {
+    const next = {
+      ...groupScorers,
+      [dayIndex]: {
+        ...(groupScorers[dayIndex] || {}),
+        [matchIndex]: value,
+      },
+    };
 
-    setDayConfigs((ds: any[]) =>
-      ds.map((d, idx) =>
-        idx === i
-          ? {
-              ...d,
-              [field]: value,
-            }
-          : d
-      )
-    );
-  };
+    setGroupScorers(next);
+    localStorage.setItem("duel_group_scorers", JSON.stringify(next));
+  }
 
-  const changePlayers = (count: number) => {
-    if (eventLocked) return;
+  function matchCountForDay(format: string) {
+    if (/stableford/i.test(format || "")) return 1;
+    if (/singles/i.test(format || "")) return players;
+    return Math.max(1, Math.ceil(players / 2));
+  }
 
-    setPlayers(count);
+  function playerNameOptions(team?: "red" | "blue") {
+    const source =
+      team === "red" ? redPlayers : team === "blue" ? bluePlayers : allPlayers;
 
-    setDayConfigs((ds: any[]) =>
-      ds.map((d) =>
-        validFormats(count).includes(d.format)
-          ? d
-          : {
-              ...d,
-              format: validFormats(count)[0],
-            }
-      )
-    );
-  };
-
-  const changeDays = (count: number) => {
-    if (eventLocked) return;
-    setDays(count);
-  };
-
-  const updatePlayer = (
-    team: string,
-    index: number,
-    field: string,
-    value: any
-  ) => {
-    setRoster((current: any) => ({
-      ...current,
-      [team]: rosterMeta(
-        current[team].map((p: any, i: number) =>
-          i === index
-            ? {
-                ...p,
-                [field]: value,
-              }
-            : p
-        )
-      ),
-    }));
-  };
-
-  const startEvent = () => {
-    if (!eventLocked) {
-      setEventLocked(true);
-    }
-
-    setEventStarted(true);
-    setScreen("home");
-  };
-
-  const shownPlayers = roster[editingTeam].slice(0, players);
+    return source
+      .map((p: any) => p?.name)
+      .filter(Boolean);
+  }
 
   return (
-    <>
-      {/* HEADER */}
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex gap-2 overflow-x-auto">
-          <Button
-            active={adminMode === "event"}
-            onClick={() => setAdminMode("event")}
-            className="px-3 py-2 text-xs"
-          >
-            Event
-          </Button>
+    <div className="relative flex h-full flex-col overflow-hidden text-white">
+      <div className="flex gap-2 overflow-x-auto pb-3">
+        <TopPill active={adminMode === "day"} onClick={() => setAdminMode("day")}>
+          Days
+        </TopPill>
 
-          <Button
-            active={adminMode === "teams"}
-            onClick={() => setAdminMode("teams")}
-            className="px-3 py-2 text-xs"
-          >
-            Teams
-          </Button>
+        <TopPill active={adminMode === "teams"} onClick={() => setAdminMode("teams")}>
+          Teams
+        </TopPill>
 
-          <Button
-            active={adminMode === "players"}
-            onClick={() => setAdminMode("players")}
-            className="px-3 py-2 text-xs"
-          >
-            Players
-          </Button>
+        <TopPill active={adminMode === "players"} onClick={() => setAdminMode("players")}>
+          Players
+        </TopPill>
 
-          <Button
-            active={adminMode === "pairings"}
-            onClick={() => setAdminMode("pairings")}
-            className="px-3 py-2 text-xs"
-          >
-            Pairings
-          </Button>
-        </div>
+        <TopPill active={adminMode === "pairings"} onClick={() => setAdminMode("pairings")}>
+          Pairings
+        </TopPill>
 
-        <button
-          onClick={() => {
-            if (eventStarted) {
-              setScreen("home");
-            }
-          }}
-          className="rounded-full border border-white/15 bg-black/40 px-4 py-2 text-xs font-semibold"
-        >
+        <TopPill active={false} onClick={() => setScreen("home")}>
           Home
-        </button>
+        </TopPill>
       </div>
 
-      {/* STATUS */}
-      <StatusPanel
-        eventLocked={eventLocked}
-        eventStarted={eventStarted}
-      />
+      <div className="flex-1 overflow-y-auto pb-28">
+        {adminMode === "day" && (
+          <div>
+            <StatusPanel eventStarted={eventStarted} />
 
-      {/* EVENT */}
-      {adminMode === "event" && (
-        <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          {/* EVENT DETAILS */}
-          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4 backdrop-blur-xl">
-            <div className="mb-3 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
-              EVENT DETAILS
-            </div>
-
-            <div className="space-y-3">
-              <InputGroup
-                label="EVENT NAME"
-                value={eventDetails.name}
-                disabled={eventLocked}
-                onChange={(v: string) =>
-                  setEventDetails((e: any) => ({
-                    ...e,
-                    name: v,
-                  }))
-                }
-              />
-
-              <InputGroup
-                label="LOCATION"
-                value={eventDetails.location}
-                disabled={eventLocked}
-                onChange={(v: string) =>
-                  setEventDetails((e: any) => ({
-                    ...e,
-                    location: v,
-                  }))
-                }
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <InputGroup
-                  label="START DATE"
-                  type="date"
-                  value={eventDetails.startDate}
-                  disabled={eventLocked}
-                  onChange={(v: string) =>
-                    setEventDetails((e: any) => ({
-                      ...e,
-                      startDate: v,
-                    }))
-                  }
-                />
-
-                <InputGroup
-                  label="END DATE"
-                  type="date"
-                  value={eventDetails.endDate}
-                  disabled={eventLocked}
-                  onChange={(v: string) =>
-                    setEventDetails((e: any) => ({
-                      ...e,
-                      endDate: v,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* CONFIG */}
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <AdminPicker
-              title="PLAYERS / TEAM"
-              options={playerOptions}
-              value={players}
-              setValue={changePlayers}
-              locked={eventLocked}
-            />
-
-            <AdminPicker
-              title="COMP DAYS"
-              options={dayOptions}
-              value={days}
-              setValue={changeDays}
-              locked={eventLocked}
-            />
-          </div>
-
-          {/* DAYS */}
-          <div className="mt-3 space-y-3">
-            {dayConfigs.slice(0, days).map((day: any, i: number) => {
-              const locked = Boolean(eventLocked || dayLocks[i]);
-
-              return (
-                <div
-                  key={day.label}
-                  className={cx(
-                    "rounded-[22px] border p-3 backdrop-blur-xl",
-                    locked
-                      ? "border-[#d1c79f]/35 bg-black/55"
-                      : "border-white/15 bg-black/40"
-                  )}
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-semibold tracking-[0.18em] text-white/80">
-                        {day.label.toUpperCase()}
-                      </div>
-
-                      <div className="mt-1 text-[10px] text-white/45">
-                        {locked ? "EVENT LOCKED" : "SETUP OPEN"}
-                      </div>
-                    </div>
-
-                    <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1.5 text-[10px] font-bold tracking-[0.14em] text-[#d1c79f]">
-                      {day.format}
-                    </div>
-                  </div>
-
-                  <div className={cx(locked && "pointer-events-none opacity-45")}>
-                    <div className="mb-3 flex items-center gap-2">
-                      <div className="text-[9px] text-white/50">
-                        1ST TEE TIME
-                      </div>
-
-                      <Select
-                        value={day.teeTime}
-                        onChange={(v: any) => setDay(i, "teeTime", v)}
-                        options={times}
-                        darkMode
-                      />
-                    </div>
-
-                    <WeekendCoursePicker
-                      dayIndex={i}
-                      day={day}
-                      courseMode={coursePickerMode[i] || "summary"}
-                      setCourseMode={(mode: "summary" | "saved" | "search") =>
-                        setCoursePickerMode((current) => ({
-                          ...current,
-                          [i]: mode,
-                        }))
-                      }
-                      savedCourses={savedCourses}
-                      selectSavedCourse={(course: any) =>
-                        selectSavedCourseForDay(i, course)
-                      }
-                      removeSavedApiCourse={removeSavedApiCourse}
-                      courseSearch={courseSearch[i] || ""}
-                      setCourseSearch={(value: string) =>
-                        setCourseSearch((current) => ({
-                          ...current,
-                          [i]: value,
-                        }))
-                      }
-                      handleCourseSearch={() => handleCourseSearch(i)}
-                      courseSearchStatus={courseSearchStatus[i] || ""}
-                      courseSearchResults={courseSearchResults[i] || []}
-                      importApiCourse={(course: any) => importApiCourse(course, i)}
-                      getApiCourseName={getApiCourseName}
-                      getApiCourseLocation={getApiCourseLocation}
-                      getApiCourseId={getApiCourseId}
-                    />
-
-                    <div className="mt-3">
-                      <Label>TEE</Label>
-
-                      <Select
-                        value={day.tee}
-                        onChange={(v: any) => setDay(i, "tee", v)}
-                        options={getCourseTeesForAdmin(day.courseId || "st-michaels")}
-                      />
-                    </div>
-
-                    <div className="mt-3">
-                      <Label>GAME FORMAT</Label>
-
-                      <Select
-                        value={day.format}
-                        onChange={(v: any) => setDay(i, "format", v)}
-                        options={validFormats(players)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* LOCK PANEL */}
-          <LockPanel
-            eventLocked={eventLocked}
-            setEventLocked={setEventLocked}
-            eventStarted={eventStarted}
-            startEvent={startEvent}
-          />
-        </div>
-      )}
-
-      {/* TEAMS */}
-      {adminMode === "teams" && (
-        <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          <div className="mb-4 rounded-[20px] border border-[#d1c79f]/25 bg-black/40 p-3">
-            <div className="mb-2 text-[10px] tracking-[0.18em] text-white/50">
-              TEAM SETUP
-            </div>
-
-            <div className="flex items-center gap-3">
-              <label className="cursor-pointer">
-                <Logo
-                  team={editingTeam === "Red" ? "red" : "blue"}
-                  size="h-16 w-16"
-                  src={teamLogos[editingTeam]}
-                />
-
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) =>
-                    readImageFile(e.target.files?.[0], (value) =>
-                      setTeamLogos((t: any) => ({
-                        ...t,
-                        [editingTeam]: value,
-                      }))
-                    )
-                  }
-                />
-              </label>
-
-              <div className="min-w-0 flex-1">
-                <div className="text-[10px] tracking-[0.18em] text-white/45">
-                  TEAM NAME
-                </div>
-
-                <input
-                  className="mt-1 w-full bg-transparent text-[18px] font-semibold text-white outline-none"
-                  value={teamNames[editingTeam]}
-                  onChange={(e) =>
-                    setTeamNames((names: any) => ({
-                      ...names,
-                      [editingTeam]: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <Button
-              active={editingTeam === "Red"}
-              onClick={() => setEditingTeam("Red")}
-            >
-              {teamNames.Red || "Team Red"}
-            </Button>
-
-            <Button
-              active={editingTeam === "Blue"}
-              onClick={() => setEditingTeam("Blue")}
-            >
-              {teamNames.Blue || "Team Blue"}
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            {shownPlayers.map((p: any, i: number) => {
-              const teamKey = editingTeam === "Red" ? "red" : "blue";
-
-              return (
-                <div
-                  key={`${editingTeam}-${i}`}
-                  className="rounded-[22px] border border-white/15 bg-black/40 p-3 backdrop-blur-xl"
-                >
-                  <div className="mb-3 flex items-center gap-3">
-                    <label className="relative cursor-pointer">
-                      <Logo
-                        team={teamKey}
-                        size="h-14 w-14"
-                        src={p.photo || teamLogos[editingTeam]}
-                      />
-
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          readImageFile(e.target.files?.[0], (value) =>
-                            updatePlayer(editingTeam, i, "photo", value)
-                          )
-                        }
-                      />
-                    </label>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="text-[10px] tracking-[0.18em] text-white/45">
-                        {p.slot}
-                      </div>
-
-                      <div className="mt-1 flex items-center gap-2">
-                        <input
-                          className="flex-1 bg-transparent text-[16px] font-semibold text-white outline-none"
-                          value={p.name}
-                          onChange={(e) =>
-                            updatePlayer(editingTeam, i, "name", e.target.value)
-                          }
-                        />
-
-                        <input
-                          className="w-[60px] rounded-lg border border-[#d1c79f]/25 bg-black/45 px-2 py-1 text-center text-sm text-white outline-none"
-                          value={p.handicap}
-                          onChange={(e) =>
-                            updatePlayer(
-                              editingTeam,
-                              i,
-                              "handicap",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* PLAYER DATABASE */}
-      {adminMode === "players" && (
-        <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          <div className="rounded-[22px] border border-[#d1c79f]/20 bg-black/45 p-4">
-            <div className="mb-2 text-[10px] font-bold tracking-[0.22em] text-[#d1c79f]">
-              SAVED PLAYERS
-            </div>
-
-            <div className="text-[11px] leading-5 text-white/50">
-              Store regular players for future weekends and quick setup.
-            </div>
-          </div>
-
-          <div className="mt-3 space-y-3">
-            {savedPlayers.map((p: any) => (
-              <div
-                key={p.id}
-                className="rounded-[22px] border border-white/15 bg-black/40 p-3"
-              >
-                <div className="flex items-center gap-3">
-                  <Logo
-                    team="blue"
-                    size="h-14 w-14"
-                    src={p.photo}
-                  />
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-[15px] font-semibold text-white">
-                          {p.name}
-                        </div>
-
-                        <div className="mt-1 text-[11px] text-white/45">
-                          {p.homeClub || "No Home Club"}
-                        </div>
-                      </div>
-
-                      <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-xs font-bold text-[#d1c79f]">
-                        {p.handicap}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 flex items-center gap-2">
-                      <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] text-white/55">
-                        {p.preferredTee}
-                      </div>
-
-                      {p.regular && (
-                        <div className="rounded-full border border-[#d1c79f]/20 bg-[#d1c79f]/10 px-3 py-1 text-[10px] font-bold text-[#d1c79f]">
-                          REGULAR PLAYER
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={() =>
-                setSavedPlayers((players: any[]) => [
-                  ...players,
-                  {
-                    id: String(Date.now()),
-                    name: "New Player",
-                    nickname: "",
-                    handicap: "0.0",
-                    homeClub: "",
-                    preferredTee: "Blue",
-                    photo: "",
-                    regular: false,
-                  },
-                ])
-              }
-              className="w-full rounded-[20px] border border-dashed border-[#d1c79f]/25 bg-black/35 py-4 text-sm font-semibold text-[#d1c79f]"
-            >
-              + Add Saved Player
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* PAIRINGS */}
-      {adminMode === "pairings" && (
-        <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          {!eventLocked ? (
-            <div className="rounded-[24px] border border-[#d1c79f]/25 bg-black/45 p-5 text-center">
-              <div className="text-[11px] font-bold tracking-[0.26em] text-[#d1c79f]">
-                EVENT NOT LOCKED
-              </div>
-
-              <div className="mt-3 text-sm leading-6 text-white/65">
-                Lock the weekend setup before setting pairings.
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {dayConfigs.slice(0, days).map((day: any, i: number) => {
-                const locked = Boolean(pairingLocks[i]);
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-2">
+              {visibleDays.map((_: any, index: number) => {
+                const active = selectedDay === index;
+                const status = (roundStatuses[index] || "setup") as RoundStatus;
 
                 return (
-                  <div
-                    key={day.label}
-                    className="rounded-[24px] border border-[#d1c79f]/20 bg-black/40 p-4"
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedDay(index)}
+                    className={cx(
+                      "shrink-0 rounded-full border px-5 py-3 text-[11px] font-black uppercase tracking-[0.16em]",
+                      active
+                        ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+                        : "border-white/10 bg-black/35 text-white/70"
+                    )}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <div className="text-[13px] font-black tracking-[0.18em] text-white">
-                          {day.label.toUpperCase()}
-                        </div>
-
-                        <div className="mt-1 text-[11px] text-white/45">
-                          {day.format} • {day.teeTime}
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setPairingLocks((locks: any) => ({
-                            ...locks,
-                            [i]: !locks[i],
-                          }))
-                        }
-                        className={cx(
-                          "rounded-full border px-3 py-2 text-[10px] font-bold",
-                          locked
-                            ? "border-[#d1c79f]/45 bg-[#d1c79f]/20 text-[#efe6bf]"
-                            : "border-white/15 bg-black/35 text-white/70"
-                        )}
-                      >
-                        {locked ? "LOCKED" : "OPEN"}
-                      </button>
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-2 gap-2">
-                      <button
-                        onClick={() => setScreen("rosterP")}
-                        disabled={locked}
-                        className="rounded-[18px] border border-red-300/25 bg-red-950/35 px-3 py-3 text-xs font-bold text-red-100 disabled:opacity-35"
-                      >
-                        Edit Red Order
-                      </button>
-
-                      <button
-                        onClick={() => setScreen("rosterB")}
-                        disabled={locked}
-                        className="rounded-[18px] border border-blue-300/25 bg-blue-950/35 px-3 py-3 text-xs font-bold text-blue-100 disabled:opacity-35"
-                      >
-                        Edit Blue Order
-                      </button>
-                    </div>
-                  </div>
+                    Day {index + 1}
+                    <span className="ml-2 opacity-60">{STATUS_LABEL[status]}</span>
+                  </button>
                 );
               })}
             </div>
-          )}
-        </div>
+
+            <div className="mt-3 rounded-[26px] border border-white/12 bg-black/45 p-4 backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[22px] font-black uppercase tracking-[0.16em]">
+                    Day {selectedDay + 1}
+                  </div>
+
+                  <div className="mt-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/45">
+                    {dayEditable ? "Edit day setup" : "Day locked"}
+                  </div>
+                </div>
+
+                <div
+                  className={cx(
+                    "rounded-full border px-4 py-2 text-[10px] font-black uppercase tracking-[0.14em]",
+                    STATUS_STYLE[roundStatus]
+                  )}
+                >
+                  {STATUS_LABEL[roundStatus]}
+                </div>
+              </div>
+
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {roundStatus === "setup" && (
+                  <ControlButton tone="gold" onClick={() => updateRoundStatus(selectedDay, "locked")}>
+                    Lock Day
+                  </ControlButton>
+                )}
+
+                {roundStatus === "locked" && (
+                  <>
+                    <ControlButton tone="dark" onClick={() => updateRoundStatus(selectedDay, "setup")}>
+                      Edit Day
+                    </ControlButton>
+
+                    <ControlButton tone="green" onClick={() => updateRoundStatus(selectedDay, "live")}>
+                      Start Duel
+                    </ControlButton>
+                  </>
+                )}
+
+                {roundStatus === "live" && (
+                  <ControlButton tone="red" onClick={() => updateRoundStatus(selectedDay, "complete")}>
+                    End Duel
+                  </ControlButton>
+                )}
+
+                {roundStatus === "complete" && (
+                  <>
+                    <ControlButton tone="dark" onClick={() => updateRoundStatus(selectedDay, "setup")}>
+                      Reopen Day
+                    </ControlButton>
+
+                    <ControlButton tone="gold" onClick={() => setScreen("home")}>
+                      View Results
+                    </ControlButton>
+                  </>
+                )}
+              </div>
+
+              <div className={cx("mt-5 space-y-4", !dayEditable && "pointer-events-none opacity-45")}>
+                <InputGroup
+                  label="1st Tee Time"
+                  value={day?.teeTime || "8:00"}
+                  onChange={(value: string) => setDay(selectedDay, "teeTime", value)}
+                  type="select"
+                  options={times}
+                />
+
+                <WeekendCoursePicker
+                  dayIndex={selectedDay}
+                  day={day}
+                  courseMode={coursePickerMode[selectedDay] || "summary"}
+                  setCourseMode={(mode: CoursePickerMode) =>
+                    setCoursePickerMode((current) => ({
+                      ...current,
+                      [selectedDay]: mode,
+                    }))
+                  }
+                  savedCourses={savedCourses}
+                  selectSavedCourse={(course: any) => selectSavedCourseForDay(selectedDay, course)}
+                  removeSavedApiCourse={removeSavedApiCourse}
+                  courseSearch={courseSearch[selectedDay] || ""}
+                  setCourseSearch={(value: string) =>
+                    setCourseSearch((current) => ({
+                      ...current,
+                      [selectedDay]: value,
+                    }))
+                  }
+                  handleCourseSearch={() => handleCourseSearch(selectedDay)}
+                  courseSearchStatus={courseSearchStatus[selectedDay] || ""}
+                  courseSearchResults={courseSearchResults[selectedDay] || []}
+                  importApiCourse={(course: any) => importApiCourse(course, selectedDay)}
+                  getApiCourseName={getApiCourseName}
+                  getApiCourseLocation={getApiCourseLocation}
+                  getApiCourseId={getApiCourseId}
+                  currentCourse={currentCourseFor(day)}
+                  courseLabel={courseLabel}
+                  courseLocation={courseLocation}
+                />
+
+                <InputGroup
+                  label="Tee"
+                  value={day?.tee || "Blue"}
+                  onChange={(value: string) => setDay(selectedDay, "tee", value)}
+                  type="select"
+                  options={getCourseTees(day?.courseId || "st-michaels")}
+                />
+
+                <InputGroup
+                  label="Format"
+                  value={day?.format || "Singles Match Play"}
+                  onChange={(value: string) => setDay(selectedDay, "format", value)}
+                  type="select"
+                  options={validFormats(players)}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <InputGroup
+                    label={`${teamNames?.Red || "Red"} Captain`}
+                    value={captains[selectedDay]?.red || ""}
+                    onChange={(value: string) => updateCaptain(selectedDay, "red", value)}
+                    type="select"
+                    options={["", ...playerNameOptions("red")]}
+                  />
+
+                  <InputGroup
+                    label={`${teamNames?.Blue || "Blue"} Captain`}
+                    value={captains[selectedDay]?.blue || ""}
+                    onChange={(value: string) => updateCaptain(selectedDay, "blue", value)}
+                    type="select"
+                    options={["", ...playerNameOptions("blue")]}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <PairingsAndScorers
+              day={day}
+              selectedDay={selectedDay}
+              players={players}
+              roster={roster}
+              teamNames={teamNames}
+              scorers={groupScorers[selectedDay] || {}}
+              updateScorer={updateScorer}
+              playerOptions={["", ...playerNameOptions()]}
+              matchCount={matchCountForDay(day?.format || "")}
+              editable={dayEditable}
+            />
+
+            <EventDetailsPanel
+              eventDetails={eventDetails}
+              updateEventDetails={updateEventDetails}
+              players={players}
+              setPlayers={setPlayers}
+              days={days}
+              setDays={setDays}
+            />
+          </div>
+        )}
+
+        {adminMode === "teams" && (
+          <TeamsPanel
+            editingTeam={editingTeam}
+            setEditingTeam={setEditingTeam}
+            teamNames={teamNames}
+            updateTeamName={updateTeamName}
+            teamLogos={teamLogos}
+            setTeamLogos={setTeamLogos}
+            readImageFile={readImageFile}
+          />
+        )}
+
+        {adminMode === "players" && (
+          <PlayersPanel
+            editingTeam={editingTeam}
+            setEditingTeam={setEditingTeam}
+            teamNames={teamNames}
+            teamLogos={teamLogos}
+            roster={roster}
+            players={players}
+            updatePlayer={updatePlayer}
+            readImageFile={readImageFile}
+          />
+        )}
+
+        {adminMode === "pairings" && (
+          <PairingsAndScorers
+            day={day}
+            selectedDay={selectedDay}
+            players={players}
+            roster={roster}
+            teamNames={teamNames}
+            scorers={groupScorers[selectedDay] || {}}
+            updateScorer={updateScorer}
+            playerOptions={["", ...playerNameOptions()]}
+            matchCount={matchCountForDay(day?.format || "")}
+            editable={dayEditable}
+            expanded
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function TopPill({ active, onClick, children }: any) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx(
+        "shrink-0 rounded-[18px] border px-5 py-3 text-[13px] font-bold",
+        active
+          ? "border-[#d1c79f] bg-[#d1c79f] text-black"
+          : "border-white/12 bg-black/35 text-white/85"
       )}
-    </>
+    >
+      {children}
+    </button>
+  );
+}
+
+function StatusPanel({ eventStarted }: any) {
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-black/35 p-4 backdrop-blur-xl">
+      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-white/45">
+        Weekend Status
+      </div>
+
+      <div className="mt-2 flex items-center justify-between">
+        <div className="text-[24px] font-black uppercase tracking-[0.12em]">
+          {eventStarted ? "Event Live" : "Setup Open"}
+        </div>
+
+        <div
+          className={cx(
+            "rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.16em]",
+            eventStarted ? "bg-[#4ade80] text-black" : "border border-white/15 bg-black/35 text-white/60"
+          )}
+        >
+          {eventStarted ? "Live" : "Admin"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ControlButton({ tone, onClick, children }: any) {
+  const styles: Record<string, string> = {
+    gold: "bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black",
+    green: "bg-gradient-to-b from-[#86efac] via-[#22c55e] to-[#15803d] text-black",
+    red: "bg-gradient-to-b from-[#fb7185] via-[#ef4444] to-[#991b1b] text-white",
+    dark: "border border-white/12 bg-black/40 text-white/75",
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cx(
+        "rounded-full px-4 py-3 text-[10px] font-black uppercase tracking-[0.16em]",
+        styles[tone] || styles.dark
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function InputGroup({
+  label,
+  value,
+  onChange,
+  type = "text",
+  options = [],
+}: any) {
+  return (
+    <div>
+      <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-white/45">
+        {label}
+      </div>
+
+      {type === "select" ? (
+        <Select value={value} onChange={onChange} options={options} darkMode />
+      ) : (
+        <input
+          value={value || ""}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full rounded-[18px] border border-white/10 bg-black/40 px-4 py-3 text-[14px] font-bold text-white outline-none"
+        />
+      )}
+    </div>
   );
 }
 
 function WeekendCoursePicker({
-  dayIndex,
   day,
   courseMode,
   setCourseMode,
@@ -861,39 +760,29 @@ function WeekendCoursePicker({
   getApiCourseName,
   getApiCourseLocation,
   getApiCourseId,
+  currentCourse,
+  courseLabel,
+  courseLocation,
 }: any) {
-  const currentCourse =
-    savedCourses.find(
-      (course: any) =>
-        day.courseId === course.id ||
-        day.course === course.shortName ||
-        day.course === course.name
-    ) || null;
-
   const currentCourseName =
-    currentCourse?.name ||
-    currentCourse?.shortName ||
-    day.course ||
-    "No course selected";
+    courseLabel(currentCourse) || day?.course || "No course selected";
 
   const currentCourseLocation =
-    currentCourse?.source === "GolfCourseAPI"
-      ? "Saved from GolfCourseAPI"
-      : `${currentCourse?.region || ""}${
-          currentCourse?.country ? ` • ${currentCourse.country}` : ""
-        }` || "Current day course";
+    currentCourse ? courseLocation(currentCourse) : "Choose a course for this day";
 
   if (courseMode === "summary") {
     return (
       <div>
-        <Label>COURSE</Label>
+        <div className="mb-2 text-[9px] font-black uppercase tracking-[0.18em] text-white/45">
+          Course
+        </div>
 
-        <div className="rounded-[18px] border border-[#d1c79f]/35 bg-black/35 p-3">
+        <div className="rounded-[20px] border border-[#d1c79f]/35 bg-black/35 p-4">
           <div className="text-[8px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/70">
             Current Course
           </div>
 
-          <div className="mt-2 text-[13px] font-black uppercase tracking-[0.12em] text-white">
+          <div className="mt-2 text-[14px] font-black uppercase tracking-[0.12em] text-white">
             {currentCourseName}
           </div>
 
@@ -901,22 +790,14 @@ function WeekendCoursePicker({
             {currentCourseLocation}
           </div>
 
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => setCourseMode("saved")}
-              className="rounded-full border border-[#d1c79f]/45 bg-[#d1c79f] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
-            >
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <ControlButton tone="gold" onClick={() => setCourseMode("saved")}>
               Choose Course
-            </button>
+            </ControlButton>
 
-            <button
-              type="button"
-              onClick={() => setCourseMode("search")}
-              className="rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-white/75"
-            >
+            <ControlButton tone="dark" onClick={() => setCourseMode("search")}>
               Search API
-            </button>
+            </ControlButton>
           </div>
         </div>
       </div>
@@ -925,31 +806,21 @@ function WeekendCoursePicker({
 
   return (
     <div>
-      <Label>COURSE</Label>
-
-      <div className="mb-2 rounded-[18px] border border-[#d1c79f]/25 bg-black/35 p-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="text-[8px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/65">
-              Current
-            </div>
-
-            <div className="mt-1 truncate text-[11px] font-black uppercase tracking-[0.12em] text-white">
-              {currentCourseName}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setCourseMode("summary")}
-            className="shrink-0 rounded-full border border-white/12 bg-black/45 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/60"
-          >
-            Close
-          </button>
+      <div className="mb-2 flex items-center justify-between">
+        <div className="text-[9px] font-black uppercase tracking-[0.18em] text-white/45">
+          Course
         </div>
+
+        <button
+          type="button"
+          onClick={() => setCourseMode("summary")}
+          className="rounded-full border border-white/12 bg-black/45 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/60"
+        >
+          Close
+        </button>
       </div>
 
-      <div className="mb-2 grid grid-cols-2 gap-2">
+      <div className="mb-3 grid grid-cols-2 gap-2">
         <button
           type="button"
           onClick={() => setCourseMode("saved")}
@@ -979,18 +850,18 @@ function WeekendCoursePicker({
 
       {courseMode === "saved" ? (
         <div>
-          <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[250px] space-y-2 overflow-y-auto pr-1">
             {savedCourses.map((course: any) => {
               const active =
-                day.courseId === course.id ||
-                day.course === course.shortName ||
-                day.course === course.name;
+                day?.courseId === course.id ||
+                day?.course === course.shortName ||
+                day?.course === course.name;
 
               const isApiCourse = course.source === "GolfCourseAPI";
 
               return (
                 <div
-                  key={`${dayIndex}-${course.id}`}
+                  key={course.id}
                   className={cx(
                     "rounded-[16px] border p-3",
                     active
@@ -1011,11 +882,7 @@ function WeekendCoursePicker({
                     </div>
 
                     <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                      {isApiCourse
-                        ? "Saved from GolfCourseAPI"
-                        : `${course.region || ""}${
-                            course.country ? ` • ${course.country}` : ""
-                          }` || "Saved Course"}
+                      {isApiCourse ? "Saved from GolfCourseAPI" : courseLocation(course)}
                     </div>
                   </button>
 
@@ -1066,7 +933,7 @@ function WeekendCoursePicker({
             </div>
           ) : null}
 
-          <div className="mt-3 max-h-[240px] space-y-2 overflow-y-auto pr-1">
+          <div className="mt-3 max-h-[250px] space-y-2 overflow-y-auto pr-1">
             {courseSearchResults.map((course: any, index: number) => (
               <div
                 key={`${getApiCourseId(course)}-${index}`}
@@ -1107,152 +974,297 @@ function WeekendCoursePicker({
   );
 }
 
-function StatusPanel({ eventLocked, eventStarted }: any) {
+function PairingsAndScorers({
+  day,
+  selectedDay,
+  players,
+  roster,
+  teamNames,
+  scorers,
+  updateScorer,
+  playerOptions,
+  matchCount,
+  editable,
+  expanded = false,
+}: any) {
+  const red = (roster?.Red || roster?.red || []).slice(0, players);
+  const blue = (roster?.Blue || roster?.blue || []).slice(0, players);
+
+  function namesFor(team: "red" | "blue", index: number) {
+    if (/singles/i.test(day?.format || "")) {
+      return team === "red"
+        ? red[index]?.name || `${teamNames?.Red || "Red"} ${index + 1}`
+        : blue[index]?.name || `${teamNames?.Blue || "Blue"} ${index + 1}`;
+    }
+
+    if (/stableford/i.test(day?.format || "")) {
+      return team === "red"
+        ? red.map((p: any) => p?.name).filter(Boolean).join(" / ") || teamNames?.Red || "Red"
+        : blue.map((p: any) => p?.name).filter(Boolean).join(" / ") || teamNames?.Blue || "Blue";
+    }
+
+    const start = index * 2;
+    const source = team === "red" ? red : blue;
+    return (
+      source
+        .slice(start, start + 2)
+        .map((p: any) => p?.name)
+        .filter(Boolean)
+        .join(" / ") || (team === "red" ? teamNames?.Red || "Red" : teamNames?.Blue || "Blue")
+    );
+  }
+
   return (
-    <div className="mt-3 rounded-[20px] border border-[#d1c79f]/20 bg-black/40 p-3">
+    <div className="mt-4 rounded-[26px] border border-white/12 bg-black/45 p-4 backdrop-blur-xl">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-bold tracking-[0.22em] text-white/45">
-            WEEKEND STATUS
+          <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+            Team Pairings & Scorers
           </div>
 
-          <div className="mt-1 text-sm font-black tracking-[0.12em] text-white">
-            {eventStarted
-              ? "EVENT LIVE"
-              : eventLocked
-              ? "EVENT LOCKED"
-              : "SETUP OPEN"}
+          <div className="mt-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/40">
+            Day {selectedDay + 1} • {day?.format}
           </div>
         </div>
-
-        <div
-          className={cx(
-            "rounded-full px-3 py-1 text-[10px] font-black tracking-[0.14em]",
-            eventStarted
-              ? "bg-[#4ade80] text-black"
-              : eventLocked
-              ? "bg-[#d1c79f] text-black"
-              : "border border-white/15 bg-black/35 text-white/60"
-          )}
-        >
-          {eventStarted ? "LIVE" : eventLocked ? "READY" : "ADMIN"}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LockPanel({
-  eventLocked,
-  setEventLocked,
-  eventStarted,
-  startEvent,
-}: any) {
-  return (
-    <div className="mt-4 rounded-[24px] border border-[#d1c79f]/25 bg-black/55 p-4">
-      <div className="text-[11px] font-black tracking-[0.22em] text-[#d1c79f]">
-        EVENT CONTROL
       </div>
 
-      <button
-        type="button"
-        disabled={eventStarted}
-        onClick={() => setEventLocked((v: boolean) => !v)}
-        className={cx(
-          "mt-4 w-full rounded-[18px] px-4 py-4 text-sm font-black tracking-[0.16em]",
-          eventStarted
-            ? "border border-white/10 bg-black/25 text-white/25"
-            : eventLocked
-            ? "border border-[#d1c79f]/30 bg-black/35 text-[#efe6bf]"
-            : "bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] text-black"
-        )}
-      >
-        {eventStarted
-          ? "EVENT LIVE"
-          : eventLocked
-          ? "UNLOCK EVENT"
-          : "LOCK EVENT"}
-      </button>
-
-      {eventLocked && !eventStarted && (
-        <button
-          type="button"
-          onClick={startEvent}
-          className="mt-3 w-full rounded-[18px] bg-gradient-to-b from-[#4ade80] via-[#22c55e] to-[#15803d] px-4 py-4 text-sm font-black tracking-[0.16em] text-black"
-        >
-          START EVENT
-        </button>
-      )}
-    </div>
-  );
-}
-
-function AdminPicker({
-  title,
-  options,
-  value,
-  setValue,
-  locked = false,
-}: any) {
-  return (
-    <div
-      className={cx(
-        "rounded-[18px] border border-[#d1c79f]/25 bg-black/40 p-3",
-        locked && "opacity-45"
-      )}
-    >
-      <div className="mb-2 text-[9px] tracking-[0.16em] text-white/50">
-        {title}
-      </div>
-
-      <div className="grid grid-cols-4 gap-1.5">
-        {options.map((o: any) => (
-          <Button
-            key={o}
-            active={o === value}
-            onClick={() => !locked && setValue(o)}
-            className="rounded-lg py-2"
+      <div className="mt-4 space-y-3">
+        {Array.from({ length: matchCount }, (_, index) => (
+          <div
+            key={index}
+            className="rounded-[18px] border border-white/10 bg-black/35 p-3"
           >
-            {o}
-          </Button>
+            <div className="mb-3 flex items-center justify-between">
+              <div className="text-[10px] font-black uppercase tracking-[0.18em] text-white">
+                Match {index + 1}
+              </div>
+
+              <div className="rounded-full border border-[#d1c79f]/25 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-[#d1c79f]">
+                {editable ? "Editable" : "Locked"}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <div className="text-[13px] font-black uppercase tracking-[0.06em] text-red-100">
+                {namesFor("red", index)}
+              </div>
+
+              <div className="text-[13px] font-black text-white/70">VS</div>
+
+              <div className="text-right text-[13px] font-black uppercase tracking-[0.06em] text-blue-100">
+                {namesFor("blue", index)}
+              </div>
+            </div>
+
+            <div className={cx("mt-3", !editable && "pointer-events-none opacity-45")}>
+              <InputGroup
+                label="Group Scorer"
+                value={scorers[index] || ""}
+                onChange={(value: string) => updateScorer(selectedDay, index, value)}
+                type="select"
+                options={playerOptions}
+              />
+            </div>
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-function InputGroup({
-  label,
-  value,
-  onChange,
-  disabled = false,
-  type = "text",
+function EventDetailsPanel({
+  eventDetails,
+  updateEventDetails,
+  players,
+  setPlayers,
+  days,
+  setDays,
 }: any) {
   return (
-    <div>
-      <div className="mb-1.5 text-[9px] tracking-[0.14em] text-white/50">
-        {label}
+    <div className="mt-4 rounded-[26px] border border-white/12 bg-black/35 p-4 backdrop-blur-xl">
+      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+        Event Details
       </div>
 
-      <input
-        type={type}
-        disabled={disabled}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={cx(
-          "w-full rounded-[14px] border border-[#d1c79f]/20 bg-black/40 px-4 py-3 text-sm text-white outline-none",
-          disabled && "opacity-45"
-        )}
-      />
+      <div className="mt-4 space-y-3">
+        <InputGroup
+          label="Event Name"
+          value={eventDetails?.name || ""}
+          onChange={(value: string) => updateEventDetails("name", value)}
+        />
+
+        <InputGroup
+          label="Location"
+          value={eventDetails?.location || ""}
+          onChange={(value: string) => updateEventDetails("location", value)}
+        />
+
+        <div className="grid grid-cols-2 gap-3">
+          <InputGroup
+            label="Players / Team"
+            value={players}
+            onChange={(value: any) => setPlayers(Number(value))}
+            type="select"
+            options={playerOptions}
+          />
+
+          <InputGroup
+            label="Comp Days"
+            value={days}
+            onChange={(value: any) => setDays(Number(value))}
+            type="select"
+            options={[1, 2, 3, 4]}
+          />
+        </div>
+      </div>
     </div>
   );
 }
 
-function Label({ children }: any) {
+function TeamsPanel({
+  editingTeam,
+  setEditingTeam,
+  teamNames,
+  updateTeamName,
+  teamLogos,
+  setTeamLogos,
+  readImageFile,
+}: any) {
   return (
-    <div className="mb-1.5 text-[9px] tracking-[0.14em] text-white/50">
-      {children}
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <Button active={editingTeam === "Red"} onClick={() => setEditingTeam("Red")}>
+          {teamNames?.Red || "Team Red"}
+        </Button>
+
+        <Button active={editingTeam === "Blue"} onClick={() => setEditingTeam("Blue")}>
+          {teamNames?.Blue || "Team Blue"}
+        </Button>
+      </div>
+
+      <div className="rounded-[26px] border border-white/12 bg-black/45 p-4 backdrop-blur-xl">
+        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.22em] text-[#d1c79f]">
+          Team Setup
+        </div>
+
+        <div className="flex items-center gap-4">
+          <label className="cursor-pointer">
+            <Logo
+              team={editingTeam === "Red" ? "red" : "blue"}
+              size="h-20 w-20"
+              src={teamLogos?.[editingTeam]}
+            />
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) =>
+                readImageFile(e.target.files?.[0], (value: string) =>
+                  setTeamLogos((current: any) => ({
+                    ...(current || {}),
+                    [editingTeam]: value,
+                  }))
+                )
+              }
+            />
+          </label>
+
+          <div className="min-w-0 flex-1">
+            <InputGroup
+              label="Team Name"
+              value={teamNames?.[editingTeam] || ""}
+              onChange={(value: string) => updateTeamName(editingTeam, value)}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
+function PlayersPanel({
+  editingTeam,
+  setEditingTeam,
+  teamNames,
+  teamLogos,
+  roster,
+  players,
+  updatePlayer,
+  readImageFile,
+}: any) {
+  const teamRoster = (roster?.[editingTeam] || []).slice(0, players);
+  const teamKey = editingTeam === "Red" ? "red" : "blue";
+
+  return (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-2">
+        <Button active={editingTeam === "Red"} onClick={() => setEditingTeam("Red")}>
+          {teamNames?.Red || "Team Red"}
+        </Button>
+
+        <Button active={editingTeam === "Blue"} onClick={() => setEditingTeam("Blue")}>
+          {teamNames?.Blue || "Team Blue"}
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {teamRoster.map((player: any, index: number) => (
+          <div
+            key={`${editingTeam}-${index}`}
+            className="rounded-[22px] border border-white/12 bg-black/45 p-3 backdrop-blur-xl"
+          >
+            <div className="flex items-center gap-3">
+              <label className="cursor-pointer">
+                <Logo
+                  team={teamKey}
+                  size="h-14 w-14"
+                  src={player?.photo || teamLogos?.[editingTeam]}
+                />
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) =>
+                    readImageFile(e.target.files?.[0], (value: string) =>
+                      updatePlayer(editingTeam, index, "photo", value)
+                    )
+                  }
+                />
+              </label>
+
+              <div className="min-w-0 flex-1">
+                <input
+                  value={player?.name || ""}
+                  onChange={(e) => updatePlayer(editingTeam, index, "name", e.target.value)}
+                  className="w-full bg-transparent text-[16px] font-black text-white outline-none"
+                />
+
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    value={player?.handicap ?? ""}
+                    onChange={(e) => updatePlayer(editingTeam, index, "handicap", Number(e.target.value))}
+                    placeholder="HCP"
+                    type="number"
+                    step="0.1"
+                    className="rounded-[12px] border border-white/10 bg-black/35 px-3 py-2 text-[12px] font-bold text-white outline-none"
+                  />
+
+                  <input
+                    value={player?.playingHandicap ?? player?.handicap ?? ""}
+                    onChange={(e) => updatePlayer(editingTeam, index, "playingHandicap", Number(e.target.value))}
+                    placeholder="Playing"
+                    type="number"
+                    step="1"
+                    className="rounded-[12px] border border-white/10 bg-black/35 px-3 py-2 text-[12px] font-bold text-white outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
