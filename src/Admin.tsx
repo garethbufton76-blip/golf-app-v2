@@ -397,13 +397,13 @@ export default function Admin({
   }
 
   return (
-    <div className="relative flex h-full max-w-full flex-col overflow-hidden px-4 text-white">
+    <div className="relative flex h-full max-w-full flex-col overflow-hidden text-white">
       <AdminHeaderNav
         activeTab={adminMode}
         setActiveTab={setAdminMode}
       />
 
-      <div className="flex-1 overflow-y-auto pb-28 pt-[144px]">
+      <div className="flex-1 overflow-y-auto pb-28 pt-[124px]">
         {adminMode === "day" && (
           <div>
             <StatusPanel eventStarted={eventStarted} />
