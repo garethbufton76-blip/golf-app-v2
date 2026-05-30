@@ -10,7 +10,7 @@ import {
 } from "./data";
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getDefaultTee } from "./courses";
-import { AdminHeaderNav } from "./AdminHeaderNav";
+import AdminHeaderNav from "./AdminHeaderNav";
 
 type RoundStatus = "setup" | "locked" | "live" | "complete";
 type CoursePickerMode = "summary" | "saved" | "search";
@@ -56,7 +56,7 @@ export default function Admin({
   savedPlayers,
   setSavedPlayers,
 }: any) {
-  const [adminMode, setAdminMode] = useState<"day" | "teams" | "players" | "pairings">("day");
+  const [adminMode, setAdminMode] = useState<"day" | "teams" | "hcps" | "pairings" | "scorers">("day");
   const [selectedDay, setSelectedDay] = useState(0);
   const [editingTeam, setEditingTeam] = useState<"Red" | "Blue">("Red");
 
@@ -401,10 +401,9 @@ export default function Admin({
       <AdminHeaderNav
         activeTab={adminMode}
         setActiveTab={setAdminMode}
-        onHome={() => setScreen("home")}
       />
 
-      <div className="flex-1 overflow-y-auto pb-28">
+      <div className="flex-1 overflow-y-auto pb-28 pt-[164px]">
         {adminMode === "day" && (
           <div>
             <StatusPanel eventStarted={eventStarted} />
@@ -606,7 +605,7 @@ export default function Admin({
           />
         )}
 
-        {adminMode === "players" && (
+        {adminMode === "hcps" && (
           <PlayersPanel
             editingTeam={editingTeam}
             setEditingTeam={setEditingTeam}
@@ -634,7 +633,24 @@ export default function Admin({
             expanded
           />
         )}
-      </div>
+ 
+
+        {adminMode === "scorers" && (
+          <PairingsAndScorers
+            day={day}
+            selectedDay={selectedDay}
+            players={players}
+            roster={roster}
+            teamNames={teamNames}
+            scorers={groupScorers[selectedDay] || {}}
+            updateScorer={updateScorer}
+            playerOptions={["", ...playerNameOptions()]}
+            matchCount={matchCountForDay(day?.format || "")}
+            editable={dayEditable}
+            expanded
+          />
+        )}
+     </div>
     </div>
   );
 }
