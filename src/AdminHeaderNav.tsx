@@ -53,7 +53,7 @@ function AdminHeaderNav({
   return (
     <div
       className={cx(
-        "absolute left-1/2 top-[-16px] z-50 h-[128px] w-[390px] max-w-none -translate-x-1/2 border-b px-2 pb-2 pt-[max(env(safe-area-inset-top),10px)] backdrop-blur-2xl",
+        "absolute left-0 right-0 top-0 z-50 h-[128px] border-b px-2 pb-2 pt-[max(env(safe-area-inset-top),10px)] backdrop-blur-2xl",
         isDayTheme
           ? "border-black/10 bg-[rgba(248,245,236,0.92)]"
           : "border-white/10 bg-[rgba(8,10,16,0.94)]"
