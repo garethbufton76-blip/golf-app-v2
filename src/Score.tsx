@@ -1898,7 +1898,7 @@ function ScoreBox({
   const namesText =
     players.map((p: any) => first(p.name)).join(" & ") || TEAM[team].title;
 
-  const points = stableford(score, par, 0);
+  const points = standardStablefordPoints(score, par, 0);
   const isRed = team === "red";
   const isSplit = splitSide !== "single";
 
