@@ -485,7 +485,7 @@ export default function Score({
     if (isStablefordFormat) {
       const redPoints = scoringRedPlayers.map((p: any, i: number) => {
         const gross = Number(draft[`red_${i}`] ?? selectedHole.par);
-        const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
+        const shotCount = shots(Number(p.playingHandicap ?? p.handicap ?? 0), selectedHole.si);
         const points = standardStablefordPoints(gross, selectedHole.par, shotCount);
         const k = playerKey("red", p);
 
@@ -502,7 +502,7 @@ export default function Score({
 
       const bluePoints = scoringBluePlayers.map((p: any, i: number) => {
         const gross = Number(draft[`blue_${i}`] ?? selectedHole.par);
-        const shotCount = shots(Number(p.handicap || 0), selectedHole.si);
+        const shotCount = shots(Number(p.playingHandicap ?? p.handicap ?? 0), selectedHole.si);
         const points = standardStablefordPoints(gross, selectedHole.par, shotCount);
         const k = playerKey("blue", p);
 
@@ -675,7 +675,7 @@ if (useFourPlayerScoring) {
         };
 
       const gross = grossFor(team, p, h.hole);
-      const shotCount = shots(Number(p.handicap || 0), h.si);
+      const shotCount = shots(Number(p.playingHandicap ?? p.handicap ?? 0), h.si);
       const net = gross == null ? null : Math.max(1, Number(gross) - shotCount);
       const points = gross == null ? null : standardStablefordPoints(gross, h.par, shotCount);
 
