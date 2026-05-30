@@ -14,7 +14,6 @@ import Score from "./Score";
 import Admin from "./Admin";
 import QuickGame from "./QuickGame";
 import BottomNav from "./BottomNav";
-import WeekendBottomNav, { WeekendTab } from "./WeekendBottomNav";
 import EventGate from "./EventGate";
 import WeekendSetupWizard from "./WeekendSetupWizard";
 
@@ -48,8 +47,6 @@ export default function App() {
   });
 
   const [screen, setScreen] = useState("home");
-  const [weekendActiveTab, setWeekendActiveTab] = useState<WeekendTab>("live");
-
   const [players, setPlayers] = useState(2);
   const [days, setDays] = useState(1);
 
@@ -319,9 +316,10 @@ export default function App() {
   }
 
   const showBottomNav =
-    mode === "weekend" &&
     eventStarted &&
+    screen !== "admin" &&
     screen !== "quick" &&
+    screen !== "score" &&
     screen !== "eventGate" &&
     screen !== "setupWizard";
 
@@ -520,42 +518,10 @@ export default function App() {
             />
           )}
 
-          {showBottomNav && mode === "weekend" && (
-            <WeekendBottomNav
-              activeTab={weekendActiveTab}
-              setActiveTab={(tab) => {
-                setWeekendActiveTab(tab);
-
-                if (tab === "live") {
-                  setScreen("home");
-                  setActiveTab("live");
-                  return;
-                }
-
-                if (tab === "score") {
-                  setScreen("score");
-                  setActiveTab("score");
-                  return;
-                }
-
-                if (tab === "teams") {
-                  setScreen("rosterP");
-                  setActiveTab("team");
-                  return;
-                }
-
-                if (tab === "admin") {
-                  setScreen("admin");
-                  return;
-                }
-
-                if (tab === "stats") {
-                  setScreen("home");
-                  setActiveTab("live");
-                  return;
-                }
-              }}
-              role={currentRole}
+          {showBottomNav && (
+            <BottomNav
+              activeTab={activeTab}
+              setActiveTab={handleBottomNav}
             />
           )}
         </div>
