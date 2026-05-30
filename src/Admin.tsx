@@ -10,7 +10,7 @@ import {
 } from "./data";
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getDefaultTee } from "./courses";
-import AdminHeaderNav from "./AdminHeaderNav";
+import { AdminHeaderNav } from "./AdminHeaderNav";
 
 type RoundStatus = "setup" | "locked" | "live" | "complete";
 type CoursePickerMode = "summary" | "saved" | "search";
