@@ -14,6 +14,7 @@ import Score from "./Score";
 import Admin from "./Admin";
 import QuickGame from "./QuickGame";
 import BottomNav from "./BottomNav";
+import WeekendBottomNav, { WeekendTab } from "./WeekendBottomNav";
 import EventGate from "./EventGate";
 import WeekendSetupWizard from "./WeekendSetupWizard";
 
@@ -51,6 +52,7 @@ export default function App() {
   const [days, setDays] = useState(1);
 
   const [activeTab, setActiveTab] = useState<GameTab>("score");
+  const [weekendActiveTab, setWeekendActiveTab] = useState<WeekendTab>("live");
 
   const [eventLocked, setEventLocked] = useState(false);
   const [eventStarted, setEventStarted] = useState(false);
@@ -143,6 +145,7 @@ export default function App() {
     setSelectedMatch(i);
     setScreen("score");
     setActiveTab("score");
+    setWeekendActiveTab("score");
   };
 
   function handleQuickScreen(nextScreen: string) {
@@ -180,6 +183,39 @@ export default function App() {
 
     if (tab === "team") {
       setScreen("rosterP");
+    }
+  }
+
+
+  function handleWeekendBottomNav(tab: WeekendTab) {
+    setWeekendActiveTab(tab);
+
+    if (tab === "live") {
+      setScreen("home");
+      setActiveTab("live");
+      return;
+    }
+
+    if (tab === "stats") {
+      setScreen("home");
+      setActiveTab("live");
+      return;
+    }
+
+    if (tab === "score") {
+      setScreen("score");
+      setActiveTab("score");
+      return;
+    }
+
+    if (tab === "teams") {
+      setScreen("rosterP");
+      setActiveTab("team");
+      return;
+    }
+
+    if (tab === "admin") {
+      setScreen("admin");
     }
   }
 
@@ -305,6 +341,7 @@ export default function App() {
           setMode("weekend");
           setScreen("eventGate");
           setActiveTab("score");
+          setWeekendActiveTab("live");
         }}
         onQuick={() => {
           setMode("quick");
@@ -315,11 +352,10 @@ export default function App() {
     );
   }
 
-  const showBottomNav =
+  const showWeekendBottomNav =
+    mode === "weekend" &&
     eventStarted &&
-    screen !== "admin" &&
     screen !== "quick" &&
-    screen !== "score" &&
     screen !== "eventGate" &&
     screen !== "setupWizard";
 
@@ -518,10 +554,11 @@ export default function App() {
             />
           )}
 
-          {showBottomNav && (
-            <BottomNav
-              activeTab={activeTab}
-              setActiveTab={handleBottomNav}
+          {showWeekendBottomNav && (
+            <WeekendBottomNav
+              activeTab={weekendActiveTab}
+              setActiveTab={handleWeekendBottomNav}
+              role={currentRole}
             />
           )}
         </div>
