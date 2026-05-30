@@ -1544,6 +1544,7 @@ if (useFourPlayerScoring) {
                           setDraft((d: any) => ({ ...d, [`red_${i}`]: v }))
                         }
                         par={selectedHole.par}
+                        si={selectedHole.si}
                         compact={scoringPlayerCount >= 4}
                       />
                     ))}
@@ -1560,6 +1561,7 @@ if (useFourPlayerScoring) {
                           setDraft((d: any) => ({ ...d, [`blue_${i}`]: v }))
                         }
                         par={selectedHole.par}
+                        si={selectedHole.si}
                         compact={scoringPlayerCount >= 4}
                       />
                     ))}
@@ -1586,6 +1588,7 @@ if (useFourPlayerScoring) {
                       setDraft((d: any) => ({ ...d, blue: v }))
                     }
                     par={selectedHole.par}
+                    si={selectedHole.si}
                     splitSide="right"
                   />
                 </div>
@@ -1892,6 +1895,7 @@ function ScoreBox({
   score,
   setScore,
   par,
+  si,
   compact = false,
   splitSide = "single",
 }: any) {
@@ -1901,10 +1905,14 @@ function ScoreBox({
   const points = (() => {
     const grossNumber = Number(score);
     const parNumber = Number(par);
+    const player = players?.[0];
+    const handicapNumber = Number(player?.playingHandicap ?? player?.handicap ?? 0);
+    const shotCount = shots(handicapNumber, Number(si || 18));
 
     if (!Number.isFinite(grossNumber) || !Number.isFinite(parNumber)) return 0;
 
-    return Math.max(0, 2 + parNumber - grossNumber);
+    const netScore = grossNumber - shotCount;
+    return Math.max(0, 2 + parNumber - netScore);
   })();
   const isRed = team === "red";
   const isSplit = splitSide !== "single";
