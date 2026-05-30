@@ -39,57 +39,9 @@ export default function Admin({
   setEventDetails,
   savedPlayers,
   setSavedPlayers,
-  currentRole = "admin",
-  setCurrentRole,
-  scoringPolicy = "matchPlayers",
-  setScoringPolicy,
-  roundStatus = {},
-  setRoundStatus,
 }: any) {
   const [adminMode, setAdminMode] = useState("event");
   const [editingTeam, setEditingTeam] = useState("Red");
-
-  const roleOptions = [
-    { id: "admin", label: "Admin", desc: "Edit event, rounds, pairings, scores and roles." },
-    { id: "captain", label: "Team Captain", desc: "Manage own team, confirm pairings and approve results." },
-    { id: "groupScorer", label: "Group Scorer", desc: "Score assigned match or group only." },
-    { id: "player", label: "Player", desc: "View event and score own match when allowed." },
-    { id: "spectator", label: "Spectator", desc: "View-only access." },
-  ];
-
-  const scoringPolicies = [
-    { id: "anyone", label: "Anyone with link" },
-    { id: "matchPlayers", label: "Match players" },
-    { id: "captains", label: "Captains only" },
-    { id: "groupScorer", label: "Group scorer" },
-    { id: "admin", label: "Admin only" },
-  ];
-
-  const roundStatuses = ["setup", "locked", "live", "complete"];
-
-  function getRoundStatus(index: number) {
-    return roundStatus?.[index] || "setup";
-  }
-
-  function updateRoundStatus(index: number, status: string) {
-    setRoundStatus?.((current: any) => ({
-      ...current,
-      [index]: status,
-    }));
-  }
-
-  function canEditRound(index: number) {
-    const status = getRoundStatus(index);
-    return status === "setup";
-  }
-
-  function roundStatusLabel(index: number) {
-    const status = getRoundStatus(index);
-    if (status === "setup") return "SETUP OPEN";
-    if (status === "locked") return "ROUND LOCKED";
-    if (status === "live") return "ROUND LIVE";
-    return "ROUND COMPLETE";
-  }
 
   const [savedApiCourses, setSavedApiCourses] = useState<any[]>(() => {
     try {
@@ -101,7 +53,7 @@ export default function Admin({
   });
 
   const [coursePickerMode, setCoursePickerMode] = useState<
-    Record<number, "saved" | "search">
+    Record<number, "summary" | "saved" | "search">
   >({});
 
   const [courseSearch, setCourseSearch] = useState<Record<number, string>>({});
@@ -278,7 +230,7 @@ export default function Admin({
   };
 
   const setDay = (i: number, field: string, value: any) => {
-    if (!canEditRound(i) || dayLocks[i]) return;
+    if (eventLocked || dayLocks[i]) return;
 
     setDayConfigs((ds: any[]) =>
       ds.map((d, idx) =>
@@ -293,7 +245,7 @@ export default function Admin({
   };
 
   const changePlayers = (count: number) => {
-    if (eventStarted) return;
+    if (eventLocked) return;
 
     setPlayers(count);
 
@@ -310,7 +262,7 @@ export default function Admin({
   };
 
   const changeDays = (count: number) => {
-    if (eventStarted) return;
+    if (eventLocked) return;
     setDays(count);
   };
 
@@ -341,10 +293,6 @@ export default function Admin({
     }
 
     setEventStarted(true);
-    setRoundStatus?.((current: any) => ({
-      ...current,
-      0: current?.[0] === "setup" ? "live" : current?.[0] || "live",
-    }));
     setScreen("home");
   };
 
@@ -386,14 +334,6 @@ export default function Admin({
           >
             Pairings
           </Button>
-
-          <Button
-            active={adminMode === "access"}
-            onClick={() => setAdminMode("access")}
-            className="px-3 py-2 text-xs"
-          >
-            Access
-          </Button>
         </div>
 
         <button
@@ -412,8 +352,6 @@ export default function Admin({
       <StatusPanel
         eventLocked={eventLocked}
         eventStarted={eventStarted}
-        currentRole={currentRole}
-        scoringPolicy={scoringPolicy}
       />
 
       {/* EVENT */}
@@ -429,7 +367,7 @@ export default function Admin({
               <InputGroup
                 label="EVENT NAME"
                 value={eventDetails.name}
-                disabled={eventStarted}
+                disabled={eventLocked}
                 onChange={(v: string) =>
                   setEventDetails((e: any) => ({
                     ...e,
@@ -441,7 +379,7 @@ export default function Admin({
               <InputGroup
                 label="LOCATION"
                 value={eventDetails.location}
-                disabled={eventStarted}
+                disabled={eventLocked}
                 onChange={(v: string) =>
                   setEventDetails((e: any) => ({
                     ...e,
@@ -455,7 +393,7 @@ export default function Admin({
                   label="START DATE"
                   type="date"
                   value={eventDetails.startDate}
-                  disabled={eventStarted}
+                  disabled={eventLocked}
                   onChange={(v: string) =>
                     setEventDetails((e: any) => ({
                       ...e,
@@ -468,7 +406,7 @@ export default function Admin({
                   label="END DATE"
                   type="date"
                   value={eventDetails.endDate}
-                  disabled={eventStarted}
+                  disabled={eventLocked}
                   onChange={(v: string) =>
                     setEventDetails((e: any) => ({
                       ...e,
@@ -487,7 +425,7 @@ export default function Admin({
               options={playerOptions}
               value={players}
               setValue={changePlayers}
-              locked={eventStarted}
+              locked={eventLocked}
             />
 
             <AdminPicker
@@ -495,15 +433,14 @@ export default function Admin({
               options={dayOptions}
               value={days}
               setValue={changeDays}
-              locked={eventStarted}
+              locked={eventLocked}
             />
           </div>
 
           {/* DAYS */}
           <div className="mt-3 space-y-3">
             {dayConfigs.slice(0, days).map((day: any, i: number) => {
-              const status = getRoundStatus(i);
-              const locked = !canEditRound(i) || Boolean(dayLocks[i]);
+              const locked = Boolean(eventLocked || dayLocks[i]);
 
               return (
                 <div
@@ -522,7 +459,7 @@ export default function Admin({
                       </div>
 
                       <div className="mt-1 text-[10px] text-white/45">
-                        {roundStatusLabel(i)}
+                        {locked ? "EVENT LOCKED" : "SETUP OPEN"}
                       </div>
                     </div>
 
@@ -548,8 +485,8 @@ export default function Admin({
                     <WeekendCoursePicker
                       dayIndex={i}
                       day={day}
-                      courseMode={coursePickerMode[i] || "saved"}
-                      setCourseMode={(mode: "saved" | "search") =>
+                      courseMode={coursePickerMode[i] || "summary"}
+                      setCourseMode={(mode: "summary" | "saved" | "search") =>
                         setCoursePickerMode((current) => ({
                           ...current,
                           [i]: mode,
@@ -595,24 +532,6 @@ export default function Admin({
                         options={validFormats(players)}
                       />
                     </div>
-                  </div>
-
-                  <div className="mt-3 grid grid-cols-4 gap-1.5">
-                    {roundStatuses.map((roundStatusOption) => (
-                      <button
-                        key={roundStatusOption}
-                        type="button"
-                        onClick={() => updateRoundStatus(i, roundStatusOption)}
-                        className={cx(
-                          "rounded-full border px-2 py-2 text-[8px] font-black uppercase tracking-[0.12em]",
-                          status === roundStatusOption
-                            ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                            : "border-white/10 bg-black/35 text-white/55"
-                        )}
-                      >
-                        {roundStatusOption}
-                      </button>
-                    ))}
                   </div>
                 </div>
               );
@@ -847,10 +766,20 @@ export default function Admin({
       {/* PAIRINGS */}
       {adminMode === "pairings" && (
         <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          <div className="space-y-3">
+          {!eventLocked ? (
+            <div className="rounded-[24px] border border-[#d1c79f]/25 bg-black/45 p-5 text-center">
+              <div className="text-[11px] font-bold tracking-[0.26em] text-[#d1c79f]">
+                EVENT NOT LOCKED
+              </div>
+
+              <div className="mt-3 text-sm leading-6 text-white/65">
+                Lock the weekend setup before setting pairings.
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
               {dayConfigs.slice(0, days).map((day: any, i: number) => {
-                const status = getRoundStatus(i);
-                const locked = Boolean(pairingLocks[i]) || status !== "setup";
+                const locked = Boolean(pairingLocks[i]);
 
                 return (
                   <div
@@ -871,7 +800,6 @@ export default function Admin({
                       <button
                         type="button"
                         onClick={() =>
-                          status === "setup" &&
                           setPairingLocks((locks: any) => ({
                             ...locks,
                             [i]: !locks[i],
@@ -909,128 +837,9 @@ export default function Admin({
                 );
               })}
             </div>
+          )}
         </div>
       )}
-
-      {/* ACCESS */}
-      {adminMode === "access" && (
-        <div className="mt-3 flex-1 overflow-y-auto pb-3">
-          <div className="rounded-[24px] border border-[#d1c79f]/20 bg-black/45 p-4">
-            <div className="text-[10px] font-black uppercase tracking-[0.24em] text-[#d1c79f]">
-              Access & Scoring Permissions
-            </div>
-
-            <div className="mt-2 text-[12px] leading-5 text-white/55">
-              Starter permissions for Weekend Mode. This is local-device based for now; later it can connect to real user accounts.
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[24px] border border-white/10 bg-black/40 p-4">
-            <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/45">
-              Current Role
-            </div>
-
-            <div className="grid gap-2">
-              {roleOptions.map((role) => (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => setCurrentRole?.(role.id)}
-                  className={cx(
-                    "rounded-[18px] border p-3 text-left transition-all",
-                    currentRole === role.id
-                      ? "border-[#d1c79f] bg-[#d1c79f]/15"
-                      : "border-white/10 bg-black/30"
-                  )}
-                >
-                  <div className="text-[12px] font-black uppercase tracking-[0.14em] text-white">
-                    {role.label}
-                  </div>
-
-                  <div className="mt-1 text-[10px] leading-4 text-white/45">
-                    {role.desc}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[24px] border border-white/10 bg-black/40 p-4">
-            <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/45">
-              Who Can Score?
-            </div>
-
-            <div className="grid gap-2">
-              {scoringPolicies.map((policy) => (
-                <button
-                  key={policy.id}
-                  type="button"
-                  onClick={() => setScoringPolicy?.(policy.id)}
-                  className={cx(
-                    "rounded-full border px-4 py-3 text-[10px] font-black uppercase tracking-[0.14em]",
-                    scoringPolicy === policy.id
-                      ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                      : "border-white/10 bg-black/30 text-white/65"
-                  )}
-                >
-                  {policy.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-3 rounded-[24px] border border-white/10 bg-black/40 p-4">
-            <div className="mb-3 text-[9px] font-black uppercase tracking-[0.2em] text-white/45">
-              Round Control
-            </div>
-
-            <div className="space-y-3">
-              {dayConfigs.slice(0, days).map((day: any, index: number) => {
-                const status = getRoundStatus(index);
-
-                return (
-                  <div key={`access-${day.label}`} className="rounded-[18px] border border-white/10 bg-black/28 p-3">
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-[12px] font-black uppercase tracking-[0.14em] text-white">
-                          {day.label}
-                        </div>
-
-                        <div className="mt-1 text-[9px] font-black uppercase tracking-[0.12em] text-white/40">
-                          {day.format}
-                        </div>
-                      </div>
-
-                      <div className="rounded-full border border-[#d1c79f]/25 bg-[#d1c79f]/10 px-3 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#d1c79f]">
-                        {status}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 grid grid-cols-4 gap-1.5">
-                      {roundStatuses.map((roundStatusOption) => (
-                        <button
-                          key={`${day.label}-${roundStatusOption}`}
-                          type="button"
-                          onClick={() => updateRoundStatus(index, roundStatusOption)}
-                          className={cx(
-                            "rounded-full border px-2 py-2 text-[8px] font-black uppercase tracking-[0.1em]",
-                            status === roundStatusOption
-                              ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-                              : "border-white/10 bg-black/35 text-white/50"
-                          )}
-                        >
-                          {roundStatusOption}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
     </>
   );
 }
@@ -1053,9 +862,92 @@ function WeekendCoursePicker({
   getApiCourseLocation,
   getApiCourseId,
 }: any) {
+  const currentCourse =
+    savedCourses.find(
+      (course: any) =>
+        day.courseId === course.id ||
+        day.course === course.shortName ||
+        day.course === course.name
+    ) || null;
+
+  const currentCourseName =
+    currentCourse?.name ||
+    currentCourse?.shortName ||
+    day.course ||
+    "No course selected";
+
+  const currentCourseLocation =
+    currentCourse?.source === "GolfCourseAPI"
+      ? "Saved from GolfCourseAPI"
+      : `${currentCourse?.region || ""}${
+          currentCourse?.country ? ` • ${currentCourse.country}` : ""
+        }` || "Current day course";
+
+  if (courseMode === "summary") {
+    return (
+      <div>
+        <Label>COURSE</Label>
+
+        <div className="rounded-[18px] border border-[#d1c79f]/35 bg-black/35 p-3">
+          <div className="text-[8px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/70">
+            Current Course
+          </div>
+
+          <div className="mt-2 text-[13px] font-black uppercase tracking-[0.12em] text-white">
+            {currentCourseName}
+          </div>
+
+          <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/42">
+            {currentCourseLocation}
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setCourseMode("saved")}
+              className="rounded-full border border-[#d1c79f]/45 bg-[#d1c79f] px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
+            >
+              Choose Course
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setCourseMode("search")}
+              className="rounded-full border border-white/15 bg-black/45 px-3 py-2 text-[9px] font-black uppercase tracking-[0.14em] text-white/75"
+            >
+              Search API
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Label>COURSE</Label>
+
+      <div className="mb-2 rounded-[18px] border border-[#d1c79f]/25 bg-black/35 p-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="text-[8px] font-black uppercase tracking-[0.18em] text-[#d1c79f]/65">
+              Current
+            </div>
+
+            <div className="mt-1 truncate text-[11px] font-black uppercase tracking-[0.12em] text-white">
+              {currentCourseName}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCourseMode("summary")}
+            className="shrink-0 rounded-full border border-white/12 bg-black/45 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.12em] text-white/60"
+          >
+            Close
+          </button>
+        </div>
+      </div>
 
       <div className="mb-2 grid grid-cols-2 gap-2">
         <button
@@ -1086,55 +978,68 @@ function WeekendCoursePicker({
       </div>
 
       {courseMode === "saved" ? (
-        <div className="space-y-2">
-          {savedCourses.map((course: any) => {
-            const active =
-              day.courseId === course.id ||
-              day.course === course.shortName ||
-              day.course === course.name;
+        <div>
+          <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1">
+            {savedCourses.map((course: any) => {
+              const active =
+                day.courseId === course.id ||
+                day.course === course.shortName ||
+                day.course === course.name;
 
-            const isApiCourse = course.source === "GolfCourseAPI";
+              const isApiCourse = course.source === "GolfCourseAPI";
 
-            return (
-              <div
-                key={`${dayIndex}-${course.id}`}
-                className={cx(
-                  "rounded-[16px] border p-3",
-                  active
-                    ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
-                    : "border-white/10 bg-black/35"
-                )}
-              >
-                <button
-                  type="button"
-                  onClick={() => selectSavedCourse(course)}
-                  className="w-full text-left"
+              return (
+                <div
+                  key={`${dayIndex}-${course.id}`}
+                  className={cx(
+                    "rounded-[16px] border p-3",
+                    active
+                      ? "border-[#d1c79f]/70 bg-[#d1c79f]/12"
+                      : "border-white/10 bg-black/35"
+                  )}
                 >
-                  <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
-                    {course.name}
-                  </div>
-
-                  <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
-                    {isApiCourse
-                      ? "Saved from GolfCourseAPI"
-                      : `${course.region || ""}${
-                          course.country ? ` • ${course.country}` : ""
-                        }` || "Saved Course"}
-                  </div>
-                </button>
-
-                {isApiCourse ? (
                   <button
                     type="button"
-                    onClick={() => removeSavedApiCourse(course.id)}
-                    className="mt-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/45"
+                    onClick={() => {
+                      selectSavedCourse(course);
+                      setCourseMode("summary");
+                    }}
+                    className="w-full text-left"
                   >
-                    Remove
+                    <div className="text-[11px] font-black uppercase tracking-[0.12em] text-white">
+                      {course.name}
+                    </div>
+
+                    <div className="mt-1 text-[8px] font-black uppercase tracking-[0.14em] text-white/45">
+                      {isApiCourse
+                        ? "Saved from GolfCourseAPI"
+                        : `${course.region || ""}${
+                            course.country ? ` • ${course.country}` : ""
+                          }` || "Saved Course"}
+                    </div>
                   </button>
-                ) : null}
-              </div>
-            );
-          })}
+
+                  {isApiCourse ? (
+                    <button
+                      type="button"
+                      onClick={() => removeSavedApiCourse(course.id)}
+                      className="mt-2 rounded-full border border-white/10 bg-black/35 px-3 py-1 text-[8px] font-black uppercase tracking-[0.12em] text-white/45"
+                    >
+                      Remove
+                    </button>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCourseMode("summary")}
+            className="mt-3 w-full rounded-full bg-gradient-to-b from-[#efe6bf] via-[#d1c79f] to-[#b7ab7d] py-3 text-[10px] font-black uppercase tracking-[0.16em] text-black"
+          >
+            Save Day Setup
+          </button>
         </div>
       ) : (
         <div>
@@ -1177,7 +1082,10 @@ function WeekendCoursePicker({
 
                 <button
                   type="button"
-                  onClick={() => importApiCourse(course)}
+                  onClick={() => {
+                    importApiCourse(course);
+                    setCourseMode("summary");
+                  }}
                   className="mt-3 w-full rounded-full bg-[#d1c79f] py-2 text-[9px] font-black uppercase tracking-[0.14em] text-black"
                 >
                   Import & Save
@@ -1185,13 +1093,21 @@ function WeekendCoursePicker({
               </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setCourseMode("summary")}
+            className="mt-3 w-full rounded-full border border-white/12 bg-black/45 py-3 text-[10px] font-black uppercase tracking-[0.16em] text-white/65"
+          >
+            Cancel
+          </button>
         </div>
       )}
     </div>
   );
 }
 
-function StatusPanel({ eventLocked, eventStarted, currentRole, scoringPolicy }: any) {
+function StatusPanel({ eventLocked, eventStarted }: any) {
   return (
     <div className="mt-3 rounded-[20px] border border-[#d1c79f]/20 bg-black/40 p-3">
       <div className="flex items-center justify-between">
@@ -1204,12 +1120,8 @@ function StatusPanel({ eventLocked, eventStarted, currentRole, scoringPolicy }: 
             {eventStarted
               ? "EVENT LIVE"
               : eventLocked
-              ? "EVENT READY"
+              ? "EVENT LOCKED"
               : "SETUP OPEN"}
-          </div>
-
-          <div className="mt-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/38">
-            {String(currentRole || "admin").replace("groupScorer", "group scorer")} • {String(scoringPolicy || "matchPlayers")}
           </div>
         </div>
 
