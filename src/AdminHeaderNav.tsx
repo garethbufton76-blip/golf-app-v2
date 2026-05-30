@@ -53,19 +53,19 @@ function AdminHeaderNav({
   return (
     <div
       className={cx(
-        "absolute left-[-16px] right-[-16px] top-[-16px] z-50 h-[118px] border-b px-2 pb-2 pt-[max(env(safe-area-inset-top),10px)] backdrop-blur-2xl",
+        "absolute left-1/2 top-[-16px] z-50 h-[128px] w-[390px] max-w-none -translate-x-1/2 border-b px-2 pb-2 pt-[max(env(safe-area-inset-top),10px)] backdrop-blur-2xl",
         isDayTheme
           ? "border-black/10 bg-[rgba(248,245,236,0.92)]"
           : "border-white/10 bg-[rgba(8,10,16,0.94)]"
       )}
     >
       <div className="flex h-full flex-col">
-        <div className="flex h-[38px] shrink-0 items-center justify-center">
+        <div className="flex h-[42px] shrink-0 items-center justify-center">
           <img
             src="/launch-logo.png"
             alt="DUEL"
             className={cx(
-              "h-7 object-contain opacity-95",
+              "h-8 object-contain opacity-95",
               isDayTheme ? "brightness-0" : "brightness-0 invert"
             )}
           />
