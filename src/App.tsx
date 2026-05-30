@@ -19,6 +19,9 @@ import WeekendSetupWizard from "./WeekendSetupWizard";
 
 type AppMode = "launch" | "weekend" | "quick";
 type GameTab = "live" | "score" | "team";
+type UserRole = "admin" | "captain" | "groupScorer" | "player" | "spectator";
+type ScoringPolicy = "anyone" | "matchPlayers" | "captains" | "groupScorer" | "admin";
+type RoundStatus = "setup" | "locked" | "live" | "complete";
 
 type WeekendEvent = {
   id: string;
@@ -52,6 +55,14 @@ export default function App() {
   const [eventLocked, setEventLocked] = useState(false);
   const [eventStarted, setEventStarted] = useState(false);
   const [pairingLocks, setPairingLocks] = useState({});
+  const [currentRole, setCurrentRole] = useState<UserRole>("admin");
+  const [scoringPolicy, setScoringPolicy] = useState<ScoringPolicy>("matchPlayers");
+  const [roundStatus, setRoundStatus] = useState<Record<number, RoundStatus>>({
+    0: "setup",
+    1: "setup",
+    2: "setup",
+    3: "setup",
+  });
 
   const [eventDetails, setEventDetails] = useState({
     name: "Dual in the Dunes",
@@ -208,6 +219,9 @@ export default function App() {
       savedPlayers,
       eventStarted,
       eventLocked,
+      currentRole,
+      scoringPolicy,
+      roundStatus,
       ...extra,
     };
 
@@ -246,6 +260,9 @@ export default function App() {
       states,
       scorecards,
       savedPlayers,
+      currentRole,
+      scoringPolicy,
+      roundStatus,
     };
 
     localStorage.setItem("duel_weekend_events", JSON.stringify(events));
@@ -271,6 +288,9 @@ export default function App() {
     if (found.states) setStates(found.states);
     if (found.scorecards) setScorecards(found.scorecards);
     if (found.savedPlayers) setSavedPlayers(found.savedPlayers);
+    if (found.currentRole) setCurrentRole(found.currentRole);
+    if (found.scoringPolicy) setScoringPolicy(found.scoringPolicy);
+    if (found.roundStatus) setRoundStatus(found.roundStatus);
 
     setEventStarted(Boolean(found.eventStarted));
     setEventLocked(Boolean(found.eventLocked));
@@ -395,6 +415,9 @@ export default function App() {
               roster={roster}
               states={states}
               scorecards={scorecards}
+              currentRole={currentRole}
+              scoringPolicy={scoringPolicy}
+              roundStatus={roundStatus}
             />
           )}
 
@@ -453,6 +476,9 @@ export default function App() {
               teamNames={teamNames}
               eventLocked={eventLocked}
               pairingLocks={pairingLocks}
+              currentRole={currentRole}
+              scoringPolicy={scoringPolicy}
+              roundStatus={roundStatus}
             />
           )}
 
@@ -483,6 +509,12 @@ export default function App() {
               setEventDetails={setEventDetails}
               savedPlayers={savedPlayers}
               setSavedPlayers={setSavedPlayers}
+              currentRole={currentRole}
+              setCurrentRole={setCurrentRole}
+              scoringPolicy={scoringPolicy}
+              setScoringPolicy={setScoringPolicy}
+              roundStatus={roundStatus}
+              setRoundStatus={setRoundStatus}
             />
           )}
 
