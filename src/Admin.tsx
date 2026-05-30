@@ -396,8 +396,8 @@ export default function Admin({
   }
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden text-white">
-      <div className="flex gap-2 overflow-x-auto pb-3">
+    <div className="relative flex h-full max-w-full flex-col overflow-hidden text-white">
+      <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <TopPill active={adminMode === "day"} onClick={() => setAdminMode("day")}>
           Days
         </TopPill>
@@ -660,7 +660,7 @@ function TopPill({ active, onClick, children }: any) {
       type="button"
       onClick={onClick}
       className={cx(
-        "shrink-0 rounded-[18px] border px-5 py-3 text-[13px] font-bold",
+        "shrink-0 rounded-[18px] border px-3.5 py-2.5 text-[11px] font-black tracking-[-0.01em]",
         active
           ? "border-[#d1c79f] bg-[#d1c79f] text-black"
           : "border-white/12 bg-black/35 text-white/85"
