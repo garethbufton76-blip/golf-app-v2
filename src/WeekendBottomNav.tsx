@@ -1,4 +1,3 @@
-import { BarChart3, Shield, Trophy, Users, Flag } from "lucide-react";
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
@@ -14,37 +13,37 @@ export type WeekendRole =
 const NAV_ITEMS: {
   id: WeekendTab;
   label: string;
-  icon: any;
+  icon: string;
   roles: WeekendRole[];
 }[] = [
   {
     id: "live",
     label: "Live",
-    icon: Trophy,
+    icon: "▦",
     roles: ["admin", "captain", "groupScorer", "player", "spectator"],
   },
   {
     id: "stats",
     label: "Stats",
-    icon: BarChart3,
+    icon: "◷",
     roles: ["admin", "captain", "groupScorer", "player", "spectator"],
   },
   {
     id: "score",
     label: "Score",
-    icon: Flag,
+    icon: "+",
     roles: ["admin", "captain", "groupScorer", "player"],
   },
   {
     id: "teams",
     label: "Teams",
-    icon: Users,
+    icon: "○",
     roles: ["admin", "captain", "groupScorer", "player", "spectator"],
   },
   {
     id: "admin",
     label: "Admin",
-    icon: Shield,
+    icon: "⚙",
     roles: ["admin", "captain"],
   },
 ];
@@ -79,7 +78,6 @@ export default function WeekendBottomNav({
         }}
       >
         {visibleTabs.map((item) => {
-          const Icon = item.icon;
           const active = activeTab === item.id;
 
           return (
@@ -96,11 +94,15 @@ export default function WeekendBottomNav({
                   : "text-white/55"
               )}
             >
-              <Icon
-                size={18}
-                strokeWidth={2.3}
-                className={cx(active ? "opacity-100" : "opacity-80")}
-              />
+              <div
+                className={cx(
+                  "flex h-[22px] items-center justify-center font-black leading-none",
+                  item.id === "score" ? "text-[25px]" : "text-[21px]",
+                  active ? "opacity-100" : "opacity-80"
+                )}
+              >
+                {item.icon}
+              </div>
 
               <div
                 className={cx(
@@ -117,4 +119,3 @@ export default function WeekendBottomNav({
     </div>
   );
 }
-
