@@ -1,7 +1,12 @@
 import { cx } from "./data";
 import { useDuelTheme } from "./useDuelTheme";
 
-export type WeekendTab = "live" | "stats" | "score" | "teams" | "admin";
+export type WeekendTab =
+  | "live"
+  | "stats"
+  | "score"
+  | "teams"
+  | "admin";
 
 export type WeekendRole =
   | "admin"
@@ -20,13 +25,25 @@ const NAV_ITEMS: {
     id: "live",
     label: "Live",
     icon: "▦",
-    roles: ["admin", "captain", "groupScorer", "player", "spectator"],
+    roles: [
+      "admin",
+      "captain",
+      "groupScorer",
+      "player",
+      "spectator",
+    ],
   },
   {
     id: "stats",
     label: "Stats",
     icon: "◷",
-    roles: ["admin", "captain", "groupScorer", "player", "spectator"],
+    roles: [
+      "admin",
+      "captain",
+      "groupScorer",
+      "player",
+      "spectator",
+    ],
   },
   {
     id: "score",
@@ -38,7 +55,13 @@ const NAV_ITEMS: {
     id: "teams",
     label: "Teams",
     icon: "○",
-    roles: ["admin", "captain", "groupScorer", "player", "spectator"],
+    roles: [
+      "admin",
+      "captain",
+      "groupScorer",
+      "player",
+      "spectator",
+    ],
   },
   {
     id: "admin",
@@ -58,17 +81,20 @@ export default function WeekendBottomNav({
   role?: WeekendRole;
 }) {
   const { themeMode } = useDuelTheme();
+
   const isDayTheme = themeMode === "day";
 
-  const visibleTabs = NAV_ITEMS.filter((item) => item.roles.includes(role));
+  const visibleTabs = NAV_ITEMS.filter((item) =>
+    item.roles.includes(role),
+  );
 
   return (
     <div
       className={cx(
-        "fixed bottom-0 left-0 right-0 z-50 border-t px-2 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 backdrop-blur-2xl",
+        "absolute bottom-0 left-0 right-0 z-50 border-t px-2 pb-[max(env(safe-area-inset-bottom),12px)] pt-2 backdrop-blur-2xl",
         isDayTheme
           ? "border-black/10 bg-[rgba(248,245,236,0.88)]"
-          : "border-white/10 bg-[rgba(8,10,16,0.88)]"
+          : "border-white/10 bg-[rgba(8,10,16,0.88)]",
       )}
     >
       <div
@@ -90,15 +116,17 @@ export default function WeekendBottomNav({
                 active
                   ? "bg-[#d1c79f] text-black shadow-[0_10px_28px_rgba(209,199,159,0.35)]"
                   : isDayTheme
-                  ? "text-black/55"
-                  : "text-white/55"
+                    ? "text-black/55"
+                    : "text-white/55",
               )}
             >
               <div
                 className={cx(
                   "flex h-[22px] items-center justify-center font-black leading-none",
-                  item.id === "score" ? "text-[25px]" : "text-[21px]",
-                  active ? "opacity-100" : "opacity-80"
+                  item.id === "score"
+                    ? "text-[25px]"
+                    : "text-[21px]",
+                  active ? "opacity-100" : "opacity-80",
                 )}
               >
                 {item.icon}
@@ -107,7 +135,7 @@ export default function WeekendBottomNav({
               <div
                 className={cx(
                   "mt-1 text-[10px] font-black uppercase tracking-[0.16em]",
-                  active ? "opacity-100" : "opacity-75"
+                  active ? "opacity-100" : "opacity-75",
                 )}
               >
                 {item.label}
