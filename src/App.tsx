@@ -343,7 +343,12 @@ export default function App() {
 
         <div className="absolute inset-0 bg-black/15" />
 
-        <div className="relative z-10 flex h-full flex-col p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]">
+        <div className={cx(
+            "relative z-10 flex h-full flex-col",
+            screen === "admin"
+              ? "p-0"
+              : "p-4 pt-[max(16px,env(safe-area-inset-top))] pb-[max(16px,env(safe-area-inset-bottom))]"
+          )}>
           {mode === "weekend" && screen === "eventGate" && (
             <EventGate
               activeEvent={activeEvent}
