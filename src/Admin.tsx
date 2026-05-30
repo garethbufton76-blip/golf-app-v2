@@ -10,6 +10,7 @@ import {
 } from "./data";
 import { searchCourses } from "./lib/golfCourseApi";
 import { COURSES, getDefaultTee } from "./courses";
+import AdminHeaderNav from "./AdminHeaderNav";
 
 type RoundStatus = "setup" | "locked" | "live" | "complete";
 type CoursePickerMode = "summary" | "saved" | "search";
@@ -397,27 +398,11 @@ export default function Admin({
 
   return (
     <div className="relative flex h-full max-w-full flex-col overflow-hidden text-white">
-      <div className="flex max-w-full gap-2 overflow-x-auto pb-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <TopPill active={adminMode === "day"} onClick={() => setAdminMode("day")}>
-          Days
-        </TopPill>
-
-        <TopPill active={adminMode === "teams"} onClick={() => setAdminMode("teams")}>
-          Teams
-        </TopPill>
-
-        <TopPill active={adminMode === "players"} onClick={() => setAdminMode("players")}>
-          Players
-        </TopPill>
-
-        <TopPill active={adminMode === "pairings"} onClick={() => setAdminMode("pairings")}>
-          Pairings
-        </TopPill>
-
-        <TopPill active={false} onClick={() => setScreen("home")}>
-          Home
-        </TopPill>
-      </div>
+      <AdminHeaderNav
+        activeTab={adminMode}
+        setActiveTab={setAdminMode}
+        onHome={() => setScreen("home")}
+      />
 
       <div className="flex-1 overflow-y-auto pb-28">
         {adminMode === "day" && (
@@ -651,23 +636,6 @@ export default function Admin({
         )}
       </div>
     </div>
-  );
-}
-
-function TopPill({ active, onClick, children }: any) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cx(
-        "shrink-0 rounded-[18px] border px-3.5 py-2.5 text-[11px] font-black tracking-[-0.01em]",
-        active
-          ? "border-[#d1c79f] bg-[#d1c79f] text-black"
-          : "border-white/12 bg-black/35 text-white/85"
-      )}
-    >
-      {children}
-    </button>
   );
 }
 
